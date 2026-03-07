@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wger-agent"
-version = "0.1.3"
+version = "0.1.4"
 description = "Wger Workout Manager — exercise database, workout routines, nutrition plans, body measurements, and progress tracking."
 readme = "README.md"
 authors = [{ name = "Audel Rouhi", email = "knucklessg1@gmail.com" }]
@@ -17,14 +17,14 @@ classifiers = [
     "Programming Language :: Python :: 3"]
 requires-python = ">=3.10"
 dependencies = [
-    "agent-utilities[mcp]>=0.2.15"]
+    "agent-utilities[mcp]>=0.2.16"]
 
 [project.optional-dependencies]
 agent = [
-    "agent-utilities[agent,logfire]>=0.2.15"]
+    "agent-utilities[agent,logfire]>=0.2.16"]
 
 all = [
-    "agent-utilities[mcp,agent,logfire]>=0.2.15"]
+    "agent-utilities[mcp,agent,logfire]>=0.2.16"]
 
 [project.scripts]
 wger-mcp = "wger_agent.mcp:mcp_server"
