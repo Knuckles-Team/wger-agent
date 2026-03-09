@@ -17,7 +17,7 @@ from agent_utilities.mcp_utilities import (
 )
 from wger_agent.auth import get_client
 
-__version__ = "0.1.9"
+__version__ = "0.1.10"
 print(f"Wger MCP v{__version__}")
 
 logger = get_logger(name="TokenMiddleware")
