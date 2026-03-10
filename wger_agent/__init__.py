@@ -12,8 +12,8 @@ CORE_MODULES = [
 ]
 
 OPTIONAL_MODULES = {
-    "wger_agent.agent": "agent",
-    "wger_agent.mcp": "mcp",
+    "wger_agent.agent_server": "agent",
+    "wger_agent.mcp_server": "mcp",
 }
 
 
