@@ -39,6 +39,27 @@ class WgerApi:
             self.session.headers.update({"Authorization": f"Token {token}"})
         self.session.headers.update({"Accept": "application/json"})
 
+        # Validate credentials during initialization
+        try:
+            # Using /api/v2/workout/ as a lightweight validation endpoint
+            response = self.session.get(f"{self.api_base}/workout/")
+            if response.status_code == 401:
+                from agent_utilities.exceptions import AuthError
+
+                raise AuthError("Wger authentication failed: Invalid API key.")
+            elif response.status_code == 403:
+                from agent_utilities.exceptions import UnauthorizedError
+
+                raise UnauthorizedError(
+                    "Wger access forbidden: Insufficient permissions."
+                )
+            response.raise_for_status()
+        except Exception as e:
+            if isinstance(e, (AuthError, UnauthorizedError)):
+                raise e
+            # For other errors (connection, etc.), let it pass or handle elsewhere
+            pass
+
     # ── Generic helpers ──────────────────────────────────────────────────
 
     def _url(self, endpoint: str) -> str:
