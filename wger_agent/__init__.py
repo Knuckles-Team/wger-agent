@@ -8,7 +8,7 @@ from typing import List
 __all__: List[str] = []
 
 CORE_MODULES = [
-    "wger_agent.wger_api",
+    "wger_agent.api_wrapper",
 ]
 
 OPTIONAL_MODULES = {

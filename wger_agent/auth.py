@@ -6,7 +6,7 @@ import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-from wger_agent.wger_api import WgerApi
+from wger_agent.api_wrapper import WgerApi
 from agent_utilities.exceptions import AuthError, UnauthorizedError
 
 _client = None
