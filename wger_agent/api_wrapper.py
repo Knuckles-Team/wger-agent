@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# coding: utf-8
+               
 """
 Wger API Wrapper — Complete REST client for the wger Workout Manager API v2.
 
@@ -39,9 +39,9 @@ class WgerApi:
             self.session.headers.update({"Authorization": f"Token {token}"})
         self.session.headers.update({"Accept": "application/json"})
 
-        # Validate credentials during initialization
+                                                    
         try:
-            # Using /api/v2/workout/ as a lightweight validation endpoint
+                                                                         
             response = self.session.get(f"{self.api_base}/workout/")
             if response.status_code == 401:
                 from agent_utilities.exceptions import AuthError
@@ -57,10 +57,10 @@ class WgerApi:
         except Exception as e:
             if isinstance(e, (AuthError, UnauthorizedError)):
                 raise e
-            # For other errors (connection, etc.), let it pass or handle elsewhere
+                                                                                  
             pass
 
-    # ── Generic helpers ──────────────────────────────────────────────────
+                                                                           
 
     def _url(self, endpoint: str) -> str:
         return f"{self.api_base}/{endpoint.strip('/')}/"
@@ -107,11 +107,11 @@ class WgerApi:
             params["ordering"] = ordering
         return self._get(endpoint, params=params)
 
-    # ══════════════════════════════════════════════════════════════════════
-    #  ROUTINE endpoints
-    # ══════════════════════════════════════════════════════════════════════
+                                                                            
+                        
+                                                                            
 
-    # ── Routines ─────────────────────────────────────────────────────────
+                                                                           
 
     def get_routines(
         self,
@@ -153,7 +153,7 @@ class WgerApi:
         """Delete a routine."""
         return self._delete(f"routine/{routine_id}")
 
-    # ── Templates ────────────────────────────────────────────────────────
+                                                                           
 
     def get_templates(
         self, limit: Optional[int] = None, offset: Optional[int] = None, **filters
@@ -171,7 +171,7 @@ class WgerApi:
         """List public workout templates."""
         return self._list("public-templates", limit=limit, offset=offset, **filters)
 
-    # ── Days ─────────────────────────────────────────────────────────────
+                                                                           
 
     def get_days(
         self,
@@ -219,7 +219,7 @@ class WgerApi:
         """Delete a day."""
         return self._delete(f"day/{day_id}")
 
-    # ── Slots ────────────────────────────────────────────────────────────
+                                                                           
 
     def get_slots(
         self, limit: Optional[int] = None, offset: Optional[int] = None, **filters
@@ -246,7 +246,7 @@ class WgerApi:
         """Delete a slot."""
         return self._delete(f"slot/{slot_id}")
 
-    # ── Slot Entries ─────────────────────────────────────────────────────
+                                                                           
 
     def get_slot_entries(
         self, limit: Optional[int] = None, offset: Optional[int] = None, **filters
@@ -273,9 +273,9 @@ class WgerApi:
         """Delete a slot entry."""
         return self._delete(f"slot-entry/{entry_id}")
 
-    # ══════════════════════════════════════════════════════════════════════
-    #  ROUTINE CONFIG endpoints
-    # ══════════════════════════════════════════════════════════════════════
+                                                                            
+                               
+                                                                            
 
     def _config_crud(
         self,
@@ -297,7 +297,7 @@ class WgerApi:
         else:
             return self._list(config_type, limit=limit, offset=offset)
 
-    # Weight configs
+                    
     def get_weight_configs(
         self, limit: Optional[int] = None, offset: Optional[int] = None, **filters
     ) -> Dict:
@@ -350,7 +350,7 @@ class WgerApi:
             "max-weight-config", data={"slot_entry": slot_entry, **kwargs}
         )
 
-    # Repetitions configs
+                         
     def get_repetitions_configs(
         self, limit: Optional[int] = None, offset: Optional[int] = None, **filters
     ) -> Dict:
@@ -401,7 +401,7 @@ class WgerApi:
             "max-repetitions-config", data={"slot_entry": slot_entry, **kwargs}
         )
 
-    # Sets configs
+                  
     def get_sets_configs(
         self, limit: Optional[int] = None, offset: Optional[int] = None, **filters
     ) -> Dict:
@@ -448,7 +448,7 @@ class WgerApi:
         """Create a max sets config."""
         return self._post("max-sets-config", data={"slot_entry": slot_entry, **kwargs})
 
-    # Rest configs
+                  
     def get_rest_configs(
         self, limit: Optional[int] = None, offset: Optional[int] = None, **filters
     ) -> Dict:
@@ -495,7 +495,7 @@ class WgerApi:
         """Create a max rest config."""
         return self._post("max-rest-config", data={"slot_entry": slot_entry, **kwargs})
 
-    # RiR (Reps in Reserve) configs
+                                   
     def get_rir_configs(
         self, limit: Optional[int] = None, offset: Optional[int] = None, **filters
     ) -> Dict:
@@ -542,9 +542,9 @@ class WgerApi:
         """Create a max RiR config."""
         return self._post("max-rir-config", data={"slot_entry": slot_entry, **kwargs})
 
-    # ══════════════════════════════════════════════════════════════════════
-    #  EXERCISE endpoints (mostly public / read-only)
-    # ══════════════════════════════════════════════════════════════════════
+                                                                            
+                                                     
+                                                                            
 
     def get_exercises(
         self,
@@ -648,9 +648,9 @@ class WgerApi:
         """List exercise variations."""
         return self._list("variation", limit=limit, offset=offset)
 
-    # ══════════════════════════════════════════════════════════════════════
-    #  WORKOUT endpoints
-    # ══════════════════════════════════════════════════════════════════════
+                                                                            
+                        
+                                                                            
 
     def get_workout_sessions(
         self,
@@ -745,9 +745,9 @@ class WgerApi:
         """Delete a workout log."""
         return self._delete(f"workoutlog/{log_id}")
 
-    # ══════════════════════════════════════════════════════════════════════
-    #  NUTRITION endpoints
-    # ══════════════════════════════════════════════════════════════════════
+                                                                            
+                          
+                                                                            
 
     def get_nutrition_plans(
         self, limit: Optional[int] = None, offset: Optional[int] = None, **filters
@@ -923,9 +923,9 @@ class WgerApi:
         """List ingredient images."""
         return self._list("ingredient-image", limit=limit, offset=offset, **filters)
 
-    # ══════════════════════════════════════════════════════════════════════
-    #  BODY endpoints
-    # ══════════════════════════════════════════════════════════════════════
+                                                                            
+                     
+                                                                            
 
     def get_weight_entries(
         self,
@@ -1013,9 +1013,9 @@ class WgerApi:
         """List progress gallery images."""
         return self._list("gallery", limit=limit, offset=offset, ordering=ordering)
 
-    # ══════════════════════════════════════════════════════════════════════
-    #  USER endpoints
-    # ══════════════════════════════════════════════════════════════════════
+                                                                            
+                     
+                                                                            
 
     def get_user_profile(self) -> Dict:
         """Get the current user's profile."""

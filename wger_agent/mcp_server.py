@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# coding: utf-8
+
 
 from dotenv import load_dotenv, find_dotenv
 from agent_utilities.base_utilities import to_boolean
@@ -16,7 +16,7 @@ from agent_utilities.mcp_utilities import (
 )
 from wger_agent.auth import get_client
 
-__version__ = "0.1.22"
+__version__ = "0.1.23"
 print(f"Wger MCP v{__version__}", file=sys.stderr)
 
 logger = get_logger(name="TokenMiddleware")
@@ -39,11 +39,6 @@ def register_prompts(mcp: FastMCP):
     def nutrition_plan_prompt(calories: str = "2000", goal: str = "maintenance") -> str:
         """Generate a nutrition plan prompt."""
         return f"Create a nutrition plan targeting {calories} calories for {goal}. Use the wger nutrition tools to search ingredients and build meals."
-
-
-# ══════════════════════════════════════════════════════════════════════════
-#  ROUTINE tools
-# ══════════════════════════════════════════════════════════════════════════
 
 
 def register_routine_tools(mcp: FastMCP):
@@ -219,11 +214,6 @@ def register_routine_tools(mcp: FastMCP):
         return get_client().get_public_templates(limit=limit)
 
 
-# ══════════════════════════════════════════════════════════════════════════
-#  ROUTINE CONFIG tools
-# ══════════════════════════════════════════════════════════════════════════
-
-
 def register_routineconfig_tools(mcp: FastMCP):
     @mcp.tool(
         name="create_weight_config",
@@ -374,11 +364,6 @@ def register_routineconfig_tools(mcp: FastMCP):
         )
 
 
-# ══════════════════════════════════════════════════════════════════════════
-#  EXERCISE tools
-# ══════════════════════════════════════════════════════════════════════════
-
-
 def register_exercise_tools(mcp: FastMCP):
     @mcp.tool(
         name="get_exercises",
@@ -497,11 +482,6 @@ def register_exercise_tools(mcp: FastMCP):
         return get_client().get_variations(limit=limit)
 
 
-# ══════════════════════════════════════════════════════════════════════════
-#  WORKOUT tools
-# ══════════════════════════════════════════════════════════════════════════
-
-
 def register_workout_tools(mcp: FastMCP):
     @mcp.tool(
         name="get_workout_sessions",
@@ -611,11 +591,6 @@ def register_workout_tools(mcp: FastMCP):
     ) -> Any:
         """Delete log."""
         return get_client().delete_workout_log(log_id)
-
-
-# ══════════════════════════════════════════════════════════════════════════
-#  NUTRITION tools
-# ══════════════════════════════════════════════════════════════════════════
 
 
 def register_nutrition_tools(mcp: FastMCP):
@@ -769,11 +744,6 @@ def register_nutrition_tools(mcp: FastMCP):
         )
 
 
-# ══════════════════════════════════════════════════════════════════════════
-#  BODY tools
-# ══════════════════════════════════════════════════════════════════════════
-
-
 def register_body_tools(mcp: FastMCP):
     @mcp.tool(
         name="get_weight_entries",
@@ -874,11 +844,6 @@ def register_body_tools(mcp: FastMCP):
         return get_client().get_gallery(limit=limit)
 
 
-# ══════════════════════════════════════════════════════════════════════════
-#  USER tools
-# ══════════════════════════════════════════════════════════════════════════
-
-
 def register_user_tools(mcp: FastMCP):
     @mcp.tool(
         name="get_user_profile",
@@ -937,11 +902,6 @@ def register_user_tools(mcp: FastMCP):
         return get_client().get_weight_unit_settings(limit=100)
 
 
-# ══════════════════════════════════════════════════════════════════════════
-#  MCP Server entry point
-# ══════════════════════════════════════════════════════════════════════════
-
-
 def get_mcp_instance() -> tuple[Any, Any, Any, Any]:
     """Initialize and return the MCP instance, args, and middlewares."""
     load_dotenv(find_dotenv())
@@ -951,7 +911,6 @@ def get_mcp_instance() -> tuple[Any, Any, Any, Any]:
         instructions="Wger Workout Manager MCP Server - Manage exercises, routines, nutrition plans, body measurements, and workout logs.",
     )
 
-    # Register tool groups with env-var toggles
     if to_boolean(os.getenv("ROUTINETOOL", "True")):
         register_routine_tools(mcp)
     if to_boolean(os.getenv("ROUTINECONFIGTOOL", "True")):
