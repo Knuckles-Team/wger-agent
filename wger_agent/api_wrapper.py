@@ -1,5 +1,5 @@
 #!/usr/bin/python
-               
+
 """
 Wger API Wrapper — Complete REST client for the wger Workout Manager API v2.
 
@@ -39,9 +39,8 @@ class WgerApi:
             self.session.headers.update({"Authorization": f"Token {token}"})
         self.session.headers.update({"Accept": "application/json"})
 
-                                                    
         try:
-                                                                         
+
             response = self.session.get(f"{self.api_base}/workout/")
             if response.status_code == 401:
                 from agent_utilities.exceptions import AuthError
@@ -57,10 +56,8 @@ class WgerApi:
         except Exception as e:
             if isinstance(e, (AuthError, UnauthorizedError)):
                 raise e
-                                                                                  
-            pass
 
-                                                                           
+            pass
 
     def _url(self, endpoint: str) -> str:
         return f"{self.api_base}/{endpoint.strip('/')}/"
@@ -107,12 +104,6 @@ class WgerApi:
             params["ordering"] = ordering
         return self._get(endpoint, params=params)
 
-                                                                            
-                        
-                                                                            
-
-                                                                           
-
     def get_routines(
         self,
         limit: Optional[int] = None,
@@ -153,8 +144,6 @@ class WgerApi:
         """Delete a routine."""
         return self._delete(f"routine/{routine_id}")
 
-                                                                           
-
     def get_templates(
         self, limit: Optional[int] = None, offset: Optional[int] = None, **filters
     ) -> Dict:
@@ -170,8 +159,6 @@ class WgerApi:
     ) -> Dict:
         """List public workout templates."""
         return self._list("public-templates", limit=limit, offset=offset, **filters)
-
-                                                                           
 
     def get_days(
         self,
@@ -219,8 +206,6 @@ class WgerApi:
         """Delete a day."""
         return self._delete(f"day/{day_id}")
 
-                                                                           
-
     def get_slots(
         self, limit: Optional[int] = None, offset: Optional[int] = None, **filters
     ) -> Dict:
@@ -245,8 +230,6 @@ class WgerApi:
     def delete_slot(self, slot_id: int) -> bool:
         """Delete a slot."""
         return self._delete(f"slot/{slot_id}")
-
-                                                                           
 
     def get_slot_entries(
         self, limit: Optional[int] = None, offset: Optional[int] = None, **filters
@@ -273,10 +256,6 @@ class WgerApi:
         """Delete a slot entry."""
         return self._delete(f"slot-entry/{entry_id}")
 
-                                                                            
-                               
-                                                                            
-
     def _config_crud(
         self,
         config_type: str,
@@ -297,7 +276,6 @@ class WgerApi:
         else:
             return self._list(config_type, limit=limit, offset=offset)
 
-                    
     def get_weight_configs(
         self, limit: Optional[int] = None, offset: Optional[int] = None, **filters
     ) -> Dict:
@@ -350,7 +328,6 @@ class WgerApi:
             "max-weight-config", data={"slot_entry": slot_entry, **kwargs}
         )
 
-                         
     def get_repetitions_configs(
         self, limit: Optional[int] = None, offset: Optional[int] = None, **filters
     ) -> Dict:
@@ -401,7 +378,6 @@ class WgerApi:
             "max-repetitions-config", data={"slot_entry": slot_entry, **kwargs}
         )
 
-                  
     def get_sets_configs(
         self, limit: Optional[int] = None, offset: Optional[int] = None, **filters
     ) -> Dict:
@@ -448,7 +424,6 @@ class WgerApi:
         """Create a max sets config."""
         return self._post("max-sets-config", data={"slot_entry": slot_entry, **kwargs})
 
-                  
     def get_rest_configs(
         self, limit: Optional[int] = None, offset: Optional[int] = None, **filters
     ) -> Dict:
@@ -495,7 +470,6 @@ class WgerApi:
         """Create a max rest config."""
         return self._post("max-rest-config", data={"slot_entry": slot_entry, **kwargs})
 
-                                   
     def get_rir_configs(
         self, limit: Optional[int] = None, offset: Optional[int] = None, **filters
     ) -> Dict:
@@ -541,10 +515,6 @@ class WgerApi:
     def create_max_rir_config(self, slot_entry: int, **kwargs) -> Dict:
         """Create a max RiR config."""
         return self._post("max-rir-config", data={"slot_entry": slot_entry, **kwargs})
-
-                                                                            
-                                                     
-                                                                            
 
     def get_exercises(
         self,
@@ -648,10 +618,6 @@ class WgerApi:
         """List exercise variations."""
         return self._list("variation", limit=limit, offset=offset)
 
-                                                                            
-                        
-                                                                            
-
     def get_workout_sessions(
         self,
         limit: Optional[int] = None,
@@ -744,10 +710,6 @@ class WgerApi:
     def delete_workout_log(self, log_id: int) -> bool:
         """Delete a workout log."""
         return self._delete(f"workoutlog/{log_id}")
-
-                                                                            
-                          
-                                                                            
 
     def get_nutrition_plans(
         self, limit: Optional[int] = None, offset: Optional[int] = None, **filters
@@ -923,10 +885,6 @@ class WgerApi:
         """List ingredient images."""
         return self._list("ingredient-image", limit=limit, offset=offset, **filters)
 
-                                                                            
-                     
-                                                                            
-
     def get_weight_entries(
         self,
         limit: Optional[int] = None,
@@ -1012,10 +970,6 @@ class WgerApi:
     ) -> Dict:
         """List progress gallery images."""
         return self._list("gallery", limit=limit, offset=offset, ordering=ordering)
-
-                                                                            
-                     
-                                                                            
 
     def get_user_profile(self) -> Dict:
         """Get the current user's profile."""
