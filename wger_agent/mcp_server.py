@@ -6,6 +6,7 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     try:
         from requests.exceptions import RequestsDependencyWarning
+
         warnings.filterwarnings("ignore", category=RequestsDependencyWarning)
     except ImportError:
         pass
@@ -29,7 +30,7 @@ from agent_utilities.mcp_utilities import (
 )
 from wger_agent.auth import get_client
 
-__version__ = "0.1.28"
+__version__ = "0.1.29"
 print(f"Wger MCP v{__version__}", file=sys.stderr)
 
 logger = get_logger(name="TokenMiddleware")
@@ -423,7 +424,7 @@ def register_exercise_tools(mcp: FastMCP):
         tags={"Exercise"},
     )
     def search_exercises_tool(
-        term: str = Field(description="Search term."),
+        _term: str = Field(description="Search term."),
         language: Optional[int] = Field(
             default=2, description="Language ID (2=English)."
         ),

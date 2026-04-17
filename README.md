@@ -21,7 +21,7 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/wger-agent)
 ![PyPI - Implementation](https://img.shields.io/pypi/implementation/wger-agent)
 
-*Version: 0.1.28*
+*Version: 0.1.29*
 
 ## Overview
 

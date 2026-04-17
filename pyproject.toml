@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wger-agent"
-version = "0.1.28"
+version = "0.1.29"
 description = "Wger Workout Manager — exercise database, workout routines, nutrition plans, body measurements, and progress tracking."
 readme = "README.md"
 authors = [{ name = "Audel Rouhi", email = "knucklessg1@gmail.com" }]

@@ -733,7 +733,7 @@ class WgerApi:
         goal_protein: Optional[float] = None,
         goal_carbohydrates: Optional[float] = None,
         goal_fat: Optional[float] = None,
-        goal_fiber: Optional[float] = None,
+        _goal_fiber: Optional[float] = None,
     ) -> Dict:
         """Create a nutrition plan."""
         data = {"description": description, "only_logging": only_logging}
@@ -742,7 +742,7 @@ class WgerApi:
             "goal_protein",
             "goal_carbohydrates",
             "goal_fat",
-            "goal_fiber",
+            "_goal_fiber",
         ]:
             val = locals()[field]
             if val is not None:
