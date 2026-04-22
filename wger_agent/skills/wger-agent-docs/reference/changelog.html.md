@@ -143,7 +143,7 @@ See <https://github.com/wger-project/wger/releases/tag/2.4>
   * Add a deletion log for exercises. This allows exercises to be marked as deleted by the system. Alternatively a replacement can be set so that when other instances sync the exercises logs and routines are correctly updated [#1237](https://github.com/wger-project/wger/issues/1237)
   * Show all the authors of an exercise and any of its child items (translations, images, videos, etc.) [#1137](https://github.com/wger-project/wger/issues/1137)
   * Allow users to give meals a description (thanks [@mohammadrafigh](https://github.com/mohammadrafigh)!) [#822](https://github.com/wger-project/wger/issues/822)
-  * Added style field (Foto, 3D, etc.) to exercise image (thanks [@LucasSD](https://github.com/LucasSD)!) [#822](https://github.com/wger-project/wger/issues/822)
+  * Added style field (Photo, 3D, etc.) to exercise image (thanks [@LucasSD](https://github.com/LucasSD)!) [#822](https://github.com/wger-project/wger/issues/822)
   * Added exercise edit history (thanks [@ImTheTom](https://github.com/ImTheTom)!) [#1082](https://github.com/wger-project/wger/issues/1082)
   * Added JWT authentication to rest API (thanks [@RohanKaran](https://github.com/RohanKaran)!) [#1134](https://github.com/wger-project/wger/issues/1134)
   * Add support for sub-locales in the application such as en-gb [#1275](https://github.com/wger-project/wger/issues/1275)
@@ -186,7 +186,7 @@ Upgrade steps from 2.0:
   * Update python libraries `pip3 install -r requirements.txt`
   * To sync the new exercises:
     * Run migrations `python3 manage.py migrate`
-    * delete all exercises not in use `python manage.py delete-unused-exercises` (this will delete all exercises that are currently in the database but are not part of any workout, log, etc. You will be promted before the script does anything)
+    * delete all exercises not in use `python manage.py delete-unused-exercises` (this will delete all exercises that are currently in the database but are not part of any workout, log, etc. You will be prompted before the script does anything)
     * get the new exercises `python manage.py sync-exercises` (Also note that if you don’t perform these steps and directly run a regular sync the worst that can happen is that you might have some duplicate exercises in your installation)
     * get the new images `python manage.py download-exercise-images`
     * get the new videos `python manage.py download-exercise-videos` (please note that this needs more space)
@@ -379,7 +379,7 @@ New features:
   * Use hostname for submitted exercises (thanks [@jamessimas](https://github.com/jamessimas)) [#159](https://github.com/wger-project/wger/issues/159)
   * Download js libraries with bowerjs (thanks [@tranbenny](https://github.com/tranbenny)) [#126](https://github.com/wger-project/wger/issues/126)
   * Improved and more flexible management commands [#184](https://github.com/wger-project/wger/issues/184)
-  * Fixed error when importin weight entries from CSV (thanks [@r-hughes](https://github.com/r-hughes)) [#204](https://github.com/wger-project/wger/issues/204)
+  * Fixed error when importing weight entries from CSV (thanks [@r-hughes](https://github.com/r-hughes)) [#204](https://github.com/wger-project/wger/issues/204)
   * Fixed problems when building and installing the application on Windows (thanks [@romansp](https://github.com/romansp)) [#197](https://github.com/wger-project/wger/issues/197)
   * Fixed potential Denial Of Service attack (thanks [@r-hughes](https://github.com/r-hughes)) [#238](https://github.com/wger-project/wger/issues/238)
   * Dummy data generator can not create nutrition plans (thanks [@cthare](https://github.com/cthare)) [#241](https://github.com/wger-project/wger/issues/241)
@@ -396,7 +396,7 @@ New translations:
 
 
 New features:
-  * Save planed weight along with the repetitions [#119](https://github.com/wger-project/wger/issues/119)
+  * Save planned weight along with the repetitions [#119](https://github.com/wger-project/wger/issues/119)
   * Improvements to the workout calendar [#98](https://github.com/wger-project/wger/issues/98)
   * Allow external access to workouts and other pages to allow for sharing [#102](https://github.com/wger-project/wger/issues/102), [#124](https://github.com/wger-project/wger/issues/124)
   * Email reminder to regularly enter (body) weight entries [#115](https://github.com/wger-project/wger/issues/115)

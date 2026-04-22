@@ -89,7 +89,7 @@ npm install
 ```
 
 ## Rendering in django[](https://wger.readthedocs.io/en/latest/development/frontend.html#rendering-in-django "Link to this heading")
-We don’t render the whole page with react, just a part of it. We use `ReactView` in django to render an emtpy div with a known ID and then let react take over.
+We don’t render the whole page with react, just a part of it. We use `ReactView` in django to render an empty div with a known ID and then let react take over.
 Take a look at `src/index.tsx` to see how we do this.
 If you want to test the new version locally, you can use `npm link` which will create a symlink to the dev repository and allow you to instantly see the changes:
 ```

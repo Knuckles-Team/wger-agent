@@ -109,7 +109,7 @@ You can group the workout days (such as “Deload week” or similar) by adding 
 
 You can add exercises to a slot (set). These slots have a `SlotConfig` entry, and different individual config entries for individual properties where the magic happens.
 ### Supersets[](https://wger.readthedocs.io/en/latest/api/routines.html#supersets "Link to this heading")
-If you add more than one slot entry to a slot, it automatically becomes a superset. The specific oder of exercises (in the gym mode only!) is the interleaved list of exercises. Not all exercises need to have the same number of sets, e.g.:
+If you add more than one slot entry to a slot, it automatically becomes a superset. The specific order of exercises (in the gym mode only!) is the interleaved list of exercises. Not all exercises need to have the same number of sets, e.g.:
   * Exercise 1, 4 sets
   * Exercise 2, 2 sets
   * Exercise 3, 3 sets

@@ -92,8 +92,8 @@ Would result in:
 Note
 This feature is currently only available on the **web version**. However, the resulting routines can be used and viewed on the mobile app as well.
 For more advanced control over your progress, you can set rules for automatic changes in weight, repetitions, number of sets or RiR. You have the option to
-  * add or substract a fixed value
-  * add or substract a percentage (in this case it’s probably a good idea to also set a rounding value)
+  * add or subtract a fixed value
+  * add or subtract a percentage (in this case it’s probably a good idea to also set a rounding value)
   * reset the value to a specified number
 
 

@@ -15,19 +15,20 @@ with warnings.catch_warnings():
 warnings.filterwarnings("ignore", message=".*urllib3.*or chardet.*")
 warnings.filterwarnings("ignore", message=".*urllib3.*or charset_normalizer.*")
 
-from dotenv import load_dotenv, find_dotenv
-from agent_utilities.base_utilities import to_boolean
+import logging
 import os
 import sys
-import logging
-from typing import Optional, Any
+from typing import Any
 
-from pydantic import Field
-from fastmcp import FastMCP
-from fastmcp.utilities.logging import get_logger
+from agent_utilities.base_utilities import to_boolean
 from agent_utilities.mcp_utilities import (
     create_mcp_server,
 )
+from dotenv import find_dotenv, load_dotenv
+from fastmcp import FastMCP
+from fastmcp.utilities.logging import get_logger
+from pydantic import Field
+
 from wger_agent.auth import get_client
 
 __version__ = "0.1.29"
@@ -62,10 +63,8 @@ def register_routine_tools(mcp: FastMCP):
         tags={"Routine"},
     )
     def get_routines_tool(
-        limit: Optional[int] = Field(default=None, description="Max results per page."),
-        offset: Optional[int] = Field(
-            default=None, description="Offset for pagination."
-        ),
+        limit: int | None = Field(default=None, description="Max results per page."),
+        offset: int | None = Field(default=None, description="Offset for pagination."),
     ) -> Any:
         """List routines."""
         return get_client().get_routines(limit=limit, offset=offset)
@@ -121,8 +120,8 @@ def register_routine_tools(mcp: FastMCP):
         tags={"Routine"},
     )
     def get_days_tool(
-        limit: Optional[int] = Field(default=None, description="Max results."),
-        offset: Optional[int] = Field(default=None, description="Offset."),
+        limit: int | None = Field(default=None, description="Max results."),
+        offset: int | None = Field(default=None, description="Offset."),
     ) -> Any:
         """List days."""
         return get_client().get_days(limit=limit, offset=offset)
@@ -170,8 +169,8 @@ def register_routine_tools(mcp: FastMCP):
         tags={"Routine"},
     )
     def get_slots_tool(
-        limit: Optional[int] = Field(default=None, description="Max results."),
-        offset: Optional[int] = Field(default=None, description="Offset."),
+        limit: int | None = Field(default=None, description="Max results."),
+        offset: int | None = Field(default=None, description="Offset."),
     ) -> Any:
         """List slots."""
         return get_client().get_slots(limit=limit, offset=offset)
@@ -211,7 +210,7 @@ def register_routine_tools(mcp: FastMCP):
         tags={"Routine"},
     )
     def get_templates_tool(
-        limit: Optional[int] = Field(default=None, description="Max results."),
+        limit: int | None = Field(default=None, description="Max results."),
     ) -> Any:
         """List templates."""
         return get_client().get_templates(limit=limit)
@@ -222,7 +221,7 @@ def register_routine_tools(mcp: FastMCP):
         tags={"Routine"},
     )
     def get_public_templates_tool(
-        limit: Optional[int] = Field(default=None, description="Max results."),
+        limit: int | None = Field(default=None, description="Max results."),
     ) -> Any:
         """List public templates."""
         return get_client().get_public_templates(limit=limit)
@@ -269,7 +268,7 @@ def register_routineconfig_tools(mcp: FastMCP):
         tags={"RoutineConfig"},
     )
     def get_weight_configs_tool(
-        limit: Optional[int] = Field(default=None, description="Max results."),
+        limit: int | None = Field(default=None, description="Max results."),
     ) -> Any:
         """List weight configs."""
         return get_client().get_weight_configs(limit=limit)
@@ -303,7 +302,7 @@ def register_routineconfig_tools(mcp: FastMCP):
         tags={"RoutineConfig"},
     )
     def get_repetitions_configs_tool(
-        limit: Optional[int] = Field(default=None, description="Max results."),
+        limit: int | None = Field(default=None, description="Max results."),
     ) -> Any:
         """List repetitions configs."""
         return get_client().get_repetitions_configs(limit=limit)
@@ -385,20 +384,20 @@ def register_exercise_tools(mcp: FastMCP):
         tags={"Exercise"},
     )
     def get_exercises_tool(
-        limit: Optional[int] = Field(default=20, description="Max results per page."),
-        offset: Optional[int] = Field(default=None, description="Offset."),
-        ordering: Optional[str] = Field(
+        limit: int | None = Field(default=20, description="Max results per page."),
+        offset: int | None = Field(default=None, description="Offset."),
+        ordering: str | None = Field(
             default=None, description="Order by field. Prefix with - for descending."
         ),
-        language: Optional[int] = Field(
+        language: int | None = Field(
             default=None, description="Filter by language ID."
         ),
-        category: Optional[int] = Field(
+        category: int | None = Field(
             default=None, description="Filter by exercise category ID."
         ),
     ) -> Any:
         """List exercises."""
-        filters = {}
+        filters: dict[str, Any] = {}
         if language:
             filters["language"] = language
         if category:
@@ -425,13 +424,11 @@ def register_exercise_tools(mcp: FastMCP):
     )
     def search_exercises_tool(
         _term: str = Field(description="Search term."),
-        language: Optional[int] = Field(
-            default=2, description="Language ID (2=English)."
-        ),
-        limit: Optional[int] = Field(default=20, description="Max results."),
+        language: int | None = Field(default=2, description="Language ID (2=English)."),
+        limit: int | None = Field(default=20, description="Max results."),
     ) -> Any:
         """Search exercises."""
-        filters = {"language": language, "format": "json"}
+        filters: dict[str, Any] = {"language": language, "format": "json"}
         return get_client().get_exercise_infos(limit=limit, **filters)
 
     @mcp.tool(
@@ -440,7 +437,7 @@ def register_exercise_tools(mcp: FastMCP):
         tags={"Exercise"},
     )
     def get_exercise_categories_tool(
-        limit: Optional[int] = Field(default=100, description="Max results."),
+        limit: int | None = Field(default=100, description="Max results."),
     ) -> Any:
         """List categories."""
         return get_client().get_exercise_categories(limit=limit)
@@ -451,7 +448,7 @@ def register_exercise_tools(mcp: FastMCP):
         tags={"Exercise"},
     )
     def get_equipment_tool(
-        limit: Optional[int] = Field(default=100, description="Max results."),
+        limit: int | None = Field(default=100, description="Max results."),
     ) -> Any:
         """List equipment."""
         return get_client().get_equipment(limit=limit)
@@ -462,7 +459,7 @@ def register_exercise_tools(mcp: FastMCP):
         tags={"Exercise"},
     )
     def get_muscles_tool(
-        limit: Optional[int] = Field(default=100, description="Max results."),
+        limit: int | None = Field(default=100, description="Max results."),
     ) -> Any:
         """List muscles."""
         return get_client().get_muscles(limit=limit)
@@ -473,8 +470,8 @@ def register_exercise_tools(mcp: FastMCP):
         tags={"Exercise"},
     )
     def get_exercise_images_tool(
-        limit: Optional[int] = Field(default=20, description="Max results."),
-        exercise_base: Optional[int] = Field(
+        limit: int | None = Field(default=20, description="Max results."),
+        exercise_base: int | None = Field(
             default=None, description="Filter by exercise base ID."
         ),
     ) -> Any:
@@ -490,7 +487,7 @@ def register_exercise_tools(mcp: FastMCP):
         tags={"Exercise"},
     )
     def get_variations_tool(
-        limit: Optional[int] = Field(default=20, description="Max results."),
+        limit: int | None = Field(default=20, description="Max results."),
     ) -> Any:
         """List variations."""
         return get_client().get_variations(limit=limit)
@@ -503,9 +500,9 @@ def register_workout_tools(mcp: FastMCP):
         tags={"Workout"},
     )
     def get_workout_sessions_tool(
-        limit: Optional[int] = Field(default=None, description="Max results."),
-        offset: Optional[int] = Field(default=None, description="Offset."),
-        ordering: Optional[str] = Field(default=None, description="Order by field."),
+        limit: int | None = Field(default=None, description="Max results."),
+        offset: int | None = Field(default=None, description="Offset."),
+        ordering: str | None = Field(default=None, description="Order by field."),
     ) -> Any:
         """List workout sessions."""
         return get_client().get_workout_sessions(
@@ -563,9 +560,9 @@ def register_workout_tools(mcp: FastMCP):
         tags={"Workout"},
     )
     def get_workout_logs_tool(
-        limit: Optional[int] = Field(default=None, description="Max results."),
-        offset: Optional[int] = Field(default=None, description="Offset."),
-        ordering: Optional[str] = Field(default=None, description="Order by field."),
+        limit: int | None = Field(default=None, description="Max results."),
+        offset: int | None = Field(default=None, description="Offset."),
+        ordering: str | None = Field(default=None, description="Order by field."),
     ) -> Any:
         """List workout logs."""
         return get_client().get_workout_logs(
@@ -583,7 +580,7 @@ def register_workout_tools(mcp: FastMCP):
         date: str = Field(description="Date (YYYY-MM-DD)."),
         repetitions: int = Field(default=0, description="Number of reps."),
         weight: float = Field(default=0, description="Weight used."),
-        rir: Optional[str] = Field(default=None, description="Reps in reserve."),
+        rir: str | None = Field(default=None, description="Reps in reserve."),
     ) -> Any:
         """Create workout log."""
         return get_client().create_workout_log(
@@ -614,7 +611,7 @@ def register_nutrition_tools(mcp: FastMCP):
         tags={"Nutrition"},
     )
     def get_nutrition_plans_tool(
-        limit: Optional[int] = Field(default=None, description="Max results."),
+        limit: int | None = Field(default=None, description="Max results."),
     ) -> Any:
         """List plans."""
         return get_client().get_nutrition_plans(limit=limit)
@@ -637,16 +634,14 @@ def register_nutrition_tools(mcp: FastMCP):
     )
     def create_nutrition_plan_tool(
         description: str = Field(default="", description="Plan description."),
-        goal_energy: Optional[float] = Field(
-            default=None, description="Target calories."
-        ),
-        goal_protein: Optional[float] = Field(
+        goal_energy: float | None = Field(default=None, description="Target calories."),
+        goal_protein: float | None = Field(
             default=None, description="Target protein (g)."
         ),
-        goal_carbohydrates: Optional[float] = Field(
+        goal_carbohydrates: float | None = Field(
             default=None, description="Target carbs (g)."
         ),
-        goal_fat: Optional[float] = Field(default=None, description="Target fat (g)."),
+        goal_fat: float | None = Field(default=None, description="Target fat (g)."),
     ) -> Any:
         """Create plan."""
         return get_client().create_nutrition_plan(
@@ -690,7 +685,7 @@ def register_nutrition_tools(mcp: FastMCP):
         meal: int = Field(description="Meal ID."),
         ingredient: int = Field(description="Ingredient ID."),
         amount: float = Field(description="Amount in grams."),
-        weight_unit: Optional[int] = Field(
+        weight_unit: int | None = Field(
             default=None, description="Optional weight unit ID."
         ),
     ) -> Any:
@@ -705,13 +700,13 @@ def register_nutrition_tools(mcp: FastMCP):
         tags={"Nutrition"},
     )
     def get_ingredients_tool(
-        limit: Optional[int] = Field(default=20, description="Max results."),
-        offset: Optional[int] = Field(default=None, description="Offset."),
-        language: Optional[int] = Field(default=None, description="Language ID."),
-        name: Optional[str] = Field(default=None, description="Filter by name."),
+        limit: int | None = Field(default=20, description="Max results."),
+        offset: int | None = Field(default=None, description="Offset."),
+        language: int | None = Field(default=None, description="Language ID."),
+        name: str | None = Field(default=None, description="Filter by name."),
     ) -> Any:
         """List ingredients."""
-        filters = {}
+        filters: dict[str, Any] = {}
         if language:
             filters["language"] = language
         if name:
@@ -735,8 +730,8 @@ def register_nutrition_tools(mcp: FastMCP):
         tags={"Nutrition"},
     )
     def get_nutrition_diary_tool(
-        limit: Optional[int] = Field(default=None, description="Max results."),
-        ordering: Optional[str] = Field(default=None, description="Order by field."),
+        limit: int | None = Field(default=None, description="Max results."),
+        ordering: str | None = Field(default=None, description="Order by field."),
     ) -> Any:
         """List diary."""
         return get_client().get_nutrition_diary(limit=limit, ordering=ordering)
@@ -750,7 +745,7 @@ def register_nutrition_tools(mcp: FastMCP):
         plan: int = Field(description="Nutrition plan ID."),
         ingredient: int = Field(description="Ingredient ID."),
         amount: float = Field(description="Amount in grams."),
-        meal: Optional[int] = Field(default=None, description="Optional meal ID."),
+        meal: int | None = Field(default=None, description="Optional meal ID."),
     ) -> Any:
         """Log nutrition."""
         return get_client().create_nutrition_diary_entry(
@@ -765,8 +760,8 @@ def register_body_tools(mcp: FastMCP):
         tags={"Body"},
     )
     def get_weight_entries_tool(
-        limit: Optional[int] = Field(default=None, description="Max results."),
-        ordering: Optional[str] = Field(
+        limit: int | None = Field(default=None, description="Max results."),
+        ordering: str | None = Field(
             default=None, description="Order by field (e.g., '-date')."
         ),
     ) -> Any:
@@ -802,8 +797,8 @@ def register_body_tools(mcp: FastMCP):
         tags={"Body"},
     )
     def get_measurements_tool(
-        limit: Optional[int] = Field(default=None, description="Max results."),
-        ordering: Optional[str] = Field(default=None, description="Order by field."),
+        limit: int | None = Field(default=None, description="Max results."),
+        ordering: str | None = Field(default=None, description="Order by field."),
     ) -> Any:
         """List measurements."""
         return get_client().get_measurements(limit=limit, ordering=ordering)
@@ -829,7 +824,7 @@ def register_body_tools(mcp: FastMCP):
         tags={"Body"},
     )
     def get_measurement_categories_tool(
-        limit: Optional[int] = Field(default=100, description="Max results."),
+        limit: int | None = Field(default=100, description="Max results."),
     ) -> Any:
         """List categories."""
         return get_client().get_measurement_categories(limit=limit)
@@ -852,7 +847,7 @@ def register_body_tools(mcp: FastMCP):
         tags={"Body"},
     )
     def get_gallery_tool(
-        limit: Optional[int] = Field(default=None, description="Max results."),
+        limit: int | None = Field(default=None, description="Max results."),
     ) -> Any:
         """List gallery."""
         return get_client().get_gallery(limit=limit)
@@ -883,7 +878,7 @@ def register_user_tools(mcp: FastMCP):
         tags={"User"},
     )
     def get_user_trophies_tool(
-        limit: Optional[int] = Field(default=None, description="Max results."),
+        limit: int | None = Field(default=None, description="Max results."),
     ) -> Any:
         """List trophies."""
         return get_client().get_user_trophies(limit=limit)
@@ -944,7 +939,7 @@ def get_mcp_instance() -> tuple[Any, Any, Any, Any]:
 
     for mw in middlewares:
         mcp.add_middleware(mw)
-    registered_tags = []
+    registered_tags: list[str] = []
     return mcp, args, middlewares, registered_tags
 
 

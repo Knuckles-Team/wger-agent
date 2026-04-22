@@ -65,7 +65,7 @@ source .venv/bin/activate
 
 ```
 
-Overwise, manually create a new virtualenv and install everything:
+Otherwise, manually create a new virtualenv and install everything:
 ```
 python3 -m venv .venv
 source .venv/bin/activate
@@ -90,7 +90,7 @@ cp database.sqlite database.sqlite.orig
 
 ```
 
-You can of course also use other databases such as PostgresSQL or MariaDB. Create a database and user and edit the DATABASES settings before calling bootstrap. Take a look at the prod_postgres on apache on how that could look like.
+You can of course also use other databases such as PostgreSQL or MariaDB. Create a database and user and edit the DATABASES settings before calling bootstrap. Take a look at the prod_postgres on apache on how that could look like.
 Compile the translation files:
 ```
 cd wger
