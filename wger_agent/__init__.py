@@ -7,7 +7,7 @@ import inspect
 __all__: list[str] = []
 
 CORE_MODULES = [
-    "wger_agent.api_wrapper",
+    "wger_agent.api_client",
 ]
 
 OPTIONAL_MODULES = {
@@ -57,3 +57,4 @@ wger-agent
 
 Wger Workout Manager — exercise database, workout routines, nutrition plans, body measurements, and progress tracking.
 """
+__version__ = "0.1.0"

@@ -28,7 +28,7 @@ class WgerApi:
     def __init__(
         self,
         base_url: str = "https://wger.de",
-        token: str = "",
+        token: str = "",  # nosec B107
         verify: bool = True,
     ):
         self.base_url = base_url.rstrip("/")

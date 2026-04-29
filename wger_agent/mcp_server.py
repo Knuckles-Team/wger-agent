@@ -23,9 +23,11 @@ from typing import Any
 from agent_utilities.base_utilities import to_boolean
 from agent_utilities.mcp_utilities import (
     create_mcp_server,
+    ctx_confirm_destructive,
+    ctx_progress,
 )
 from dotenv import find_dotenv, load_dotenv
-from fastmcp import FastMCP
+from fastmcp import Context, FastMCP
 from fastmcp.utilities.logging import get_logger
 from pydantic import Field
 
@@ -65,6 +67,9 @@ def register_routine_tools(mcp: FastMCP):
     def get_routines_tool(
         limit: int | None = Field(default=None, description="Max results per page."),
         offset: int | None = Field(default=None, description="Offset for pagination."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List routines."""
         return get_client().get_routines(limit=limit, offset=offset)
@@ -76,6 +81,9 @@ def register_routine_tools(mcp: FastMCP):
     )
     def get_routine_tool(
         routine_id: int = Field(description="Routine ID."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Get routine."""
         return get_client().get_routine(routine_id)
@@ -93,6 +101,9 @@ def register_routine_tools(mcp: FastMCP):
         start_date: str = Field(default="", description="Start date (YYYY-MM-DD)."),
         end_date: str = Field(default="", description="End date (YYYY-MM-DD)."),
         fit_in_week: bool = Field(default=False, description="Fit routine in a week."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Create routine."""
         return get_client().create_routine(
@@ -108,10 +119,16 @@ def register_routine_tools(mcp: FastMCP):
         description="Delete a routine.",
         tags={"Routine"},
     )
-    def delete_routine_tool(
+    async def delete_routine_tool(
         routine_id: int = Field(description="Routine ID to delete."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Delete routine."""
+        if not await ctx_confirm_destructive(ctx, "delete routine"):
+            return {"status": "cancelled", "message": "Operation cancelled by user"}
+        await ctx_progress(ctx, 0, 100)
         return get_client().delete_routine(routine_id)
 
     @mcp.tool(
@@ -119,9 +136,12 @@ def register_routine_tools(mcp: FastMCP):
         description="List workout days. Filter by routine with routine=<id>.",
         tags={"Routine"},
     )
-    def get_days_tool(
+    async def get_days_tool(
         limit: int | None = Field(default=None, description="Max results."),
         offset: int | None = Field(default=None, description="Offset."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List days."""
         return get_client().get_days(limit=limit, offset=offset)
@@ -141,6 +161,9 @@ def register_routine_tools(mcp: FastMCP):
             default="custom",
             description="Type: custom, enom, amrap, hiit, tabata, edt, rft, afap.",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Create day."""
         return get_client().create_day(
@@ -157,10 +180,16 @@ def register_routine_tools(mcp: FastMCP):
         description="Delete a workout day.",
         tags={"Routine"},
     )
-    def delete_day_tool(
+    async def delete_day_tool(
         day_id: int = Field(description="Day ID to delete."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Delete day."""
+        if not await ctx_confirm_destructive(ctx, "delete day"):
+            return {"status": "cancelled", "message": "Operation cancelled by user"}
+        await ctx_progress(ctx, 0, 100)
         return get_client().delete_day(day_id)
 
     @mcp.tool(
@@ -168,9 +197,12 @@ def register_routine_tools(mcp: FastMCP):
         description="List exercise slots (sets) in workout days.",
         tags={"Routine"},
     )
-    def get_slots_tool(
+    async def get_slots_tool(
         limit: int | None = Field(default=None, description="Max results."),
         offset: int | None = Field(default=None, description="Offset."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List slots."""
         return get_client().get_slots(limit=limit, offset=offset)
@@ -187,6 +219,9 @@ def register_routine_tools(mcp: FastMCP):
             default="normal",
             description="Type: normal, dropset, myo, partial, forced, tut, iso, jump.",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Create slot."""
         return get_client().create_slot(day=day, order=order, slot_type=slot_type)
@@ -200,6 +235,9 @@ def register_routine_tools(mcp: FastMCP):
         slot: int = Field(description="Slot ID."),
         exercise: int = Field(description="Exercise ID."),
         order: int = Field(default=1, description="Entry order."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Create slot entry."""
         return get_client().create_slot_entry(slot=slot, exercise=exercise, order=order)
@@ -211,6 +249,9 @@ def register_routine_tools(mcp: FastMCP):
     )
     def get_templates_tool(
         limit: int | None = Field(default=None, description="Max results."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List templates."""
         return get_client().get_templates(limit=limit)
@@ -222,6 +263,9 @@ def register_routine_tools(mcp: FastMCP):
     )
     def get_public_templates_tool(
         limit: int | None = Field(default=None, description="Max results."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List public templates."""
         return get_client().get_public_templates(limit=limit)
@@ -251,6 +295,9 @@ def register_routineconfig_tools(mcp: FastMCP):
         repeat: bool = Field(
             default=False, description="Repeat this rule until a new one takes effect."
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Create weight config."""
         return get_client().create_weight_config(
@@ -269,6 +316,9 @@ def register_routineconfig_tools(mcp: FastMCP):
     )
     def get_weight_configs_tool(
         limit: int | None = Field(default=None, description="Max results."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List weight configs."""
         return get_client().get_weight_configs(limit=limit)
@@ -285,6 +335,9 @@ def register_routineconfig_tools(mcp: FastMCP):
         operation: str = Field(default="r", description="Operation: 'r', '+', '-'."),
         step: str = Field(default="abs", description="Step: 'abs' or 'percent'."),
         repeat: bool = Field(default=False, description="Repeat until next rule."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Create repetitions config."""
         return get_client().create_repetitions_config(
@@ -303,6 +356,9 @@ def register_routineconfig_tools(mcp: FastMCP):
     )
     def get_repetitions_configs_tool(
         limit: int | None = Field(default=None, description="Max results."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List repetitions configs."""
         return get_client().get_repetitions_configs(limit=limit)
@@ -319,6 +375,9 @@ def register_routineconfig_tools(mcp: FastMCP):
         operation: str = Field(default="r", description="Operation: 'r', '+', '-'."),
         step: str = Field(default="abs", description="Step: 'abs' or 'percent'."),
         repeat: bool = Field(default=False, description="Repeat until next rule."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Create sets config."""
         return get_client().create_sets_config(
@@ -342,6 +401,9 @@ def register_routineconfig_tools(mcp: FastMCP):
         operation: str = Field(default="r", description="Operation: 'r', '+', '-'."),
         step: str = Field(default="abs", description="Step: 'abs' or 'percent'."),
         repeat: bool = Field(default=False, description="Repeat until next rule."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Create rest config."""
         return get_client().create_rest_config(
@@ -365,6 +427,9 @@ def register_routineconfig_tools(mcp: FastMCP):
         operation: str = Field(default="r", description="Operation: 'r', '+', '-'."),
         step: str = Field(default="abs", description="Step: 'abs' or 'percent'."),
         repeat: bool = Field(default=False, description="Repeat until next rule."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Create RiR config."""
         return get_client().create_rir_config(
@@ -395,6 +460,9 @@ def register_exercise_tools(mcp: FastMCP):
         category: int | None = Field(
             default=None, description="Filter by exercise category ID."
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List exercises."""
         filters: dict[str, Any] = {}
@@ -413,6 +481,9 @@ def register_exercise_tools(mcp: FastMCP):
     )
     def get_exercise_info_tool(
         exercise_id: int = Field(description="Exercise ID."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Get exercise info."""
         return get_client().get_exercise_info(exercise_id)
@@ -426,6 +497,9 @@ def register_exercise_tools(mcp: FastMCP):
         _term: str = Field(description="Search term."),
         language: int | None = Field(default=2, description="Language ID (2=English)."),
         limit: int | None = Field(default=20, description="Max results."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Search exercises."""
         filters: dict[str, Any] = {"language": language, "format": "json"}
@@ -438,6 +512,9 @@ def register_exercise_tools(mcp: FastMCP):
     )
     def get_exercise_categories_tool(
         limit: int | None = Field(default=100, description="Max results."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List categories."""
         return get_client().get_exercise_categories(limit=limit)
@@ -449,6 +526,9 @@ def register_exercise_tools(mcp: FastMCP):
     )
     def get_equipment_tool(
         limit: int | None = Field(default=100, description="Max results."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List equipment."""
         return get_client().get_equipment(limit=limit)
@@ -460,6 +540,9 @@ def register_exercise_tools(mcp: FastMCP):
     )
     def get_muscles_tool(
         limit: int | None = Field(default=100, description="Max results."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List muscles."""
         return get_client().get_muscles(limit=limit)
@@ -473,6 +556,9 @@ def register_exercise_tools(mcp: FastMCP):
         limit: int | None = Field(default=20, description="Max results."),
         exercise_base: int | None = Field(
             default=None, description="Filter by exercise base ID."
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> Any:
         """List exercise images."""
@@ -488,6 +574,9 @@ def register_exercise_tools(mcp: FastMCP):
     )
     def get_variations_tool(
         limit: int | None = Field(default=20, description="Max results."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List variations."""
         return get_client().get_variations(limit=limit)
@@ -503,6 +592,9 @@ def register_workout_tools(mcp: FastMCP):
         limit: int | None = Field(default=None, description="Max results."),
         offset: int | None = Field(default=None, description="Offset."),
         ordering: str | None = Field(default=None, description="Order by field."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List workout sessions."""
         return get_client().get_workout_sessions(
@@ -516,6 +608,9 @@ def register_workout_tools(mcp: FastMCP):
     )
     def get_workout_session_tool(
         session_id: int = Field(description="Session ID."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Get session."""
         return get_client().get_workout_session(session_id)
@@ -532,6 +627,9 @@ def register_workout_tools(mcp: FastMCP):
         notes: str = Field(default="", description="Session notes."),
         time_start: str = Field(default="", description="Start time (HH:MM)."),
         time_end: str = Field(default="", description="End time (HH:MM)."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Create session."""
         return get_client().create_workout_session(
@@ -548,10 +646,16 @@ def register_workout_tools(mcp: FastMCP):
         description="Delete a workout session.",
         tags={"Workout"},
     )
-    def delete_workout_session_tool(
+    async def delete_workout_session_tool(
         session_id: int = Field(description="Session ID."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Delete session."""
+        if not await ctx_confirm_destructive(ctx, "delete workout session"):
+            return {"status": "cancelled", "message": "Operation cancelled by user"}
+        await ctx_progress(ctx, 0, 100)
         return get_client().delete_workout_session(session_id)
 
     @mcp.tool(
@@ -559,10 +663,13 @@ def register_workout_tools(mcp: FastMCP):
         description="List workout log entries.",
         tags={"Workout"},
     )
-    def get_workout_logs_tool(
+    async def get_workout_logs_tool(
         limit: int | None = Field(default=None, description="Max results."),
         offset: int | None = Field(default=None, description="Offset."),
         ordering: str | None = Field(default=None, description="Order by field."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List workout logs."""
         return get_client().get_workout_logs(
@@ -581,6 +688,9 @@ def register_workout_tools(mcp: FastMCP):
         repetitions: int = Field(default=0, description="Number of reps."),
         weight: float = Field(default=0, description="Weight used."),
         rir: str | None = Field(default=None, description="Reps in reserve."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Create workout log."""
         return get_client().create_workout_log(
@@ -597,10 +707,16 @@ def register_workout_tools(mcp: FastMCP):
         description="Delete a workout log entry.",
         tags={"Workout"},
     )
-    def delete_workout_log_tool(
+    async def delete_workout_log_tool(
         log_id: int = Field(description="Log ID."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Delete log."""
+        if not await ctx_confirm_destructive(ctx, "delete workout log"):
+            return {"status": "cancelled", "message": "Operation cancelled by user"}
+        await ctx_progress(ctx, 0, 100)
         return get_client().delete_workout_log(log_id)
 
 
@@ -612,6 +728,9 @@ def register_nutrition_tools(mcp: FastMCP):
     )
     def get_nutrition_plans_tool(
         limit: int | None = Field(default=None, description="Max results."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List plans."""
         return get_client().get_nutrition_plans(limit=limit)
@@ -623,6 +742,9 @@ def register_nutrition_tools(mcp: FastMCP):
     )
     def get_nutrition_plan_info_tool(
         plan_id: int = Field(description="Nutrition plan ID."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Get plan info."""
         return get_client().get_nutrition_plan_info(plan_id)
@@ -642,6 +764,9 @@ def register_nutrition_tools(mcp: FastMCP):
             default=None, description="Target carbs (g)."
         ),
         goal_fat: float | None = Field(default=None, description="Target fat (g)."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Create plan."""
         return get_client().create_nutrition_plan(
@@ -657,10 +782,16 @@ def register_nutrition_tools(mcp: FastMCP):
         description="Delete a nutrition plan.",
         tags={"Nutrition"},
     )
-    def delete_nutrition_plan_tool(
+    async def delete_nutrition_plan_tool(
         plan_id: int = Field(description="Plan ID."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Delete plan."""
+        if not await ctx_confirm_destructive(ctx, "delete nutrition plan"):
+            return {"status": "cancelled", "message": "Operation cancelled by user"}
+        await ctx_progress(ctx, 0, 100)
         return get_client().delete_nutrition_plan(plan_id)
 
     @mcp.tool(
@@ -668,10 +799,13 @@ def register_nutrition_tools(mcp: FastMCP):
         description="Create a meal in a nutrition plan.",
         tags={"Nutrition"},
     )
-    def create_meal_tool(
+    async def create_meal_tool(
         plan: int = Field(description="Nutrition plan ID."),
         name: str = Field(default="", description="Meal name."),
         time: str = Field(default="", description="Meal time (HH:MM)."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Create meal."""
         return get_client().create_meal(plan=plan, name=name, time=time)
@@ -687,6 +821,9 @@ def register_nutrition_tools(mcp: FastMCP):
         amount: float = Field(description="Amount in grams."),
         weight_unit: int | None = Field(
             default=None, description="Optional weight unit ID."
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> Any:
         """Create meal item."""
@@ -704,6 +841,9 @@ def register_nutrition_tools(mcp: FastMCP):
         offset: int | None = Field(default=None, description="Offset."),
         language: int | None = Field(default=None, description="Language ID."),
         name: str | None = Field(default=None, description="Filter by name."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List ingredients."""
         filters: dict[str, Any] = {}
@@ -720,6 +860,9 @@ def register_nutrition_tools(mcp: FastMCP):
     )
     def get_ingredient_info_tool(
         ingredient_id: int = Field(description="Ingredient ID."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Get ingredient info."""
         return get_client().get_ingredient_info(ingredient_id)
@@ -732,6 +875,9 @@ def register_nutrition_tools(mcp: FastMCP):
     def get_nutrition_diary_tool(
         limit: int | None = Field(default=None, description="Max results."),
         ordering: str | None = Field(default=None, description="Order by field."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List diary."""
         return get_client().get_nutrition_diary(limit=limit, ordering=ordering)
@@ -746,6 +892,9 @@ def register_nutrition_tools(mcp: FastMCP):
         ingredient: int = Field(description="Ingredient ID."),
         amount: float = Field(description="Amount in grams."),
         meal: int | None = Field(default=None, description="Optional meal ID."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Log nutrition."""
         return get_client().create_nutrition_diary_entry(
@@ -764,6 +913,9 @@ def register_body_tools(mcp: FastMCP):
         ordering: str | None = Field(
             default=None, description="Order by field (e.g., '-date')."
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List weight entries."""
         return get_client().get_weight_entries(limit=limit, ordering=ordering)
@@ -776,6 +928,9 @@ def register_body_tools(mcp: FastMCP):
     def log_body_weight_tool(
         date: str = Field(description="Date (YYYY-MM-DD)."),
         weight: float = Field(description="Body weight."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Log weight."""
         return get_client().create_weight_entry(date=date, weight=weight)
@@ -785,10 +940,16 @@ def register_body_tools(mcp: FastMCP):
         description="Delete a body weight entry.",
         tags={"Body"},
     )
-    def delete_weight_entry_tool(
+    async def delete_weight_entry_tool(
         entry_id: int = Field(description="Entry ID."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Delete weight entry."""
+        if not await ctx_confirm_destructive(ctx, "delete weight entry"):
+            return {"status": "cancelled", "message": "Operation cancelled by user"}
+        await ctx_progress(ctx, 0, 100)
         return get_client().delete_weight_entry(entry_id)
 
     @mcp.tool(
@@ -796,9 +957,12 @@ def register_body_tools(mcp: FastMCP):
         description="List body measurements (biceps, chest, waist, etc.).",
         tags={"Body"},
     )
-    def get_measurements_tool(
+    async def get_measurements_tool(
         limit: int | None = Field(default=None, description="Max results."),
         ordering: str | None = Field(default=None, description="Order by field."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List measurements."""
         return get_client().get_measurements(limit=limit, ordering=ordering)
@@ -812,6 +976,9 @@ def register_body_tools(mcp: FastMCP):
         category: int = Field(description="Measurement category ID."),
         date: str = Field(description="Date (YYYY-MM-DD)."),
         value: float = Field(description="Measurement value."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Log measurement."""
         return get_client().create_measurement(
@@ -825,6 +992,9 @@ def register_body_tools(mcp: FastMCP):
     )
     def get_measurement_categories_tool(
         limit: int | None = Field(default=100, description="Max results."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List categories."""
         return get_client().get_measurement_categories(limit=limit)
@@ -837,6 +1007,9 @@ def register_body_tools(mcp: FastMCP):
     def create_measurement_category_tool(
         name: str = Field(description="Category name."),
         unit: str = Field(default="cm", description="Unit of measurement."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """Create category."""
         return get_client().create_measurement_category(name=name, unit=unit)
@@ -848,6 +1021,9 @@ def register_body_tools(mcp: FastMCP):
     )
     def get_gallery_tool(
         limit: int | None = Field(default=None, description="Max results."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List gallery."""
         return get_client().get_gallery(limit=limit)
@@ -859,7 +1035,11 @@ def register_user_tools(mcp: FastMCP):
         description="Get the authenticated user's profile (age, height, gender, etc.).",
         tags={"User"},
     )
-    def get_user_profile_tool() -> Any:
+    def get_user_profile_tool(
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
+    ) -> Any:
         """Get profile."""
         return get_client().get_user_profile()
 
@@ -868,7 +1048,11 @@ def register_user_tools(mcp: FastMCP):
         description="Get user statistics (workout counts, etc.).",
         tags={"User"},
     )
-    def get_user_statistics_tool() -> Any:
+    def get_user_statistics_tool(
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
+    ) -> Any:
         """Get stats."""
         return get_client().get_user_statistics()
 
@@ -879,6 +1063,9 @@ def register_user_tools(mcp: FastMCP):
     )
     def get_user_trophies_tool(
         limit: int | None = Field(default=None, description="Max results."),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> Any:
         """List trophies."""
         return get_client().get_user_trophies(limit=limit)
@@ -888,7 +1075,11 @@ def register_user_tools(mcp: FastMCP):
         description="List available languages.",
         tags={"User"},
     )
-    def get_languages_tool() -> Any:
+    def get_languages_tool(
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
+    ) -> Any:
         """List languages."""
         return get_client().get_languages(limit=100)
 
@@ -897,7 +1088,11 @@ def register_user_tools(mcp: FastMCP):
         description="List repetition unit settings (e.g., Repetitions, Until failure, etc.).",
         tags={"User"},
     )
-    def get_repetition_units_tool() -> Any:
+    def get_repetition_units_tool(
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
+    ) -> Any:
         """List rep units."""
         return get_client().get_repetition_units(limit=100)
 
@@ -906,7 +1101,11 @@ def register_user_tools(mcp: FastMCP):
         description="List weight unit settings (kg, lb, plates, etc.).",
         tags={"User"},
     )
-    def get_weight_unit_settings_tool() -> Any:
+    def get_weight_unit_settings_tool(
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
+    ) -> Any:
         """List weight units."""
         return get_client().get_weight_unit_settings(limit=100)
 
