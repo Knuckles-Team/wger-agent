@@ -42,11 +42,11 @@ class WgerApi:
         try:
             response = self.session.get(f"{self.api_base}/workout/")
             if response.status_code == 401:
-                from agent_utilities.exceptions import AuthError
+                from agent_utilities.core.exceptions import AuthError
 
                 raise AuthError("Wger authentication failed: Invalid API key.")
             elif response.status_code == 403:
-                from agent_utilities.exceptions import UnauthorizedError
+                from agent_utilities.core.exceptions import UnauthorizedError
 
                 raise UnauthorizedError(
                     "Wger access forbidden: Insufficient permissions."
