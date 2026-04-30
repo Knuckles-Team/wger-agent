@@ -33,7 +33,7 @@ from pydantic import Field
 
 from wger_agent.auth import get_client
 
-__version__ = "0.1.31"
+__version__ = "0.2.0"
 print(f"Wger MCP v{__version__}", file=sys.stderr)
 
 logger = get_logger(name="TokenMiddleware")
