@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "wger-agent": {
+      "command": "uv",
+      "args": [
+        "run",
+        "wger-mcp"
+      ],
+      "env": {
+        "AGENT_DESCRIPTION": "<YOUR_AGENT_DESCRIPTION>",
+        "AGENT_SYSTEM_PROMPT": "<YOUR_AGENT_SYSTEM_PROMPT>",
+        "BODYTOOL": "True",
+        "DEFAULT_AGENT_NAME": "<YOUR_DEFAULT_AGENT_NAME>",
+        "EXERCISETOOL": "True",
+        "NUTRITIONTOOL": "True",
+        "ROUTINECONFIGTOOL": "True",
+        "ROUTINETOOL": "True",
+        "USERTOOL": "True",
+        "WGER_ACCESS_TOKEN": "<YOUR_WGER_ACCESS_TOKEN>",
+        "WGER_INSTANCE": "<YOUR_WGER_INSTANCE>",
+        "WGER_VERIFY": "<YOUR_WGER_VERIFY>",
+        "WORKOUTTOOL": "True"
+      }
+    }
+  }
+}

@@ -21,7 +21,7 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/wger-agent)
 ![PyPI - Implementation](https://img.shields.io/pypi/implementation/wger-agent)
 
-*Version: 0.5.0*
+*Version: 0.6.0*
 
 ## Overview
 
@@ -157,3 +157,74 @@ stateDiagram-v2
 
 - **RouterNode**: A fast, lightweight LLM (e.g., `nvidia/nemotron-3-super`) that classifies the user's query into one of the specialized domains.
 - **DomainNode**: The executor node. For the selected domain, it dynamically sets environment variables to temporarily enable ONLY the tools relevant to that domain, creating a highly focused sub-agent (e.g., `gpt-4o`) to complete the request. This preserves LLM context and prevents tool hallucination.
+
+
+## MCP Configuration Examples
+
+### 1. Standard IO (stdio) Deployment
+
+```json
+{
+  "mcpServers": {
+    "wger-agent": {
+      "command": "uv",
+      "args": [
+        "run",
+        "wger-mcp"
+      ],
+      "env": {
+        "AGENT_DESCRIPTION": "<YOUR_AGENT_DESCRIPTION>",
+        "AGENT_SYSTEM_PROMPT": "<YOUR_AGENT_SYSTEM_PROMPT>",
+        "BODYTOOL": "True",
+        "DEFAULT_AGENT_NAME": "<YOUR_DEFAULT_AGENT_NAME>",
+        "EXERCISETOOL": "True",
+        "NUTRITIONTOOL": "True",
+        "ROUTINECONFIGTOOL": "True",
+        "ROUTINETOOL": "True",
+        "USERTOOL": "True",
+        "WGER_ACCESS_TOKEN": "<YOUR_WGER_ACCESS_TOKEN>",
+        "WGER_INSTANCE": "<YOUR_WGER_INSTANCE>",
+        "WGER_VERIFY": "<YOUR_WGER_VERIFY>",
+        "WORKOUTTOOL": "True"
+      }
+    }
+  }
+}
+```
+
+### 2. Streamable HTTP (SSE) Deployment
+
+```json
+{
+  "mcpServers": {
+    "wger-agent": {
+      "command": "uv",
+      "args": [
+        "run",
+        "wger-mcp",
+        "--transport",
+        "http",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000"
+      ],
+      "env": {
+        "AGENT_DESCRIPTION": "<YOUR_AGENT_DESCRIPTION>",
+        "AGENT_SYSTEM_PROMPT": "<YOUR_AGENT_SYSTEM_PROMPT>",
+        "BODYTOOL": "True",
+        "DEFAULT_AGENT_NAME": "<YOUR_DEFAULT_AGENT_NAME>",
+        "EXERCISETOOL": "True",
+        "NUTRITIONTOOL": "True",
+        "ROUTINECONFIGTOOL": "True",
+        "ROUTINETOOL": "True",
+        "USERTOOL": "True",
+        "WGER_ACCESS_TOKEN": "<YOUR_WGER_ACCESS_TOKEN>",
+        "WGER_INSTANCE": "<YOUR_WGER_INSTANCE>",
+        "WGER_VERIFY": "<YOUR_WGER_VERIFY>",
+        "WORKOUTTOOL": "True"
+      }
+    }
+  }
+}
+```
