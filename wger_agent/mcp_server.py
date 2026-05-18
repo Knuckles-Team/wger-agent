@@ -11,7 +11,6 @@ with warnings.catch_warnings():
     except ImportError:
         pass
 
-# General urllib3/chardet mismatch warnings
 warnings.filterwarnings("ignore", message=".*urllib3.*or chardet.*")
 warnings.filterwarnings("ignore", message=".*urllib3.*or charset_normalizer.*")
 
@@ -21,1134 +20,702 @@ import sys
 from typing import Any
 
 from agent_utilities.base_utilities import to_boolean
-from agent_utilities.mcp_utilities import (
-    create_mcp_server,
-    ctx_confirm_destructive,
-    ctx_progress,
-)
+from agent_utilities.mcp_utilities import create_mcp_server
 from dotenv import find_dotenv, load_dotenv
-from fastmcp import Context, FastMCP
+from fastmcp import FastMCP
+from fastmcp.dependencies import Depends
 from fastmcp.utilities.logging import get_logger
 from pydantic import Field
+from starlette.responses import JSONResponse
 
 from wger_agent.auth import get_client
 
 __version__ = "0.10.0"
-print(f"Wger MCP v{__version__}", file=sys.stderr)
 
-logger = get_logger(name="TokenMiddleware")
-logger.setLevel(logging.DEBUG)
-
-
-def register_prompts(mcp: FastMCP):
-    @mcp.prompt(
-        name="fitness_plan",
-        description="Generate a fitness plan using wger data.",
-    )
-    def fitness_plan_prompt(goal: str, experience_level: str = "intermediate") -> str:
-        """Generate a fitness plan prompt."""
-        return f"Create a {experience_level} fitness plan for the goal: '{goal}'. Use the available wger tools to search exercises, create routines, and set up progression."
-
-    @mcp.prompt(
-        name="nutrition_plan",
-        description="Generate a nutrition plan using wger data.",
-    )
-    def nutrition_plan_prompt(calories: str = "2000", goal: str = "maintenance") -> str:
-        """Generate a nutrition plan prompt."""
-        return f"Create a nutrition plan targeting {calories} calories for {goal}. Use the wger nutrition tools to search ingredients and build meals."
+logger = get_logger(name="wger-agent")
+logger.setLevel(logging.INFO)
 
 
 def register_routine_tools(mcp: FastMCP):
-    @mcp.tool(
-        name="get_routines",
-        description="List all workout routines for the authenticated user.",
-        tags={"Routine"},
-    )
-    def get_routines_tool(
-        limit: int | None = Field(default=None, description="Max results per page."),
-        offset: int | None = Field(default=None, description="Offset for pagination."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
+    @mcp.tool(tags={"Routine"})
+    async def wger_routine(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'get_routines', 'get_routine', 'create_routine', 'delete_routine', 'get_days', 'create_day', 'delete_day', 'get_slots', 'create_slot', 'create_slot_entry', 'get_templates', 'get_public_templates'"
         ),
+        limit: int | None = Field(default=None, description="limit"),
+        offset: int | None = Field(default=None, description="offset"),
+        ordering: str | None = Field(default=None, description="ordering"),
+        routine_id: int | None = Field(default=None, description="routine id"),
+        name: str | None = Field(default=None, description="name"),
+        description: str | None = Field(default=None, description="description"),
+        start_date: str | None = Field(default=None, description="start date"),
+        end_date: str | None = Field(default=None, description="end date"),
+        fit_in_week: bool | None = Field(default=None, description="fit in week"),
+        routine: int | None = Field(default=None, description="routine"),
+        is_rest: bool | None = Field(default=None, description="is rest"),
+        order: int | None = Field(default=None, description="order"),
+        day_type: str | None = Field(default=None, description="day type"),
+        need_logs_to_advance: bool | None = Field(
+            default=None, description="need logs to advance"
+        ),
+        day_id: int | None = Field(default=None, description="day id"),
+        day: int | None = Field(default=None, description="day"),
+        slot_type: str | None = Field(default=None, description="slot type"),
+        slot: int | None = Field(default=None, description="slot"),
+        exercise: int | None = Field(default=None, description="exercise"),
+        client=Depends(get_client),
     ) -> Any:
-        """List routines."""
-        return get_client().get_routines(limit=limit, offset=offset)
+        """Manage routine operations.
 
-    @mcp.tool(
-        name="get_routine",
-        description="Get a specific routine by ID.",
-        tags={"Routine"},
-    )
-    def get_routine_tool(
-        routine_id: int = Field(description="Routine ID."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Get routine."""
-        return get_client().get_routine(routine_id)
-
-    @mcp.tool(
-        name="create_routine",
-        description="Create a new workout routine.",
-        tags={"Routine"},
-    )
-    def create_routine_tool(
-        name: str = Field(description="Routine name (max 50 chars)."),
-        description: str = Field(
-            default="", description="Description (max 1000 chars)."
-        ),
-        start_date: str = Field(default="", description="Start date (YYYY-MM-DD)."),
-        end_date: str = Field(default="", description="End date (YYYY-MM-DD)."),
-        fit_in_week: bool = Field(default=False, description="Fit routine in a week."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Create routine."""
-        return get_client().create_routine(
-            name=name,
-            description=description,
-            start_date=start_date,
-            end_date=end_date,
-            fit_in_week=fit_in_week,
+        Actions:
+          - 'get_routines': List all routines.
+          - 'get_routine': Get a specific routine by ID.
+          - 'create_routine': Create a new routine.
+          - 'delete_routine': Delete a routine.
+          - 'get_days': List all workout days.
+          - 'create_day': Create a workout day in a routine.
+          - 'delete_day': Delete a day.
+          - 'get_slots': List all slots (sets).
+          - 'create_slot': Create a slot (set) in a day.
+          - 'create_slot_entry': Create a slot entry (add exercise to slot).
+          - 'get_templates': List user's workout templates.
+          - 'get_public_templates': List public workout templates.
+        """
+        kwargs: dict[str, Any]
+        if action == "get_routines":
+            kwargs = {
+                "limit": limit,
+                "offset": offset,
+                "ordering": ordering,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_routines(**kwargs)
+        if action == "get_routine":
+            kwargs = {"routine_id": routine_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_routine(**kwargs)
+        if action == "create_routine":
+            kwargs = {
+                "name": name,
+                "description": description,
+                "start_date": start_date,
+                "end_date": end_date,
+                "fit_in_week": fit_in_week,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_routine(**kwargs)
+        if action == "delete_routine":
+            kwargs = {"routine_id": routine_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_routine(**kwargs)
+        if action == "get_days":
+            kwargs = {
+                "limit": limit,
+                "offset": offset,
+                "ordering": ordering,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_days(**kwargs)
+        if action == "create_day":
+            kwargs = {
+                "routine": routine,
+                "name": name,
+                "description": description,
+                "is_rest": is_rest,
+                "order": order,
+                "day_type": day_type,
+                "need_logs_to_advance": need_logs_to_advance,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_day(**kwargs)
+        if action == "delete_day":
+            kwargs = {"day_id": day_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_day(**kwargs)
+        if action == "get_slots":
+            kwargs = {"limit": limit, "offset": offset}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_slots(**kwargs)
+        if action == "create_slot":
+            kwargs = {
+                "day": day,
+                "order": order,
+                "slot_type": slot_type,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_slot(**kwargs)
+        if action == "create_slot_entry":
+            kwargs = {
+                "slot": slot,
+                "exercise": exercise,
+                "order": order,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_slot_entry(**kwargs)
+        if action == "get_templates":
+            kwargs = {"limit": limit, "offset": offset}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_templates(**kwargs)
+        if action == "get_public_templates":
+            kwargs = {"limit": limit, "offset": offset}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_public_templates(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: get_routines', 'get_routine', 'create_routine', 'delete_routine', 'get_days', 'create_day', 'delete_day', 'get_slots', 'create_slot', 'create_slot_entry', 'get_templates', 'get_public_templates"
         )
-
-    @mcp.tool(
-        name="delete_routine",
-        description="Delete a routine.",
-        tags={"Routine"},
-    )
-    async def delete_routine_tool(
-        routine_id: int = Field(description="Routine ID to delete."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Delete routine."""
-        if not await ctx_confirm_destructive(ctx, "delete routine"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
-        await ctx_progress(ctx, 0, 100)
-        return get_client().delete_routine(routine_id)
-
-    @mcp.tool(
-        name="get_days",
-        description="List workout days. Filter by routine with routine=<id>.",
-        tags={"Routine"},
-    )
-    async def get_days_tool(
-        limit: int | None = Field(default=None, description="Max results."),
-        offset: int | None = Field(default=None, description="Offset."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List days."""
-        return get_client().get_days(limit=limit, offset=offset)
-
-    @mcp.tool(
-        name="create_day",
-        description="Create a workout day in a routine.",
-        tags={"Routine"},
-    )
-    def create_day_tool(
-        routine: int = Field(description="Routine ID."),
-        name: str = Field(default="", description="Day name."),
-        description: str = Field(default="", description="Day description."),
-        is_rest: bool = Field(default=False, description="Whether this is a rest day."),
-        order: int = Field(default=1, description="Day order in the routine."),
-        day_type: str = Field(
-            default="custom",
-            description="Type: custom, enom, amrap, hiit, tabata, edt, rft, afap.",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Create day."""
-        return get_client().create_day(
-            routine=routine,
-            name=name,
-            description=description,
-            is_rest=is_rest,
-            order=order,
-            day_type=day_type,
-        )
-
-    @mcp.tool(
-        name="delete_day",
-        description="Delete a workout day.",
-        tags={"Routine"},
-    )
-    async def delete_day_tool(
-        day_id: int = Field(description="Day ID to delete."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Delete day."""
-        if not await ctx_confirm_destructive(ctx, "delete day"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
-        await ctx_progress(ctx, 0, 100)
-        return get_client().delete_day(day_id)
-
-    @mcp.tool(
-        name="get_slots",
-        description="List exercise slots (sets) in workout days.",
-        tags={"Routine"},
-    )
-    async def get_slots_tool(
-        limit: int | None = Field(default=None, description="Max results."),
-        offset: int | None = Field(default=None, description="Offset."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List slots."""
-        return get_client().get_slots(limit=limit, offset=offset)
-
-    @mcp.tool(
-        name="create_slot",
-        description="Create an exercise slot (set) in a day.",
-        tags={"Routine"},
-    )
-    def create_slot_tool(
-        day: int = Field(description="Day ID."),
-        order: int = Field(default=1, description="Slot order."),
-        slot_type: str = Field(
-            default="normal",
-            description="Type: normal, dropset, myo, partial, forced, tut, iso, jump.",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Create slot."""
-        return get_client().create_slot(day=day, order=order, slot_type=slot_type)
-
-    @mcp.tool(
-        name="create_slot_entry",
-        description="Add an exercise to a slot.",
-        tags={"Routine"},
-    )
-    def create_slot_entry_tool(
-        slot: int = Field(description="Slot ID."),
-        exercise: int = Field(description="Exercise ID."),
-        order: int = Field(default=1, description="Entry order."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Create slot entry."""
-        return get_client().create_slot_entry(slot=slot, exercise=exercise, order=order)
-
-    @mcp.tool(
-        name="get_templates",
-        description="List user's workout templates.",
-        tags={"Routine"},
-    )
-    def get_templates_tool(
-        limit: int | None = Field(default=None, description="Max results."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List templates."""
-        return get_client().get_templates(limit=limit)
-
-    @mcp.tool(
-        name="get_public_templates",
-        description="List publicly shared workout templates.",
-        tags={"Routine"},
-    )
-    def get_public_templates_tool(
-        limit: int | None = Field(default=None, description="Max results."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List public templates."""
-        return get_client().get_public_templates(limit=limit)
 
 
 def register_routineconfig_tools(mcp: FastMCP):
-    @mcp.tool(
-        name="create_weight_config",
-        description="Create a weight progression config for a slot entry. Controls how weight progresses across iterations.",
-        tags={"RoutineConfig"},
-    )
-    def create_weight_config_tool(
-        slot_entry: int = Field(description="Slot entry ID."),
-        iteration: int = Field(
-            default=1, description="Iteration number this takes effect."
+    @mcp.tool(tags={"RoutineConfig"})
+    async def wger_routineconfig(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'create_weight_config', 'get_weight_configs', 'create_repetitions_config', 'get_repetitions_configs', 'create_sets_config', 'create_rest_config', 'create_rir_config'"
         ),
-        value: float = Field(
-            default=0, description="Weight value (e.g., 50.0 for 50kg)."
-        ),
-        operation: str = Field(
-            default="r",
-            description="Operation: 'r' (replace), '+' (add), '-' (subtract).",
-        ),
-        step: str = Field(
-            default="abs", description="Step: 'abs' (absolute) or 'percent'."
-        ),
-        repeat: bool = Field(
-            default=False, description="Repeat this rule until a new one takes effect."
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Create weight config."""
-        return get_client().create_weight_config(
-            slot_entry=slot_entry,
-            iteration=iteration,
-            value=value,
-            operation=operation,
-            step=step,
-            repeat=repeat,
-        )
+        limit: int | None = Field(default=None, description="limit"),
+        offset: int | None = Field(default=None, description="offset"),
+        slot_entry: int | None = Field(default=None, description="slot entry"),
+        iteration: int | None = Field(default=None, description="iteration"),
+        value: float | None = Field(default=None, description="value"),
+        operation: str | None = Field(default=None, description="operation"),
+        step: str | None = Field(default=None, description="step"),
+        repeat: bool | None = Field(default=None, description="repeat"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage routineconfig operations.
 
-    @mcp.tool(
-        name="get_weight_configs",
-        description="List weight progression configs.",
-        tags={"RoutineConfig"},
-    )
-    def get_weight_configs_tool(
-        limit: int | None = Field(default=None, description="Max results."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List weight configs."""
-        return get_client().get_weight_configs(limit=limit)
-
-    @mcp.tool(
-        name="create_repetitions_config",
-        description="Create a repetitions progression config for a slot entry.",
-        tags={"RoutineConfig"},
-    )
-    def create_repetitions_config_tool(
-        slot_entry: int = Field(description="Slot entry ID."),
-        iteration: int = Field(default=1, description="Iteration number."),
-        value: float = Field(default=0, description="Repetitions value."),
-        operation: str = Field(default="r", description="Operation: 'r', '+', '-'."),
-        step: str = Field(default="abs", description="Step: 'abs' or 'percent'."),
-        repeat: bool = Field(default=False, description="Repeat until next rule."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Create repetitions config."""
-        return get_client().create_repetitions_config(
-            slot_entry=slot_entry,
-            iteration=iteration,
-            value=value,
-            operation=operation,
-            step=step,
-            repeat=repeat,
-        )
-
-    @mcp.tool(
-        name="get_repetitions_configs",
-        description="List repetitions configs.",
-        tags={"RoutineConfig"},
-    )
-    def get_repetitions_configs_tool(
-        limit: int | None = Field(default=None, description="Max results."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List repetitions configs."""
-        return get_client().get_repetitions_configs(limit=limit)
-
-    @mcp.tool(
-        name="create_sets_config",
-        description="Create a sets count progression config for a slot entry.",
-        tags={"RoutineConfig"},
-    )
-    def create_sets_config_tool(
-        slot_entry: int = Field(description="Slot entry ID."),
-        iteration: int = Field(default=1, description="Iteration number."),
-        value: float = Field(default=0, description="Sets value."),
-        operation: str = Field(default="r", description="Operation: 'r', '+', '-'."),
-        step: str = Field(default="abs", description="Step: 'abs' or 'percent'."),
-        repeat: bool = Field(default=False, description="Repeat until next rule."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Create sets config."""
-        return get_client().create_sets_config(
-            slot_entry=slot_entry,
-            iteration=iteration,
-            value=value,
-            operation=operation,
-            step=step,
-            repeat=repeat,
-        )
-
-    @mcp.tool(
-        name="create_rest_config",
-        description="Create a rest time progression config for a slot entry.",
-        tags={"RoutineConfig"},
-    )
-    def create_rest_config_tool(
-        slot_entry: int = Field(description="Slot entry ID."),
-        iteration: int = Field(default=1, description="Iteration number."),
-        value: float = Field(default=0, description="Rest value in seconds."),
-        operation: str = Field(default="r", description="Operation: 'r', '+', '-'."),
-        step: str = Field(default="abs", description="Step: 'abs' or 'percent'."),
-        repeat: bool = Field(default=False, description="Repeat until next rule."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Create rest config."""
-        return get_client().create_rest_config(
-            slot_entry=slot_entry,
-            iteration=iteration,
-            value=value,
-            operation=operation,
-            step=step,
-            repeat=repeat,
-        )
-
-    @mcp.tool(
-        name="create_rir_config",
-        description="Create a RiR (Reps in Reserve) progression config for a slot entry.",
-        tags={"RoutineConfig"},
-    )
-    def create_rir_config_tool(
-        slot_entry: int = Field(description="Slot entry ID."),
-        iteration: int = Field(default=1, description="Iteration number."),
-        value: float = Field(default=0, description="RiR value."),
-        operation: str = Field(default="r", description="Operation: 'r', '+', '-'."),
-        step: str = Field(default="abs", description="Step: 'abs' or 'percent'."),
-        repeat: bool = Field(default=False, description="Repeat until next rule."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Create RiR config."""
-        return get_client().create_rir_config(
-            slot_entry=slot_entry,
-            iteration=iteration,
-            value=value,
-            operation=operation,
-            step=step,
-            repeat=repeat,
+        Actions:
+          - 'create_weight_config': Create a weight progression config.
+          - 'get_weight_configs': List weight progression configs.
+          - 'create_repetitions_config': Create a repetitions config.
+          - 'get_repetitions_configs': List repetitions configs.
+          - 'create_sets_config': Create a sets config.
+          - 'create_rest_config': Create a rest time config.
+          - 'create_rir_config': Create a RiR config.
+        """
+        kwargs: dict[str, Any]
+        if action == "create_weight_config":
+            kwargs = {
+                "slot_entry": slot_entry,
+                "iteration": iteration,
+                "value": value,
+                "operation": operation,
+                "step": step,
+                "repeat": repeat,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_weight_config(**kwargs)
+        if action == "get_weight_configs":
+            kwargs = {"limit": limit, "offset": offset}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_weight_configs(**kwargs)
+        if action == "create_repetitions_config":
+            kwargs = {
+                "slot_entry": slot_entry,
+                "iteration": iteration,
+                "value": value,
+                "operation": operation,
+                "step": step,
+                "repeat": repeat,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_repetitions_config(**kwargs)
+        if action == "get_repetitions_configs":
+            kwargs = {"limit": limit, "offset": offset}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_repetitions_configs(**kwargs)
+        if action == "create_sets_config":
+            kwargs = {
+                "slot_entry": slot_entry,
+                "iteration": iteration,
+                "value": value,
+                "operation": operation,
+                "step": step,
+                "repeat": repeat,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_sets_config(**kwargs)
+        if action == "create_rest_config":
+            kwargs = {
+                "slot_entry": slot_entry,
+                "iteration": iteration,
+                "value": value,
+                "operation": operation,
+                "step": step,
+                "repeat": repeat,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_rest_config(**kwargs)
+        if action == "create_rir_config":
+            kwargs = {
+                "slot_entry": slot_entry,
+                "iteration": iteration,
+                "value": value,
+                "operation": operation,
+                "step": step,
+                "repeat": repeat,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_rir_config(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: create_weight_config', 'get_weight_configs', 'create_repetitions_config', 'get_repetitions_configs', 'create_sets_config', 'create_rest_config', 'create_rir_config"
         )
 
 
 def register_exercise_tools(mcp: FastMCP):
-    @mcp.tool(
-        name="get_exercises",
-        description="List exercises from the exercise database. Supports filters: language, category, muscles, equipment.",
-        tags={"Exercise"},
-    )
-    def get_exercises_tool(
-        limit: int | None = Field(default=20, description="Max results per page."),
-        offset: int | None = Field(default=None, description="Offset."),
-        ordering: str | None = Field(
-            default=None, description="Order by field. Prefix with - for descending."
+    @mcp.tool(tags={"Exercise"})
+    async def wger_exercise(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'get_exercises', 'get_exercise_info', 'search_exercises', 'get_exercise_categories', 'get_equipment', 'get_muscles', 'get_exercise_images', 'get_variations'"
         ),
-        language: int | None = Field(
-            default=None, description="Filter by language ID."
-        ),
-        category: int | None = Field(
-            default=None, description="Filter by exercise category ID."
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
+        limit: int | None = Field(default=None, description="limit"),
+        offset: int | None = Field(default=None, description="offset"),
+        ordering: str | None = Field(default=None, description="ordering"),
+        exercise_id: int | None = Field(default=None, description="exercise id"),
+        term: str | None = Field(default=None, description="search term"),
+        client=Depends(get_client),
     ) -> Any:
-        """List exercises."""
-        filters: dict[str, Any] = {}
-        if language:
-            filters["language"] = language
-        if category:
-            filters["category"] = category
-        return get_client().get_exercises(
-            limit=limit, offset=offset, ordering=ordering, **filters
+        """Manage exercise operations.
+
+        Actions:
+          - 'get_exercises': List exercises. Supports filters: language, category, muscles, equipment, etc.
+          - 'get_exercise_info': Get detailed exercise info (includes translations, images, muscles, etc.).
+          - 'search_exercises': Call search_exercises
+          - 'get_exercise_categories': List exercise categories (e.g., Arms, Legs, etc.).
+          - 'get_equipment': List equipment (e.g., Barbell, Dumbbell, etc.).
+          - 'get_muscles': List muscles.
+          - 'get_exercise_images': List exercise images.
+          - 'get_variations': List exercise variations.
+        """
+        kwargs: dict[str, Any]
+        if action == "get_exercises":
+            kwargs = {
+                "limit": limit,
+                "offset": offset,
+                "ordering": ordering,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_exercises(**kwargs)
+        if action == "get_exercise_info":
+            kwargs = {"exercise_id": exercise_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_exercise_info(**kwargs)
+        if action == "search_exercises":
+            kwargs = {"term": term}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.search_exercises(**kwargs)
+        if action == "get_exercise_categories":
+            kwargs = {"limit": limit, "offset": offset}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_exercise_categories(**kwargs)
+        if action == "get_equipment":
+            kwargs = {"limit": limit, "offset": offset}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_equipment(**kwargs)
+        if action == "get_muscles":
+            kwargs = {"limit": limit, "offset": offset}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_muscles(**kwargs)
+        if action == "get_exercise_images":
+            kwargs = {"limit": limit, "offset": offset}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_exercise_images(**kwargs)
+        if action == "get_variations":
+            kwargs = {"limit": limit, "offset": offset}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_variations(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: get_exercises', 'get_exercise_info', 'search_exercises', 'get_exercise_categories', 'get_equipment', 'get_muscles', 'get_exercise_images', 'get_variations"
         )
-
-    @mcp.tool(
-        name="get_exercise_info",
-        description="Get detailed exercise info including translations, images, muscles worked, and equipment.",
-        tags={"Exercise"},
-    )
-    def get_exercise_info_tool(
-        exercise_id: int = Field(description="Exercise ID."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Get exercise info."""
-        return get_client().get_exercise_info(exercise_id)
-
-    @mcp.tool(
-        name="search_exercises",
-        description="Search exercises by name. Returns exercise info entries matching the search term.",
-        tags={"Exercise"},
-    )
-    def search_exercises_tool(
-        _term: str = Field(description="Search term."),
-        language: int | None = Field(default=2, description="Language ID (2=English)."),
-        limit: int | None = Field(default=20, description="Max results."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Search exercises."""
-        filters: dict[str, Any] = {"language": language, "format": "json"}
-        return get_client().get_exercise_infos(limit=limit, **filters)
-
-    @mcp.tool(
-        name="get_exercise_categories",
-        description="List exercise categories (e.g., Arms, Legs, Chest, Back, etc.).",
-        tags={"Exercise"},
-    )
-    def get_exercise_categories_tool(
-        limit: int | None = Field(default=100, description="Max results."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List categories."""
-        return get_client().get_exercise_categories(limit=limit)
-
-    @mcp.tool(
-        name="get_equipment",
-        description="List available equipment (e.g., Barbell, Dumbbell, Kettlebell, etc.).",
-        tags={"Exercise"},
-    )
-    def get_equipment_tool(
-        limit: int | None = Field(default=100, description="Max results."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List equipment."""
-        return get_client().get_equipment(limit=limit)
-
-    @mcp.tool(
-        name="get_muscles",
-        description="List muscles (e.g., Biceps, Pectoralis, Quadriceps, etc.).",
-        tags={"Exercise"},
-    )
-    def get_muscles_tool(
-        limit: int | None = Field(default=100, description="Max results."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List muscles."""
-        return get_client().get_muscles(limit=limit)
-
-    @mcp.tool(
-        name="get_exercise_images",
-        description="List exercise images. Filter by exercise with exercise_base=<id>.",
-        tags={"Exercise"},
-    )
-    def get_exercise_images_tool(
-        limit: int | None = Field(default=20, description="Max results."),
-        exercise_base: int | None = Field(
-            default=None, description="Filter by exercise base ID."
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List exercise images."""
-        filters = {}
-        if exercise_base:
-            filters["exercise_base"] = exercise_base
-        return get_client().get_exercise_images(limit=limit, **filters)
-
-    @mcp.tool(
-        name="get_variations",
-        description="List exercise variation groups.",
-        tags={"Exercise"},
-    )
-    def get_variations_tool(
-        limit: int | None = Field(default=20, description="Max results."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List variations."""
-        return get_client().get_variations(limit=limit)
 
 
 def register_workout_tools(mcp: FastMCP):
-    @mcp.tool(
-        name="get_workout_sessions",
-        description="List workout sessions.",
-        tags={"Workout"},
-    )
-    def get_workout_sessions_tool(
-        limit: int | None = Field(default=None, description="Max results."),
-        offset: int | None = Field(default=None, description="Offset."),
-        ordering: str | None = Field(default=None, description="Order by field."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
+    @mcp.tool(tags={"Workout"})
+    async def wger_workout(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'get_workout_sessions', 'get_workout_session', 'create_workout_session', 'delete_workout_session', 'get_workout_logs', 'create_workout_log', 'delete_workout_log'"
         ),
+        limit: int | None = Field(default=None, description="limit"),
+        offset: int | None = Field(default=None, description="offset"),
+        ordering: str | None = Field(default=None, description="ordering"),
+        session_id: int | None = Field(default=None, description="session id"),
+        routine: int | None = Field(default=None, description="routine"),
+        date: str | None = Field(default=None, description="date"),
+        impression: str | None = Field(default=None, description="impression"),
+        notes: str | None = Field(default=None, description="notes"),
+        time_start: str | None = Field(default=None, description="time start"),
+        time_end: str | None = Field(default=None, description="time end"),
+        exercise: int | None = Field(default=None, description="exercise"),
+        repetitions: int | None = Field(default=None, description="repetitions"),
+        weight: float | None = Field(default=None, description="weight"),
+        rir: str | None = Field(default=None, description="rir"),
+        log_id: int | None = Field(default=None, description="log id"),
+        client=Depends(get_client),
     ) -> Any:
-        """List workout sessions."""
-        return get_client().get_workout_sessions(
-            limit=limit, offset=offset, ordering=ordering
+        """Manage workout operations.
+
+        Actions:
+          - 'get_workout_sessions': List workout sessions.
+          - 'get_workout_session': Get a specific workout session.
+          - 'create_workout_session': Create a workout session. Impression: 1=General discomfort, 2=Could be better, 3=Neutral, 4=Good, 5=Perfect.
+          - 'delete_workout_session': Delete a workout session.
+          - 'get_workout_logs': List workout logs.
+          - 'create_workout_log': Create a workout log entry.
+          - 'delete_workout_log': Delete a workout log.
+        """
+        kwargs: dict[str, Any]
+        if action == "get_workout_sessions":
+            kwargs = {
+                "limit": limit,
+                "offset": offset,
+                "ordering": ordering,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_workout_sessions(**kwargs)
+        if action == "get_workout_session":
+            kwargs = {"session_id": session_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_workout_session(**kwargs)
+        if action == "create_workout_session":
+            kwargs = {
+                "routine": routine,
+                "date": date,
+                "impression": impression,
+                "notes": notes,
+                "time_start": time_start,
+                "time_end": time_end,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_workout_session(**kwargs)
+        if action == "delete_workout_session":
+            kwargs = {"session_id": session_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_workout_session(**kwargs)
+        if action == "get_workout_logs":
+            kwargs = {
+                "limit": limit,
+                "offset": offset,
+                "ordering": ordering,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_workout_logs(**kwargs)
+        if action == "create_workout_log":
+            kwargs = {
+                "exercise": exercise,
+                "routine": routine,
+                "date": date,
+                "repetitions": repetitions,
+                "weight": weight,  # type: ignore
+                "rir": rir,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_workout_log(**kwargs)
+        if action == "delete_workout_log":
+            kwargs = {"log_id": log_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_workout_log(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: get_workout_sessions', 'get_workout_session', 'create_workout_session', 'delete_workout_session', 'get_workout_logs', 'create_workout_log', 'delete_workout_log"
         )
-
-    @mcp.tool(
-        name="get_workout_session",
-        description="Get a specific workout session.",
-        tags={"Workout"},
-    )
-    def get_workout_session_tool(
-        session_id: int = Field(description="Session ID."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Get session."""
-        return get_client().get_workout_session(session_id)
-
-    @mcp.tool(
-        name="create_workout_session",
-        description="Create a workout session. Impression: 1=Discomfort, 2=Could be better, 3=Neutral, 4=Good, 5=Perfect.",
-        tags={"Workout"},
-    )
-    def create_workout_session_tool(
-        routine: int = Field(description="Routine ID."),
-        date: str = Field(description="Date (YYYY-MM-DD)."),
-        impression: str = Field(default="3", description="1-5 scale."),
-        notes: str = Field(default="", description="Session notes."),
-        time_start: str = Field(default="", description="Start time (HH:MM)."),
-        time_end: str = Field(default="", description="End time (HH:MM)."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Create session."""
-        return get_client().create_workout_session(
-            routine=routine,
-            date=date,
-            impression=impression,
-            notes=notes,
-            time_start=time_start,
-            time_end=time_end,
-        )
-
-    @mcp.tool(
-        name="delete_workout_session",
-        description="Delete a workout session.",
-        tags={"Workout"},
-    )
-    async def delete_workout_session_tool(
-        session_id: int = Field(description="Session ID."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Delete session."""
-        if not await ctx_confirm_destructive(ctx, "delete workout session"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
-        await ctx_progress(ctx, 0, 100)
-        return get_client().delete_workout_session(session_id)
-
-    @mcp.tool(
-        name="get_workout_logs",
-        description="List workout log entries.",
-        tags={"Workout"},
-    )
-    async def get_workout_logs_tool(
-        limit: int | None = Field(default=None, description="Max results."),
-        offset: int | None = Field(default=None, description="Offset."),
-        ordering: str | None = Field(default=None, description="Order by field."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List workout logs."""
-        return get_client().get_workout_logs(
-            limit=limit, offset=offset, ordering=ordering
-        )
-
-    @mcp.tool(
-        name="create_workout_log",
-        description="Log a set performed during a workout (exercise, weight, reps, date).",
-        tags={"Workout"},
-    )
-    def create_workout_log_tool(
-        exercise: int = Field(description="Exercise ID."),
-        routine: int = Field(description="Routine ID."),
-        date: str = Field(description="Date (YYYY-MM-DD)."),
-        repetitions: int = Field(default=0, description="Number of reps."),
-        weight: float = Field(default=0, description="Weight used."),
-        rir: str | None = Field(default=None, description="Reps in reserve."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Create workout log."""
-        return get_client().create_workout_log(
-            exercise=exercise,
-            routine=routine,
-            date=date,
-            repetitions=repetitions,
-            weight=weight,
-            rir=rir,
-        )
-
-    @mcp.tool(
-        name="delete_workout_log",
-        description="Delete a workout log entry.",
-        tags={"Workout"},
-    )
-    async def delete_workout_log_tool(
-        log_id: int = Field(description="Log ID."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Delete log."""
-        if not await ctx_confirm_destructive(ctx, "delete workout log"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
-        await ctx_progress(ctx, 0, 100)
-        return get_client().delete_workout_log(log_id)
 
 
 def register_nutrition_tools(mcp: FastMCP):
-    @mcp.tool(
-        name="get_nutrition_plans",
-        description="List nutrition plans.",
-        tags={"Nutrition"},
-    )
-    def get_nutrition_plans_tool(
-        limit: int | None = Field(default=None, description="Max results."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
+    @mcp.tool(tags={"Nutrition"})
+    async def wger_nutrition(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'get_nutrition_plans', 'get_nutrition_plan_info', 'create_nutrition_plan', 'delete_nutrition_plan', 'create_meal', 'create_meal_item', 'get_ingredients', 'get_ingredient_info', 'get_nutrition_diary', 'log_nutrition'"
         ),
-    ) -> Any:
-        """List plans."""
-        return get_client().get_nutrition_plans(limit=limit)
-
-    @mcp.tool(
-        name="get_nutrition_plan_info",
-        description="Get detailed nutrition plan with meals, items, and nutritional totals.",
-        tags={"Nutrition"},
-    )
-    def get_nutrition_plan_info_tool(
-        plan_id: int = Field(description="Nutrition plan ID."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Get plan info."""
-        return get_client().get_nutrition_plan_info(plan_id)
-
-    @mcp.tool(
-        name="create_nutrition_plan",
-        description="Create a nutrition plan with optional macro goals.",
-        tags={"Nutrition"},
-    )
-    def create_nutrition_plan_tool(
-        description: str = Field(default="", description="Plan description."),
-        goal_energy: float | None = Field(default=None, description="Target calories."),
-        goal_protein: float | None = Field(
-            default=None, description="Target protein (g)."
-        ),
+        limit: int | None = Field(default=None, description="limit"),
+        offset: int | None = Field(default=None, description="offset"),
+        plan_id: int | None = Field(default=None, description="plan id"),
+        description: str | None = Field(default=None, description="description"),
+        only_logging: bool | None = Field(default=None, description="only logging"),
+        goal_energy: float | None = Field(default=None, description="goal energy"),
+        goal_protein: float | None = Field(default=None, description="goal protein"),
         goal_carbohydrates: float | None = Field(
-            default=None, description="Target carbs (g)."
+            default=None, description="goal carbohydrates"
         ),
-        goal_fat: float | None = Field(default=None, description="Target fat (g)."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
+        goal_fat: float | None = Field(default=None, description="goal fat"),
+        _goal_fiber: float | None = Field(default=None, description=" goal fiber"),
+        plan: int | None = Field(default=None, description="plan"),
+        name: str | None = Field(default=None, description="name"),
+        time: str | None = Field(default=None, description="time"),
+        order: int | None = Field(default=None, description="order"),
+        meal: int | None = Field(default=None, description="meal"),
+        ingredient: int | None = Field(default=None, description="ingredient"),
+        amount: float | None = Field(default=None, description="amount"),
+        weight_unit: int | None = Field(default=None, description="weight unit"),
+        ordering: str | None = Field(default=None, description="ordering"),
+        ingredient_id: int | None = Field(default=None, description="ingredient id"),
+        client=Depends(get_client),
     ) -> Any:
-        """Create plan."""
-        return get_client().create_nutrition_plan(
-            description=description,
-            goal_energy=goal_energy,
-            goal_protein=goal_protein,
-            goal_carbohydrates=goal_carbohydrates,
-            goal_fat=goal_fat,
-        )
+        """Manage nutrition operations.
 
-    @mcp.tool(
-        name="delete_nutrition_plan",
-        description="Delete a nutrition plan.",
-        tags={"Nutrition"},
-    )
-    async def delete_nutrition_plan_tool(
-        plan_id: int = Field(description="Plan ID."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Delete plan."""
-        if not await ctx_confirm_destructive(ctx, "delete nutrition plan"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
-        await ctx_progress(ctx, 0, 100)
-        return get_client().delete_nutrition_plan(plan_id)
-
-    @mcp.tool(
-        name="create_meal",
-        description="Create a meal in a nutrition plan.",
-        tags={"Nutrition"},
-    )
-    async def create_meal_tool(
-        plan: int = Field(description="Nutrition plan ID."),
-        name: str = Field(default="", description="Meal name."),
-        time: str = Field(default="", description="Meal time (HH:MM)."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Create meal."""
-        return get_client().create_meal(plan=plan, name=name, time=time)
-
-    @mcp.tool(
-        name="create_meal_item",
-        description="Add an ingredient to a meal.",
-        tags={"Nutrition"},
-    )
-    def create_meal_item_tool(
-        meal: int = Field(description="Meal ID."),
-        ingredient: int = Field(description="Ingredient ID."),
-        amount: float = Field(description="Amount in grams."),
-        weight_unit: int | None = Field(
-            default=None, description="Optional weight unit ID."
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Create meal item."""
-        return get_client().create_meal_item(
-            meal=meal, ingredient=ingredient, amount=amount, weight_unit=weight_unit
-        )
-
-    @mcp.tool(
-        name="get_ingredients",
-        description="List/search ingredients from the food database.",
-        tags={"Nutrition"},
-    )
-    def get_ingredients_tool(
-        limit: int | None = Field(default=20, description="Max results."),
-        offset: int | None = Field(default=None, description="Offset."),
-        language: int | None = Field(default=None, description="Language ID."),
-        name: str | None = Field(default=None, description="Filter by name."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List ingredients."""
-        filters: dict[str, Any] = {}
-        if language:
-            filters["language"] = language
-        if name:
-            filters["name"] = name
-        return get_client().get_ingredients(limit=limit, offset=offset, **filters)
-
-    @mcp.tool(
-        name="get_ingredient_info",
-        description="Get detailed ingredient info including nutritional values and weight units.",
-        tags={"Nutrition"},
-    )
-    def get_ingredient_info_tool(
-        ingredient_id: int = Field(description="Ingredient ID."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Get ingredient info."""
-        return get_client().get_ingredient_info(ingredient_id)
-
-    @mcp.tool(
-        name="get_nutrition_diary",
-        description="List nutrition diary entries.",
-        tags={"Nutrition"},
-    )
-    def get_nutrition_diary_tool(
-        limit: int | None = Field(default=None, description="Max results."),
-        ordering: str | None = Field(default=None, description="Order by field."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List diary."""
-        return get_client().get_nutrition_diary(limit=limit, ordering=ordering)
-
-    @mcp.tool(
-        name="log_nutrition",
-        description="Log a nutrition diary entry (what was actually eaten).",
-        tags={"Nutrition"},
-    )
-    def log_nutrition_tool(
-        plan: int = Field(description="Nutrition plan ID."),
-        ingredient: int = Field(description="Ingredient ID."),
-        amount: float = Field(description="Amount in grams."),
-        meal: int | None = Field(default=None, description="Optional meal ID."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Log nutrition."""
-        return get_client().create_nutrition_diary_entry(
-            plan=plan, ingredient=ingredient, amount=amount, meal=meal
+        Actions:
+          - 'get_nutrition_plans': List nutrition plans.
+          - 'get_nutrition_plan_info': Get detailed nutrition plan info (includes meals, items, nutritional values).
+          - 'create_nutrition_plan': Create a nutrition plan.
+          - 'delete_nutrition_plan': Delete a nutrition plan.
+          - 'create_meal': Create a meal in a nutrition plan.
+          - 'create_meal_item': Add an ingredient to a meal.
+          - 'get_ingredients': List ingredients. Supports filters: language, name, etc.
+          - 'get_ingredient_info': Get detailed ingredient info (includes weight units).
+          - 'get_nutrition_diary': List nutrition diary entries.
+          - 'log_nutrition': Call log_nutrition
+        """
+        kwargs: dict[str, Any]
+        if action == "get_nutrition_plans":
+            kwargs = {"limit": limit, "offset": offset}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_nutrition_plans(**kwargs)
+        if action == "get_nutrition_plan_info":
+            kwargs = {"plan_id": plan_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_nutrition_plan_info(**kwargs)
+        if action == "create_nutrition_plan":
+            kwargs = {
+                "description": description,  # type: ignore
+                "only_logging": only_logging,
+                "goal_energy": goal_energy,  # type: ignore
+                "goal_protein": goal_protein,  # type: ignore
+                "goal_carbohydrates": goal_carbohydrates,  # type: ignore
+                "goal_fat": goal_fat,  # type: ignore
+                "_goal_fiber": _goal_fiber,  # type: ignore
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_nutrition_plan(**kwargs)
+        if action == "delete_nutrition_plan":
+            kwargs = {"plan_id": plan_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_nutrition_plan(**kwargs)
+        if action == "create_meal":
+            kwargs = {
+                "plan": plan,
+                "name": name,
+                "time": time,
+                "order": order,
+            }  # type: ignore
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_meal(**kwargs)
+        if action == "create_meal_item":
+            kwargs = {
+                "meal": meal,
+                "ingredient": ingredient,
+                "amount": amount,  # type: ignore
+                "weight_unit": weight_unit,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_meal_item(**kwargs)
+        if action == "get_ingredients":
+            kwargs = {
+                "limit": limit,
+                "offset": offset,
+                "ordering": ordering,
+            }  # type: ignore
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_ingredients(**kwargs)
+        if action == "get_ingredient_info":
+            kwargs = {"ingredient_id": ingredient_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_ingredient_info(**kwargs)
+        if action == "get_nutrition_diary":
+            kwargs = {
+                "limit": limit,
+                "offset": offset,
+                "ordering": ordering,
+            }  # type: ignore
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_nutrition_diary(**kwargs)
+        if action == "log_nutrition":
+            kwargs = {
+                "plan": plan,
+                "ingredient": ingredient,
+                "amount": amount,
+                "meal": meal,
+                "weight_unit": weight_unit,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_nutrition_diary_entry(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: get_nutrition_plans', 'get_nutrition_plan_info', 'create_nutrition_plan', 'delete_nutrition_plan', 'create_meal', 'create_meal_item', 'get_ingredients', 'get_ingredient_info', 'get_nutrition_diary', 'log_nutrition"
         )
 
 
 def register_body_tools(mcp: FastMCP):
-    @mcp.tool(
-        name="get_weight_entries",
-        description="List body weight entries over time.",
-        tags={"Body"},
-    )
-    def get_weight_entries_tool(
-        limit: int | None = Field(default=None, description="Max results."),
-        ordering: str | None = Field(
-            default=None, description="Order by field (e.g., '-date')."
+    @mcp.tool(tags={"Body"})
+    async def wger_body(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'get_weight_entries', 'log_body_weight', 'delete_weight_entry', 'get_measurements', 'log_measurement', 'get_measurement_categories', 'create_measurement_category', 'get_gallery'"
         ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
+        limit: int | None = Field(default=None, description="limit"),
+        offset: int | None = Field(default=None, description="offset"),
+        ordering: str | None = Field(default=None, description="ordering"),
+        entry_id: int | None = Field(default=None, description="entry id"),
+        name: str | None = Field(default=None, description="name"),
+        unit: str | None = Field(default=None, description="unit"),
+        date: str | None = Field(default=None, description="date"),
+        weight: float | None = Field(default=None, description="weight"),
+        category: int | None = Field(default=None, description="category"),
+        value: float | None = Field(default=None, description="value"),
+        client=Depends(get_client),
     ) -> Any:
-        """List weight entries."""
-        return get_client().get_weight_entries(limit=limit, ordering=ordering)
+        """Manage body operations.
 
-    @mcp.tool(
-        name="log_body_weight",
-        description="Log a body weight entry.",
-        tags={"Body"},
-    )
-    def log_body_weight_tool(
-        date: str = Field(description="Date (YYYY-MM-DD)."),
-        weight: float = Field(description="Body weight."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Log weight."""
-        return get_client().create_weight_entry(date=date, weight=weight)
-
-    @mcp.tool(
-        name="delete_weight_entry",
-        description="Delete a body weight entry.",
-        tags={"Body"},
-    )
-    async def delete_weight_entry_tool(
-        entry_id: int = Field(description="Entry ID."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Delete weight entry."""
-        if not await ctx_confirm_destructive(ctx, "delete weight entry"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
-        await ctx_progress(ctx, 0, 100)
-        return get_client().delete_weight_entry(entry_id)
-
-    @mcp.tool(
-        name="get_measurements",
-        description="List body measurements (biceps, chest, waist, etc.).",
-        tags={"Body"},
-    )
-    async def get_measurements_tool(
-        limit: int | None = Field(default=None, description="Max results."),
-        ordering: str | None = Field(default=None, description="Order by field."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List measurements."""
-        return get_client().get_measurements(limit=limit, ordering=ordering)
-
-    @mcp.tool(
-        name="log_measurement",
-        description="Log a body measurement.",
-        tags={"Body"},
-    )
-    def log_measurement_tool(
-        category: int = Field(description="Measurement category ID."),
-        date: str = Field(description="Date (YYYY-MM-DD)."),
-        value: float = Field(description="Measurement value."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Log measurement."""
-        return get_client().create_measurement(
-            category=category, date=date, value=value
+        Actions:
+          - 'get_weight_entries': List body weight entries.
+          - 'log_body_weight': Call log_body_weight
+          - 'delete_weight_entry': Delete a weight entry.
+          - 'get_measurements': List body measurements.
+          - 'log_measurement': Call log_measurement
+          - 'get_measurement_categories': List measurement categories (e.g., Biceps, Chest, etc.).
+          - 'create_measurement_category': Create a measurement category.
+          - 'get_gallery': List progress gallery images.
+        """
+        kwargs: dict[str, Any]
+        if action == "get_weight_entries":
+            kwargs = {
+                "limit": limit,
+                "offset": offset,
+                "ordering": ordering,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_weight_entries(**kwargs)
+        if action == "log_body_weight":
+            kwargs = {"date": date, "weight": weight}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_weight_entry(**kwargs)
+        if action == "delete_weight_entry":
+            kwargs = {"entry_id": entry_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_weight_entry(**kwargs)
+        if action == "get_measurements":
+            kwargs = {
+                "limit": limit,
+                "offset": offset,
+                "ordering": ordering,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_measurements(**kwargs)
+        if action == "log_measurement":
+            kwargs = {"category": category, "date": date, "value": value}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_measurement(**kwargs)
+        if action == "get_measurement_categories":
+            kwargs = {"limit": limit, "offset": offset}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_measurement_categories(**kwargs)
+        if action == "create_measurement_category":
+            kwargs = {"name": name, "unit": unit}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_measurement_category(**kwargs)
+        if action == "get_gallery":
+            kwargs = {
+                "limit": limit,
+                "offset": offset,
+                "ordering": ordering,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_gallery(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: get_weight_entries', 'log_body_weight', 'delete_weight_entry', 'get_measurements', 'log_measurement', 'get_measurement_categories', 'create_measurement_category', 'get_gallery"
         )
-
-    @mcp.tool(
-        name="get_measurement_categories",
-        description="List measurement categories (e.g., Biceps, Chest, Waist).",
-        tags={"Body"},
-    )
-    def get_measurement_categories_tool(
-        limit: int | None = Field(default=100, description="Max results."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List categories."""
-        return get_client().get_measurement_categories(limit=limit)
-
-    @mcp.tool(
-        name="create_measurement_category",
-        description="Create a new measurement category.",
-        tags={"Body"},
-    )
-    def create_measurement_category_tool(
-        name: str = Field(description="Category name."),
-        unit: str = Field(default="cm", description="Unit of measurement."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Create category."""
-        return get_client().create_measurement_category(name=name, unit=unit)
-
-    @mcp.tool(
-        name="get_gallery",
-        description="List progress gallery photos.",
-        tags={"Body"},
-    )
-    def get_gallery_tool(
-        limit: int | None = Field(default=None, description="Max results."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List gallery."""
-        return get_client().get_gallery(limit=limit)
 
 
 def register_user_tools(mcp: FastMCP):
-    @mcp.tool(
-        name="get_user_profile",
-        description="Get the authenticated user's profile (age, height, gender, etc.).",
-        tags={"User"},
-    )
-    def get_user_profile_tool(
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
+    @mcp.tool(tags={"User"})
+    async def wger_user(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'get_user_profile', 'get_user_statistics', 'get_user_trophies', 'get_languages', 'get_repetition_units', 'get_weight_unit_settings'"
         ),
+        limit: int | None = Field(default=None, description="limit"),
+        offset: int | None = Field(default=None, description="offset"),
+        client=Depends(get_client),
     ) -> Any:
-        """Get profile."""
-        return get_client().get_user_profile()
+        """Manage user operations.
 
-    @mcp.tool(
-        name="get_user_statistics",
-        description="Get user statistics (workout counts, etc.).",
-        tags={"User"},
-    )
-    def get_user_statistics_tool(
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """Get stats."""
-        return get_client().get_user_statistics()
-
-    @mcp.tool(
-        name="get_user_trophies",
-        description="List user's earned trophies/achievements.",
-        tags={"User"},
-    )
-    def get_user_trophies_tool(
-        limit: int | None = Field(default=None, description="Max results."),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List trophies."""
-        return get_client().get_user_trophies(limit=limit)
-
-    @mcp.tool(
-        name="get_languages",
-        description="List available languages.",
-        tags={"User"},
-    )
-    def get_languages_tool(
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List languages."""
-        return get_client().get_languages(limit=100)
-
-    @mcp.tool(
-        name="get_repetition_units",
-        description="List repetition unit settings (e.g., Repetitions, Until failure, etc.).",
-        tags={"User"},
-    )
-    def get_repetition_units_tool(
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List rep units."""
-        return get_client().get_repetition_units(limit=100)
-
-    @mcp.tool(
-        name="get_weight_unit_settings",
-        description="List weight unit settings (kg, lb, plates, etc.).",
-        tags={"User"},
-    )
-    def get_weight_unit_settings_tool(
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> Any:
-        """List weight units."""
-        return get_client().get_weight_unit_settings(limit=100)
+        Actions:
+          - 'get_user_profile': Get the current user's profile.
+          - 'get_user_statistics': Get user statistics (workout count, etc.).
+          - 'get_user_trophies': List user's earned trophies.
+          - 'get_languages': List available languages.
+          - 'get_repetition_units': List repetition unit settings.
+          - 'get_weight_unit_settings': List weight unit settings.
+        """
+        kwargs: dict[str, Any]
+        if action == "get_user_profile":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_user_profile(**kwargs)
+        if action == "get_user_statistics":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_user_statistics(**kwargs)
+        if action == "get_user_trophies":
+            kwargs = {"limit": limit, "offset": offset}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_user_trophies(**kwargs)
+        if action == "get_languages":
+            kwargs = {"limit": limit, "offset": offset}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_languages(**kwargs)
+        if action == "get_repetition_units":
+            kwargs = {"limit": limit, "offset": offset}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_repetition_units(**kwargs)
+        if action == "get_weight_unit_settings":
+            kwargs = {"limit": limit, "offset": offset}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_weight_unit_settings(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: get_user_profile', 'get_user_statistics', 'get_user_trophies', 'get_languages', 'get_repetition_units', 'get_weight_unit_settings"
+        )
 
 
-def get_mcp_instance() -> tuple[Any, Any, Any, Any]:
-    """Initialize and return the MCP instance, args, and middlewares."""
+def get_mcp_instance() -> tuple[Any, ...]:
+    """Initialize and return the MCP instance."""
     load_dotenv(find_dotenv())
     args, mcp, middlewares = create_mcp_server(
-        name="Wger MCP",
+        name="wger-agent MCP",
         version=__version__,
-        instructions="Wger Workout Manager MCP Server - Manage exercises, routines, nutrition plans, body measurements, and workout logs.",
+        instructions="wger-agent MCP Server — Condensed Action-Routed Tools.",
     )
 
-    if to_boolean(os.getenv("ROUTINETOOL", "True")):
-        register_routine_tools(mcp)
-    if to_boolean(os.getenv("ROUTINECONFIGTOOL", "True")):
-        register_routineconfig_tools(mcp)
-    if to_boolean(os.getenv("EXERCISETOOL", "True")):
-        register_exercise_tools(mcp)
-    if to_boolean(os.getenv("WORKOUTTOOL", "True")):
-        register_workout_tools(mcp)
-    if to_boolean(os.getenv("NUTRITIONTOOL", "True")):
-        register_nutrition_tools(mcp)
-    if to_boolean(os.getenv("BODYTOOL", "True")):
-        register_body_tools(mcp)
-    if to_boolean(os.getenv("USERTOOL", "True")):
-        register_user_tools(mcp)
+    @mcp.custom_route("/health", methods=["GET"])
+    async def health_check() -> JSONResponse:
+        return JSONResponse({"status": "OK"})
 
-    register_prompts(mcp)
+    DEFAULT_ROUTINETOOL = to_boolean(os.getenv("ROUTINETOOL", "True"))
+    if DEFAULT_ROUTINETOOL:
+        register_routine_tools(mcp)
+    DEFAULT_ROUTINECONFIGTOOL = to_boolean(os.getenv("ROUTINECONFIGTOOL", "True"))
+    if DEFAULT_ROUTINECONFIGTOOL:
+        register_routineconfig_tools(mcp)
+    DEFAULT_EXERCISETOOL = to_boolean(os.getenv("EXERCISETOOL", "True"))
+    if DEFAULT_EXERCISETOOL:
+        register_exercise_tools(mcp)
+    DEFAULT_WORKOUTTOOL = to_boolean(os.getenv("WORKOUTTOOL", "True"))
+    if DEFAULT_WORKOUTTOOL:
+        register_workout_tools(mcp)
+    DEFAULT_NUTRITIONTOOL = to_boolean(os.getenv("NUTRITIONTOOL", "True"))
+    if DEFAULT_NUTRITIONTOOL:
+        register_nutrition_tools(mcp)
+    DEFAULT_BODYTOOL = to_boolean(os.getenv("BODYTOOL", "True"))
+    if DEFAULT_BODYTOOL:
+        register_body_tools(mcp)
+    DEFAULT_USERTOOL = to_boolean(os.getenv("USERTOOL", "True"))
+    if DEFAULT_USERTOOL:
+        register_user_tools(mcp)
 
     for mw in middlewares:
         mcp.add_middleware(mw)
-    registered_tags: list[str] = []
-    return mcp, args, middlewares, registered_tags
+    return mcp, args, middlewares
 
 
 def mcp_server() -> None:
-    mcp, args, middlewares, registered_tags = get_mcp_instance()
-    print(f"{'wger-agent'} MCP v{__version__}", file=sys.stderr)
+    mcp, args, middlewares = get_mcp_instance()
+    print(f"wger-agent MCP v{__version__}", file=sys.stderr)
     print("\nStarting MCP Server", file=sys.stderr)
     print(f"  Transport: {args.transport.upper()}", file=sys.stderr)
     print(f"  Auth: {args.auth_type}", file=sys.stderr)
-    print(f"  Dynamic Tags Loaded: {len(set(registered_tags))}", file=sys.stderr)
 
     if args.transport == "stdio":
         mcp.run(transport="stdio")

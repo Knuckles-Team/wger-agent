@@ -228,3 +228,17 @@ stateDiagram-v2
   }
 }
 ```
+
+## Available MCP Tools
+
+This server utilizes dynamic Action-Routed tools to optimize token overhead and maximize IDE compatibility.
+
+| Tool Name | Description |
+|-----------|-------------|
+| `wger_body` | Consolidated Action-Routed tool for Body. Methods: get_weight_entries, log_body_weight, delete_weight_entry, get_measurements, log_measurement, get_measurement_categories, create_measurement_category, get_gallery |
+| `wger_exercise` | Consolidated Action-Routed tool for Exercise. Methods: get_exercises, get_exercise_info, search_exercises, get_exercise_categories, get_equipment, get_muscles, get_exercise_images, get_variations |
+| `wger_nutrition` | Consolidated Action-Routed tool for Nutrition. Methods: get_nutrition_plans, get_nutrition_plan_info, create_nutrition_plan, delete_nutrition_plan, create_meal, create_meal_item, get_ingredients, get_ingredient_info, get_nutrition_diary, log_nutrition |
+| `wger_routine` | Consolidated Action-Routed tool for Routine. Methods: get_routines, get_routine, create_routine, delete_routine, get_days, create_day, delete_day, get_slots, create_slot, create_slot_entry, get_templates, get_public_templates |
+| `wger_routineconfig` | Consolidated Action-Routed tool for RoutineConfig. Methods: create_weight_config, get_weight_configs, create_repetitions_config, get_repetitions_configs, create_sets_config, create_rest_config, create_rir_config |
+| `wger_user` | Consolidated Action-Routed tool for User. Methods: get_user_profile, get_user_statistics, get_user_trophies, get_languages, get_repetition_units, get_weight_unit_settings |
+| `wger_workout` | Consolidated Action-Routed tool for Workout. Methods: get_workout_sessions, get_workout_session, create_workout_session, delete_workout_session, get_workout_logs, create_workout_log, delete_workout_log |

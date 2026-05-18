@@ -527,6 +527,10 @@ class WgerApi:
             "exercise", limit=limit, offset=offset, ordering=ordering, **filters
         )
 
+    def search_exercises(self, term: str) -> dict:
+        """Search exercises."""
+        return self._get("exercise/search", params={"term": term})
+
     def get_exercise(self, exercise_id: int) -> dict:
         """Get a specific exercise."""
         return self._get(f"exercise/{exercise_id}")
