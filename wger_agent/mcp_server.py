@@ -30,7 +30,7 @@ from starlette.responses import JSONResponse
 
 from wger_agent.auth import get_client
 
-__version__ = "0.10.0"
+__version__ = "0.11.0"
 
 logger = get_logger(name="wger-agent")
 logger.setLevel(logging.INFO)
