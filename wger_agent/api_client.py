@@ -737,17 +737,20 @@ class WgerApi:
         _goal_fiber: float | None = None,
     ) -> dict:
         """Create a nutrition plan."""
-        data = {"description": description, "only_logging": only_logging}
-        for field in [
-            "goal_energy",
-            "goal_protein",
-            "goal_carbohydrates",
-            "goal_fat",
-            "_goal_fiber",
-        ]:
-            val = locals()[field]
-            if val is not None:
-                data[field] = val
+        data: dict[str, object] = {
+            "description": description,
+            "only_logging": only_logging,
+        }
+        if goal_energy is not None:
+            data["goal_energy"] = goal_energy
+        if goal_protein is not None:
+            data["goal_protein"] = goal_protein
+        if goal_carbohydrates is not None:
+            data["goal_carbohydrates"] = goal_carbohydrates
+        if goal_fat is not None:
+            data["goal_fat"] = goal_fat
+        if _goal_fiber is not None:
+            data["_goal_fiber"] = _goal_fiber
         return self._post("nutritionplan", data=data)
 
     def update_nutrition_plan(self, plan_id: int, **kwargs) -> dict:

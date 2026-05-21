@@ -1,6 +1,7 @@
-import pytest
-from wger_agent.mcp_server import get_mcp_instance
 from fastmcp import FastMCP
+
+from wger_agent.mcp_server import get_mcp_instance
+
 
 def test_mcp_instance_creation():
     """Test that the MCP instance can be created successfully."""
@@ -8,7 +9,9 @@ def test_mcp_instance_creation():
     assert isinstance(mcp, FastMCP)
     assert "wger" in mcp.name.lower()
 
+
 def test_import_wger_agent():
     """Test that the package can be imported."""
     import wger_agent
+
     assert wger_agent.__version__ is not None

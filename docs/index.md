@@ -173,10 +173,7 @@ stateDiagram-v2
         "wger-mcp"
       ],
       "env": {
-        "AGENT_DESCRIPTION": "<YOUR_AGENT_DESCRIPTION>",
-        "AGENT_SYSTEM_PROMPT": "<YOUR_AGENT_SYSTEM_PROMPT>",
         "BODYTOOL": "True",
-        "DEFAULT_AGENT_NAME": "<YOUR_DEFAULT_AGENT_NAME>",
         "EXERCISETOOL": "True",
         "NUTRITIONTOOL": "True",
         "ROUTINECONFIGTOOL": "True",
@@ -210,10 +207,7 @@ stateDiagram-v2
         "8000"
       ],
       "env": {
-        "AGENT_DESCRIPTION": "<YOUR_AGENT_DESCRIPTION>",
-        "AGENT_SYSTEM_PROMPT": "<YOUR_AGENT_SYSTEM_PROMPT>",
         "BODYTOOL": "True",
-        "DEFAULT_AGENT_NAME": "<YOUR_DEFAULT_AGENT_NAME>",
         "EXERCISETOOL": "True",
         "NUTRITIONTOOL": "True",
         "ROUTINECONFIGTOOL": "True",
