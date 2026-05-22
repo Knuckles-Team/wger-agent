@@ -91,33 +91,7 @@ Configure your IDE's `mcp.json` to launch the MCP server via `uvx`:
 ```
 
 #### Streamable-HTTP Transport (Recommended for production deployments)
-Configure your client's `mcp.json` to launch the Streamable-HTTP server via `uvx` with explicit host and port definition:
-
-```json
-{
-  "mcpServers": {
-    "wger-agent": {
-      "command": "uvx",
-      "args": [
-        "--from",
-        "wger-agent",
-        "wger-mcp"
-      ],
-      "env": {
-        "TRANSPORT": "streamable-http",
-        "HOST": "0.0.0.0",
-        "PORT": "8000",
-        "WGER_URL": "your_wger_url_here",
-        "WGER_API_KEY": "your_wger_api_key_here",
-        "WGER_DEFAULT_EMAIL": "your_wger_default_email_here",
-        "WGER_DEFAULT_PASSWORD": "your_wger_default_password_here"
-      }
-    }
-  }
-}
-```
-
-Alternatively, connect to a pre-deployed remote or local Streamable-HTTP instance:
+To run the server as a long-running Streamable-HTTP service:
 
 ```json
 {
