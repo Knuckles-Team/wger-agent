@@ -43,7 +43,7 @@
 
 This agent wraps the Wger Workout Manager — exercise database, workout routines, nutrition plans, body measurements, and progress tracking. API. You can interact with it programmatically or via its integrated execution entrypoints.
 
-Detailed instructions on how to use the underlying API wrappers, extended schema bindings, and developer SDK references are maintained in [docs/index.md](file:///home/apps/workspace/agent-packages/agents/wger-agent/docs/index.md).
+Detailed instructions on how to use the underlying API wrappers, extended schema bindings, and developer SDK references are maintained in [docs/index.md](docs/index.md).
 
 ---
 
@@ -54,15 +54,36 @@ This server utilizes dynamic Action-Routed tools to optimize token overhead and 
 ### Available MCP Tools
 | Tool Module | Toggle Env Var | Enabled by Default | Description & Nested Methods |
 |-------------|----------------|--------------------|------------------------------|
-| **Routine** | `ROUTINETOOL` | `True` | Manage wger routine operations. Action-routed methods: `get_routines`, `get_routine`, `create_routine`, `delete_routine`, `get_days`, `create_day`, `delete_day`, `get_slots`, `create_slot`, `create_slot_entry`, `get_templates`, `get_public_templates`. |
-| **Routineconfig** | `ROUTINECONFIGTOOL` | `True` | Manage wger routineconfig operations. Action-routed methods: `create_weight_config`, `get_weight_configs`, `create_repetitions_config`, `get_repetitions_configs`, `create_sets_config`, `create_rest_config`, `create_rir_config`. |
-| **Exercise** | `EXERCISETOOL` | `True` | Manage wger exercise operations. Action-routed methods: `get_exercises`, `get_exercise_info`, `search_exercises`, `get_exercise_categories`, `get_equipment`, `get_muscles`, `get_exercise_images`, `get_variations`. |
-| **Workout** | `WORKOUTTOOL` | `True` | Manage wger workout operations. Action-routed methods: `get_workout_sessions`, `get_workout_session`, `create_workout_session`, `delete_workout_session`, `get_workout_logs`, `create_workout_log`, `delete_workout_log`. |
-| **Nutrition** | `NUTRITIONTOOL` | `True` | Manage wger nutrition operations. Action-routed methods: `get_nutrition_plans`, `get_nutrition_plan_info`, `create_nutrition_plan`, `delete_nutrition_plan`, `create_meal`, `create_meal_item`, `get_ingredients`, `get_ingredient_info`, `get_nutrition_diary`, `log_nutrition`. |
-| **Body** | `BODYTOOL` | `True` | Manage wger body operations. Action-routed methods: `get_weight_entries`, `log_body_weight`, `delete_weight_entry`, `get_measurements`, `log_measurement`, `get_measurement_categories`, `create_measurement_category`, `get_gallery`. |
-| **User** | `USERTOOL` | `True` | Manage wger user operations. Action-routed methods: `get_user_profile`, `get_user_statistics`, `get_user_trophies`, `get_languages`, `get_repetition_units`, `get_weight_unit_settings`. |
+| **Routine** | `ROUTINETOOL` | `True` | Manage wger routine operations. Action-routed methods: `create_day`, `create_routine`, `create_slot`, `create_slot_entry`, `delete_day`, `delete_routine`, `get_days`, `get_public_templates`, `get_routine`, `get_routines`, `get_slots`, `get_templates`. |
+| **Routineconfig** | `ROUTINECONFIGTOOL` | `True` | Manage wger routineconfig operations. Action-routed methods: `create_repetitions_config`, `create_rest_config`, `create_rir_config`, `create_sets_config`, `create_weight_config`, `get_repetitions_configs`, `get_weight_configs`. |
+| **Exercise** | `EXERCISETOOL` | `True` | Manage wger exercise operations. Action-routed methods: `get_equipment`, `get_exercise_categories`, `get_exercise_images`, `get_exercise_info`, `get_exercises`, `get_muscles`, `get_variations`, `search_exercises`. |
+| **Workout** | `WORKOUTTOOL` | `True` | Manage wger workout operations. Action-routed methods: `create_workout_log`, `create_workout_session`, `delete_workout_log`, `delete_workout_session`, `get_workout_logs`, `get_workout_session`, `get_workout_sessions`. |
+| **Nutrition** | `NUTRITIONTOOL` | `True` | Manage wger nutrition operations. Action-routed methods: `create_meal`, `create_meal_item`, `create_nutrition_plan`, `delete_nutrition_plan`, `get_ingredient_info`, `get_ingredients`, `get_nutrition_diary`, `get_nutrition_plan_info`, `get_nutrition_plans`, `log_nutrition`. |
+| **Body** | `BODYTOOL` | `True` | Manage wger body operations. Action-routed methods: `create_measurement_category`, `delete_weight_entry`, `get_gallery`, `get_measurement_categories`, `get_measurements`, `get_weight_entries`, `log_body_weight`, `log_measurement`. |
+| **User** | `USERTOOL` | `True` | Manage wger user operations. Action-routed methods: `get_languages`, `get_repetition_units`, `get_user_profile`, `get_user_statistics`, `get_user_trophies`, `get_weight_unit_settings`. |
 
-Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/mcp.md](file:///home/apps/workspace/agent-packages/agents/wger-agent/docs/mcp.md).
+Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/mcp.md](docs/mcp.md).
+
+### Dynamic Tool Selection & Visibility
+
+This MCP server supports dynamic toolset selection and visibility filtering at runtime. This allows you to restrict the set of exposed tools in order to prevent blowing up the LLM's context window.
+
+You can configure tool filtering via multiple input channels:
+
+- **CLI Arguments:** Pass `--tools` or `--toolsets` (or their disabled counterparts `--disabled-tools` and `--disabled-toolsets`) during startup.
+- **Environment Variables:** Define standard environment variables:
+  - `MCP_ENABLED_TOOLS` / `MCP_DISABLED_TOOLS`
+  - `MCP_ENABLED_TAGS` / `MCP_DISABLED_TAGS`
+- **HTTP SSE Request Headers:** Pass custom headers during transport initialization:
+  - `x-mcp-enabled-tools` / `x-mcp-disabled-tools`
+  - `x-mcp-enabled-tags` / `x-mcp-disabled-tags`
+- **HTTP SSE Request Query Parameters:** Append query parameters directly to your transport connection URL:
+  - `?tools=tool1,tool2`
+  - `?tags=tag1`
+
+When query strings or parameters are supplied, an LLM-free **Knowledge Graph resolution layer** (using `DynamicToolOrchestrator`) matches query intents against known tool tags, names, or descriptions, with safe fallback and automated 24-hour background cache refreshing.
+
+---
 
 ### MCP Configuration Examples
 
@@ -232,7 +253,7 @@ services:
 
 ```
 
-Detailed graph node architecture explanations, custom skill configurations, and agentic trace guides are available in [docs/agent.md](file:///home/apps/workspace/agent-packages/agents/wger-agent/docs/agent.md).
+Detailed graph node architecture explanations, custom skill configurations, and agentic trace guides are available in [docs/agent.md](docs/agent.md).
 
 ---
 

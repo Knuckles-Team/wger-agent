@@ -1,0 +1,65 @@
+# Tasks: Code Enhancement: wger-agent
+
+Generated: 2026-05-24T04:17:16.249995+00:00
+Skipped informational: 6
+
+- [ ] [P] **T001** [Project Analysis] Detected 1 agent skill(s) — will grade in CE-026
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T002** [Dependency Audit] Minor update: agent-utilities 0.2.40 (installed) -> 0.16.0
+  - Priority: P3-Low | Effort: Small
+- [ ] [P] **T003** [Dependency Audit] Minor update: pytest-xdist 3.6.0 (constraint — not installed) -> 3.8.0
+  - Priority: P3-Low | Effort: Small
+- [ ] [P] **T004** [Codebase Optimization] 1 functions exceed 200 lines (actionable refactoring targets): test_mcp_tools_an
+  - Priority: P2-Medium | Effort: Large
+- [ ] [P] **T005** [Test Coverage] Test suite lacks intent diversity (only one type)
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T006** [Test Coverage] 14 potential doc-test drift items
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T007** [Documentation & Governance] README.md missing sections: usage|quick start
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T008** [Documentation & Governance] 2 broken internal links in README.md
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T009** [Documentation & Governance] README missing: Has a Table of Contents
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T010** [Documentation & Governance] README missing: Has usage examples with code blocks
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T011** [Architecture & Design Patterns] SRP: 1 modules exceed 500 lines (god modules)
+  - Priority: P2-Medium | Effort: Large
+- [ ] [P] **T012** [Architecture & Design Patterns] SRP: 4 classes have >15 methods
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T013** [Architecture & Design Patterns] No discernible layer architecture (no domain/service/adapter separation)
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T014** [Architecture & Design Patterns] Low dependency injection ratio: 9%
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T015** [Concept Traceability] Low traceability ratio: 0% concepts fully traced
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T016** [Concept Traceability] 16 orphaned concepts (only in one source)
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T017** [Concept Traceability] 18 test functions missing concept markers
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T018** [Concept Traceability] 38 significant functions (>10 lines) missing concept markers in docstrings
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T019** [Linting & Formatting] Total lint findings: 0 (high/error: 0, medium/warning: 0, low: 0)
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T020** [Pre-Commit Compliance] 2 hook(s) may be outdated: ruff-pre-commit, uv-pre-commit
+  - Priority: P2-Medium | Effort: Small
+- [ ] [P] **T021** [Changelog Audit] CHANGELOG.md exists but could not be parsed — check format compliance
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T022** [Changelog Audit] No changelog entries within the last 30 days
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T023** [Changelog Audit] keepachangelog not installed — pip install 'universal-skills[code-enhancer]'
+  - Priority: P3-Low | Effort: Small
+- [ ] [P] **T024** [Pytest Quality] 1 test files exceed 500 lines — split into focused modules
+  - Priority: P3-Low | Effort: Large
+- [ ] [P] **T025** [Pytest Quality] No @pytest.mark.parametrize usage — consider data-driven tests
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T026** [Pytest Quality] 3 tests have no assertions
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T027** [Pytest Quality] 2 tests exceed 100 lines — likely doing too much per test
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T028** [Environment Variables] Undocumented env vars: AUTH_TYPE, DEFAULT_AGENT_NAME, EUNOMIA_POLICY_FILE, EUNOM
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T029** [Environment Variables] 4 Python env vars not in .env.example: DEFAULT_AGENT_NAME, WGER_ACCESS_TOKEN, WG
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T030** [analyze_xdg_kg] Analysis error: No module named 'agent_utilities.knowledge_graph'
+  - Priority: P1-High | Effort: Medium

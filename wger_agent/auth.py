@@ -16,9 +16,14 @@ def get_client() -> WgerApi:
     """Get or create a singleton WgerApi client instance."""
     global _client
     if _client is None:
-        base_url = os.getenv("WGER_INSTANCE", "https://wger.de")
-        token = os.getenv("WGER_ACCESS_TOKEN", "")
-        verify = os.getenv("WGER_VERIFY", "True").lower() in ("true", "1", "yes")
+        base_url: str = os.getenv("WGER_URL", "") or os.getenv(
+            "WGER_INSTANCE", "https://wger.de"
+        )
+        token: str = os.getenv("WGER_TOKEN", "") or os.getenv("WGER_ACCESS_TOKEN", "")
+        ssl_verify_env: str = os.getenv("WGER_SSL_VERIFY", "") or os.getenv(
+            "WGER_VERIFY", "True"
+        )
+        verify: bool = ssl_verify_env.lower() in ("true", "1", "yes")
 
         try:
             _client = WgerApi(
