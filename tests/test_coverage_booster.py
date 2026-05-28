@@ -24,20 +24,21 @@ from wger_agent.mcp_server import (
     register_body_tools,
     register_user_tools,
 )
-import wger_agent.mcp_server as mcp_server_mod
+import wger_agent.mcp.mcp_server
+mcp_server_mod = sys.modules["wger_agent.mcp.mcp_server"]
 from wger_agent.agent_server import agent_server
 import wger_agent.agent_server as agent_server_mod
 
 
 def test_init_getattr_and_dir():
     # Test availability flags in __init__.py
-    assert wger_agent._MCP_AVAILABLE is True
-    assert wger_agent._AGENT_AVAILABLE is True
+    assert wger_agent._MCP_AVAILABLE
+    assert wger_agent._AGENT_AVAILABLE
 
     # Test availability flags missing branch
     with patch.dict(wger_agent.OPTIONAL_MODULES, {}, clear=True):
-        assert wger_agent._MCP_AVAILABLE is False
-        assert wger_agent._AGENT_AVAILABLE is False
+        assert not wger_agent._MCP_AVAILABLE
+        assert not wger_agent._AGENT_AVAILABLE
 
     # Test attribute error
     with pytest.raises(AttributeError):
@@ -828,10 +829,13 @@ async def test_health_check_endpoint():
 
 def test_mcp_server_exceptions_reload():
     # Cover lines 15-16 of mcp_server.py and mcp/mcp_server.py (except ImportError logic)
-    mcp_module = sys.modules["wger_agent.mcp.mcp_server"]
+    wrapper_module = sys.modules.get("wger_agent.mcp_server")
+    mcp_module = sys.modules.get("wger_agent.mcp.mcp_server")
     with patch.dict("sys.modules", {"requests.exceptions": None}):
-        importlib.reload(mcp_server_mod)
-        importlib.reload(mcp_module)
+        if wrapper_module:
+            importlib.reload(wrapper_module)
+        if mcp_module:
+            importlib.reload(mcp_module)
 
 
 def test_agent_server(mock_requests_session):
