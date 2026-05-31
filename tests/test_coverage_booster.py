@@ -25,6 +25,7 @@ from wger_agent.mcp_server import (
     register_user_tools,
 )
 import wger_agent.mcp.mcp_server
+
 mcp_server_mod = sys.modules["wger_agent.mcp.mcp_server"]
 from wger_agent.agent_server import agent_server
 import wger_agent.agent_server as agent_server_mod
