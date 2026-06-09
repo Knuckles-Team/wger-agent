@@ -1,224 +1,59 @@
-# Wger - A2A | AG-UI | MCP
+# wger-agent
 
-![PyPI - Version](https://img.shields.io/pypi/v/wger-agent)
+Wger Workout Manager **MCP server + A2A agent** for the agent-utilities ecosystem
+— exercise database, workout routines, nutrition plans, body measurements, and
+progress tracking, exposed as typed, deterministic tools.
+
+!!! info "Official documentation"
+    This site is the canonical reference for `wger-agent`, maintained alongside every
+    release.
+
+[![PyPI](https://img.shields.io/pypi/v/wger-agent)](https://pypi.org/project/wger-agent/)
 ![MCP Server](https://badge.mcpx.dev?type=server 'MCP Server')
-![PyPI - Downloads](https://img.shields.io/pypi/dd/wger-agent)
-![GitHub Repo stars](https://img.shields.io/github/stars/Knuckles-Team/wger-agent)
-![GitHub forks](https://img.shields.io/github/forks/Knuckles-Team/wger-agent)
-![GitHub contributors](https://img.shields.io/github/contributors/Knuckles-Team/wger-agent)
-![PyPI - License](https://img.shields.io/pypi/l/wger-agent)
-![GitHub](https://img.shields.io/github/license/Knuckles-Team/wger-agent)
-
-![GitHub last commit (by committer)](https://img.shields.io/github/last-commit/Knuckles-Team/wger-agent)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/Knuckles-Team/wger-agent)
-![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed/Knuckles-Team/wger-agent)
-![GitHub issues](https://img.shields.io/github/issues/Knuckles-Team/wger-agent)
-
-![GitHub top language](https://img.shields.io/github/languages/top/Knuckles-Team/wger-agent)
-![GitHub language count](https://img.shields.io/github/languages/count/Knuckles-Team/wger-agent)
-![GitHub repo size](https://img.shields.io/github/repo-size/Knuckles-Team/wger-agent)
-![GitHub repo file count (file type)](https://img.shields.io/github/directory-file-count/Knuckles-Team/wger-agent)
-![PyPI - Wheel](https://img.shields.io/pypi/wheel/wger-agent)
-![PyPI - Implementation](https://img.shields.io/pypi/implementation/wger-agent)
-
-*Version: 0.8.0*
+[![License](https://img.shields.io/pypi/l/wger-agent)](https://github.com/Knuckles-Team/wger-agent/blob/main/LICENSE)
+[![GitHub](https://img.shields.io/badge/source-GitHub-181717?logo=github)](https://github.com/Knuckles-Team/wger-agent)
 
 ## Overview
 
-**Wger MCP Server + A2A Agent**
+`wger-agent` wraps the [Wger Workout Manager](https://wger.de) REST API with
+action-routed MCP tools and a Pydantic-AI graph agent. It provides:
 
-Wger Workout Manager — exercise database, workout routines, nutrition plans, body measurements, and progress tracking.
+- **`WgerApi`** — a unified Python client composed of domain-specific sub-clients
+  (routine, exercise, nutrition, workout, body, user) over the Wger REST surface.
+- **Action-routed MCP tools** across seven togglable domains, registered through the
+  `agent-utilities` FastMCP middleware to minimize token overhead in LLM contexts.
+- **An integrated graph agent** (the `wger-agent` console script) that speaks the
+  Agent Control Protocol and the Agent Web UI, with a confidence-gated router that
+  enables only the tools relevant to each request.
 
-This repository is actively maintained - Contributions are welcome!
+## Explore the documentation
 
-## MCP
+<div class="grid cards" markdown>
 
-### Using as an MCP Server
+- :material-rocket-launch: **[Installation](installation.md)** — pip, source, extras, and the prebuilt Docker image.
+- :material-server-network: **[Deployment](deployment.md)** — run the MCP and agent servers, Docker Compose, Caddy + Technitium.
+- :material-console: **[Usage](usage.md)** — the MCP tools, the `WgerApi` client, and the agent CLI.
+- :material-database-cog: **[Backing Platform](platform.md)** — deploy the Wger Workout Manager with Docker.
+- :material-sitemap: **[Architecture](overview.md)** — the standardized agent-package pattern.
+- :material-tag-multiple: **[Concepts](concepts.md)** — the `CONCEPT:WGER-*` registry.
 
-The MCP Server can be run in two modes: `stdio` (for local testing) or `http` (for networked access).
+</div>
 
-#### Environment Variables
-
-*   `WGER_INSTANCE`: The URL of the target service.
-*   `WGER_ACCESS_TOKEN`: The API token or access token.
-
-#### Run in stdio mode (default):
-```bash
-export WGER_INSTANCE="http://localhost:8080"
-export WGER_ACCESS_TOKEN="your_token"
-wger-mcp --transport "stdio"
-```
-
-#### Run in HTTP mode:
-```bash
-export WGER_INSTANCE="http://localhost:8080"
-export WGER_ACCESS_TOKEN="your_token"
-wger-mcp --transport "http" --host "0.0.0.0" --port "8000"
-```
-
-## A2A Agent
-
-### Run A2A Server
-```bash
-export WGER_INSTANCE="http://localhost:8080"
-export WGER_ACCESS_TOKEN="your_token"
-wger-agent --provider openai --model-id gpt-4o --api-key sk-...
-```
-
-## Docker
-
-### Build
+## Quick start
 
 ```bash
-docker build -t wger-agent .
+pip install wger-agent
+wger-mcp                         # stdio MCP server (default transport)
 ```
 
-### Run MCP Server
+Connect it to a Wger instance:
 
 ```bash
-docker run -d \
-  --name wger-agent \
-  -p 8000:8000 \
-  -e TRANSPORT=http \
-  -e WGER_INSTANCE="http://your-service:8080" \
-  -e WGER_ACCESS_TOKEN="your_token" \
-  knucklessg1/wger-agent:latest
+export WGER_URL=https://your-wger:8000
+export WGER_API_KEY=your_api_key
+wger-mcp --transport streamable-http --host 0.0.0.0 --port 8000
 ```
 
-### Deploy with Docker Compose
-
-```yaml
-services:
-  wger-agent:
-    image: knucklessg1/wger-agent:latest
-    environment:
-      - HOST=0.0.0.0
-      - PORT=8000
-      - TRANSPORT=http
-      - WGER_INSTANCE=http://your-service:8080
-      - WGER_ACCESS_TOKEN=your_token
-    ports:
-      - 8000:8000
-```
-
-#### Configure `mcp.json` for AI Integration (e.g. Claude Desktop)
-
-```json
-{
-  "mcpServers": {
-    "wger": {
-      "command": "uv",
-      "args": [
-        "run",
-        "--with",
-        "wger-agent",
-        "wger-mcp"
-      ],
-      "env": {
-        "WGER_INSTANCE": "http://your-service:8080",
-        "WGER_ACCESS_TOKEN": "your_token"
-      }
-    }
-  }
-}
-```
-
-## Install Python Package
-
-```bash
-python -m pip install wger-agent
-```
-```bash
-uv pip install wger-agent
-```
-
-## Repository Owners
-
-<img width="100%" height="180em" src="https://github-readme-stats.vercel.app/api?username=Knucklessg1&show_icons=true&hide_border=true&&count_private=true&include_all_commits=true" />
-
-![GitHub followers](https://img.shields.io/github/followers/Knucklessg1)
-![GitHub User's stars](https://img.shields.io/github/stars/Knucklessg1)
-
-
-## Graph Architecture
-
-This agent uses `pydantic-graph` orchestration for intelligent routing and optimal context management.
-
-```mermaid
----
-title: Wger Agent Graph Agent
----
-stateDiagram-v2
-  [*] --> RouterNode: User Query
-  RouterNode --> DomainNode: Classified Domain
-  RouterNode --> [*]: Low confidence / Error
-  DomainNode --> [*]: Domain Result
-```
-
-- **RouterNode**: A fast, lightweight LLM (e.g., `nvidia/nemotron-3-super`) that classifies the user's query into one of the specialized domains.
-- **DomainNode**: The executor node. For the selected domain, it dynamically sets environment variables to temporarily enable ONLY the tools relevant to that domain, creating a highly focused sub-agent (e.g., `gpt-4o`) to complete the request. This preserves LLM context and prevents tool hallucination.
-
-
-## MCP Configuration Examples
-
-### 1. Standard IO (stdio) Deployment
-
-```json
-{
-  "mcpServers": {
-    "wger-agent": {
-      "command": "uv",
-      "args": [
-        "run",
-        "wger-mcp"
-      ],
-      "env": {
-        "BODYTOOL": "True",
-        "EXERCISETOOL": "True",
-        "NUTRITIONTOOL": "True",
-        "ROUTINECONFIGTOOL": "True",
-        "ROUTINETOOL": "True",
-        "USERTOOL": "True",
-        "WGER_ACCESS_TOKEN": "<YOUR_WGER_ACCESS_TOKEN>",
-        "WGER_INSTANCE": "<YOUR_WGER_INSTANCE>",
-        "WGER_VERIFY": "<YOUR_WGER_VERIFY>",
-        "WORKOUTTOOL": "True"
-      }
-    }
-  }
-}
-```
-
-### 2. Streamable HTTP (SSE) Deployment
-
-```json
-{
-  "mcpServers": {
-    "wger-agent": {
-      "command": "uv",
-      "args": [
-        "run",
-        "wger-mcp",
-        "--transport",
-        "http",
-        "--host",
-        "0.0.0.0",
-        "--port",
-        "8000"
-      ],
-      "env": {
-        "BODYTOOL": "True",
-        "EXERCISETOOL": "True",
-        "NUTRITIONTOOL": "True",
-        "ROUTINECONFIGTOOL": "True",
-        "ROUTINETOOL": "True",
-        "USERTOOL": "True",
-        "WGER_ACCESS_TOKEN": "<YOUR_WGER_ACCESS_TOKEN>",
-        "WGER_INSTANCE": "<YOUR_WGER_INSTANCE>",
-        "WGER_VERIFY": "<YOUR_WGER_VERIFY>",
-        "WORKOUTTOOL": "True"
-      }
-    }
-  }
-}
-```
+See **[Installation](installation.md)** and **[Deployment](deployment.md)** for the
+full matrix (PyPI extras, Docker image, all transports, the agent server, reverse
+proxy, DNS).

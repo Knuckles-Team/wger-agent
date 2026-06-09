@@ -22,6 +22,10 @@
 
 *Version: 0.28.0*
 
+> **Documentation** — Installation, deployment, usage across the MCP, API, and agent
+> interfaces, and guidance for provisioning the Wger Workout Manager platform are
+> maintained in the [official documentation](https://knuckles-team.github.io/wger-agent/).
+
 ---
 
 ## Overview
@@ -286,6 +290,23 @@ uv pip install wger-agent[all]
 # Using standard pip
 python -m pip install wger-agent[all]
 ```
+
+---
+
+## Documentation
+
+The complete documentation is published as the
+[official documentation site](https://knuckles-team.github.io/wger-agent/) and is the
+recommended reference for installation, deployment, and day-to-day operation.
+
+| Page | Contents |
+|---|---|
+| [Installation](https://knuckles-team.github.io/wger-agent/installation/) | pip, source, extras, prebuilt Docker image |
+| [Deployment](https://knuckles-team.github.io/wger-agent/deployment/) | run the MCP and agent servers, Compose, Caddy + Technitium, env config |
+| [Usage](https://knuckles-team.github.io/wger-agent/usage/) | the MCP tools, the `WgerApi` client, the agent CLI |
+| [Backing Platform](https://knuckles-team.github.io/wger-agent/platform/) | deploy the Wger Workout Manager with Docker |
+| [Overview](https://knuckles-team.github.io/wger-agent/overview/) | the standardized agent-package pattern |
+| [Concepts](https://knuckles-team.github.io/wger-agent/concepts/) | concept registry (`CONCEPT:WGER-*`) |
 
 ---
 
