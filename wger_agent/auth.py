@@ -1,12 +1,11 @@
 #!/usr/bin/python
-import os
-
 import urllib3
 
 from wger_agent.api_client import WgerApi
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+from agent_utilities.core.config import setting
 from agent_utilities.core.exceptions import AuthError, UnauthorizedError
 
 _client = None
@@ -16,14 +15,14 @@ def get_client() -> WgerApi:
     """Get or create a singleton WgerApi client instance."""
     global _client
     if _client is None:
-        base_url: str = os.getenv("WGER_URL", "") or os.getenv(
+        base_url: str = setting("WGER_URL", "") or setting(
             "WGER_INSTANCE", "https://wger.de"
         )
-        token: str = os.getenv("WGER_TOKEN", "") or os.getenv("WGER_ACCESS_TOKEN", "")
-        ssl_verify_env: str = os.getenv("WGER_SSL_VERIFY", "") or os.getenv(
-            "WGER_VERIFY", "True"
+        token: str = setting("WGER_TOKEN", "") or setting("WGER_ACCESS_TOKEN", "")
+        ssl_verify = setting("WGER_SSL_VERIFY", None, cast=bool)
+        verify: bool = (
+            ssl_verify if ssl_verify is not None else setting("WGER_VERIFY", True)
         )
-        verify: bool = ssl_verify_env.lower() in ("true", "1", "yes")
 
         try:
             _client = WgerApi(

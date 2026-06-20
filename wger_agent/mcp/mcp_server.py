@@ -19,16 +19,19 @@ warnings.filterwarnings("ignore", message=".*urllib3.*or chardet.*")
 warnings.filterwarnings("ignore", message=".*urllib3.*or charset_normalizer.*")
 
 import logging
-import os
 import sys
 from typing import Any
 
-from agent_utilities.base_utilities import to_boolean
-from agent_utilities.mcp_utilities import create_mcp_server
-from dotenv import find_dotenv, load_dotenv
+from agent_utilities.mcp_utilities import (
+    create_mcp_server,
+    load_config,
+    register_tool_surface,
+)
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
+from wger_agent.api_client import WgerApi
+from wger_agent.auth import get_client
 from wger_agent.mcp import tools
 
 __version__ = "0.14.0"
@@ -42,7 +45,7 @@ def get_mcp_instance() -> tuple[Any, ...]:
 
     Bootstraps FastMCP instance, custom routes, and conditionally registers tools.
     """
-    load_dotenv(find_dotenv())
+    load_config()
     args, mcp, middlewares = create_mcp_server(
         name="wger-agent MCP",
         version=__version__,
@@ -54,21 +57,13 @@ def get_mcp_instance() -> tuple[Any, ...]:
         """Standard Starlette endpoint for health status checking."""
         return JSONResponse({"status": "OK"})
 
-    # Map environment variable toggles to registration functions
-    tool_registrations = [
-        ("ROUTINETOOL", tools.register_routine_tools),
-        ("ROUTINECONFIGTOOL", tools.register_routineconfig_tools),
-        ("EXERCISETOOL", tools.register_exercise_tools),
-        ("WORKOUTTOOL", tools.register_workout_tools),
-        ("NUTRITIONTOOL", tools.register_nutrition_tools),
-        ("BODYTOOL", tools.register_body_tools),
-        ("USERTOOL", tools.register_user_tools),
-    ]
-
-    # Modular iteration to register active tools with FastMCP (CC=2)
-    for env_var, register_func in tool_registrations:
-        if to_boolean(os.getenv(env_var, "True")):
-            register_func(mcp)
+    register_tool_surface(
+        mcp,
+        client_cls=WgerApi,
+        get_client=get_client,
+        service="wger-agent",
+        tools_module=tools,
+    )
 
     for mw in middlewares:
         mcp.add_middleware(mw)
