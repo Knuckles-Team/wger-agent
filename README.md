@@ -56,15 +56,23 @@ Detailed instructions on how to use the underlying API wrappers, extended schema
 This server utilizes dynamic Action-Routed tools to optimize token overhead and maximize IDE compatibility.
 
 ### Available MCP Tools
-| Tool Module | Toggle Env Var | Enabled by Default | Description & Nested Methods |
-|-------------|----------------|--------------------|------------------------------|
-| **Routine** | `ROUTINETOOL` | `True` | Manage wger routine operations. Action-routed methods: `create_day`, `create_routine`, `create_slot`, `create_slot_entry`, `delete_day`, `delete_routine`, `get_days`, `get_public_templates`, `get_routine`, `get_routines`, `get_slots`, `get_templates`. |
-| **Routineconfig** | `ROUTINECONFIGTOOL` | `True` | Manage wger routineconfig operations. Action-routed methods: `create_repetitions_config`, `create_rest_config`, `create_rir_config`, `create_sets_config`, `create_weight_config`, `get_repetitions_configs`, `get_weight_configs`. |
-| **Exercise** | `EXERCISETOOL` | `True` | Manage wger exercise operations. Action-routed methods: `get_equipment`, `get_exercise_categories`, `get_exercise_images`, `get_exercise_info`, `get_exercises`, `get_muscles`, `get_variations`, `search_exercises`. |
-| **Workout** | `WORKOUTTOOL` | `True` | Manage wger workout operations. Action-routed methods: `create_workout_log`, `create_workout_session`, `delete_workout_log`, `delete_workout_session`, `get_workout_logs`, `get_workout_session`, `get_workout_sessions`. |
-| **Nutrition** | `NUTRITIONTOOL` | `True` | Manage wger nutrition operations. Action-routed methods: `create_meal`, `create_meal_item`, `create_nutrition_plan`, `delete_nutrition_plan`, `get_ingredient_info`, `get_ingredients`, `get_nutrition_diary`, `get_nutrition_plan_info`, `get_nutrition_plans`, `log_nutrition`. |
-| **Body** | `BODYTOOL` | `True` | Manage wger body operations. Action-routed methods: `create_measurement_category`, `delete_weight_entry`, `get_gallery`, `get_measurement_categories`, `get_measurements`, `get_weight_entries`, `log_body_weight`, `log_measurement`. |
-| **User** | `USERTOOL` | `True` | Manage wger user operations. Action-routed methods: `get_languages`, `get_repetition_units`, `get_user_profile`, `get_user_statistics`, `get_user_trophies`, `get_weight_unit_settings`. |
+
+_Auto-generated from the live MCP server — do not edit by hand._
+
+<!-- MCP-TOOLS-TABLE:START -->
+
+| MCP Tool | Toggle Env Var | Description |
+|----------|----------------|-------------|
+| `wger_body` | `BODYTOOL` | Manage wger body operations. |
+| `wger_exercise` | `EXERCISETOOL` | Manage wger exercise operations. |
+| `wger_nutrition` | `NUTRITIONTOOL` | Manage wger nutrition operations. |
+| `wger_routine` | `ROUTINETOOL` | Manage wger routine operations. |
+| `wger_routineconfig` | `ROUTINECONFIGTOOL` | Manage wger routineconfig operations. |
+| `wger_user` | `USERTOOL` | Manage wger user operations. |
+| `wger_workout` | `WORKOUTTOOL` | Manage wger workout operations. |
+
+_7 action-routed tools (default `MCP_TOOL_MODE=condensed`). Each is enabled unless its toggle is set false; set `MCP_TOOL_MODE=verbose` (or `both`) for the 1:1 per-operation surface. Auto-generated — do not edit._
+<!-- MCP-TOOLS-TABLE:END -->
 
 Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/mcp.md](docs/mcp.md).
 
