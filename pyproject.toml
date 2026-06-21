@@ -27,6 +27,12 @@ test = [
 wger-mcp = "wger_agent.mcp_server:mcp_server"
 wger-agent = "wger_agent.agent_server:agent_server"
 
+[project.entry-points."agent_utilities.skill_providers"]
+wger-agent = "wger_agent.skills"
+
+[project.entry-points."agent_utilities.prompt_providers"]
+wger-agent = "wger_agent.prompts"
+
 [tool.setuptools]
 include-package-data = true
 
@@ -45,7 +51,7 @@ dev = [
 ]
 
 [tool.setuptools.package-data]
-wger_agent = [ "mcp_config.json", "agent_data/**", "skills/**",]
+wger_agent = [ "mcp_config.json", "agent_data/**", "skills/**", "prompts/**",]
 
 [tool.ruff.lint]
 select = [ "E", "F", "I", "UP", "B",]
