@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   wger-agent-mcp:
-    image: knucklessg1/wger-agent:latest
+    image: knucklessg1/wger-agent:mcp
     container_name: wger-agent-mcp
     hostname: wger-agent-mcp
     restart: always
