@@ -61,6 +61,8 @@ _Auto-generated from the live MCP server — do not edit by hand._
 
 <!-- MCP-TOOLS-TABLE:START -->
 
+#### Condensed action-routed tools (default — `MCP_TOOL_MODE=condensed`)
+
 | MCP Tool | Toggle Env Var | Description |
 |----------|----------------|-------------|
 | `wger_body` | `BODYTOOL` | Manage wger body operations. |
@@ -71,7 +73,149 @@ _Auto-generated from the live MCP server — do not edit by hand._
 | `wger_user` | `USERTOOL` | Manage wger user operations. |
 | `wger_workout` | `WORKOUTTOOL` | Manage wger workout operations. |
 
-_7 action-routed tools (default `MCP_TOOL_MODE=condensed`). Each is enabled unless its toggle is set false; set `MCP_TOOL_MODE=verbose` (or `both`) for the 1:1 per-operation surface. Auto-generated — do not edit._
+#### Verbose 1:1 API-mapped tools (`MCP_TOOL_MODE=verbose` or `both`)
+
+<details>
+<summary>132 per-operation tools — one per public API method (click to expand)</summary>
+
+| MCP Tool | Toggle Env Var | Description |
+|----------|----------------|-------------|
+| `wger_create_day` | `APITOOL` | Create a workout day in a routine. |
+| `wger_create_max_repetitions_config` | `APITOOL` | Create a max repetitions config. |
+| `wger_create_max_rest_config` | `APITOOL` | Create a max rest config. |
+| `wger_create_max_rir_config` | `APITOOL` | Create a max RiR config. |
+| `wger_create_max_sets_config` | `APITOOL` | Create a max sets config. |
+| `wger_create_max_weight_config` | `APITOOL` | Create a max weight config. |
+| `wger_create_meal` | `APITOOL` | Create a meal in a nutrition plan. |
+| `wger_create_meal_item` | `APITOOL` | Add an ingredient to a meal. |
+| `wger_create_measurement` | `APITOOL` | Log a body measurement. |
+| `wger_create_measurement_category` | `APITOOL` | Create a measurement category. |
+| `wger_create_nutrition_diary_entry` | `APITOOL` | Log a nutrition diary entry. |
+| `wger_create_nutrition_plan` | `APITOOL` | Create a nutrition plan. |
+| `wger_create_repetitions_config` | `APITOOL` | Create a repetitions config. |
+| `wger_create_rest_config` | `APITOOL` | Create a rest time config. |
+| `wger_create_rir_config` | `APITOOL` | Create a RiR config. |
+| `wger_create_routine` | `APITOOL` | Create a new routine. |
+| `wger_create_sets_config` | `APITOOL` | Create a sets config. |
+| `wger_create_slot` | `APITOOL` | Create a slot (set) in a day. |
+| `wger_create_slot_entry` | `APITOOL` | Create a slot entry (add exercise to slot). |
+| `wger_create_weight_config` | `APITOOL` | Create a weight progression config. |
+| `wger_create_weight_entry` | `APITOOL` | Log a body weight entry. |
+| `wger_create_workout_log` | `APITOOL` | Create a workout log entry. |
+| `wger_create_workout_session` | `APITOOL` | Create a workout session. Impression: 1=General discomfort, 2=Could be better, 3=Neutral, 4=Good, 5=Perfect. |
+| `wger_delete_day` | `APITOOL` | Delete a day. |
+| `wger_delete_meal` | `APITOOL` | Delete a meal. |
+| `wger_delete_meal_item` | `APITOOL` | Delete a meal item. |
+| `wger_delete_measurement` | `APITOOL` | Delete a measurement. |
+| `wger_delete_measurement_category` | `APITOOL` | Delete a measurement category. |
+| `wger_delete_nutrition_diary_entry` | `APITOOL` | Delete a nutrition diary entry. |
+| `wger_delete_nutrition_plan` | `APITOOL` | Delete a nutrition plan. |
+| `wger_delete_repetitions_config` | `APITOOL` | Delete a repetitions config. |
+| `wger_delete_rest_config` | `APITOOL` | Delete a rest config. |
+| `wger_delete_rir_config` | `APITOOL` | Delete a RiR config. |
+| `wger_delete_routine` | `APITOOL` | Delete a routine. |
+| `wger_delete_sets_config` | `APITOOL` | Delete a sets config. |
+| `wger_delete_slot` | `APITOOL` | Delete a slot. |
+| `wger_delete_slot_entry` | `APITOOL` | Delete a slot entry. |
+| `wger_delete_weight_config` | `APITOOL` | Delete a weight config. |
+| `wger_delete_weight_entry` | `APITOOL` | Delete a weight entry. |
+| `wger_delete_workout_log` | `APITOOL` | Delete a workout log. |
+| `wger_delete_workout_session` | `APITOOL` | Delete a workout session. |
+| `wger_get_day` | `APITOOL` | Get a specific day. |
+| `wger_get_days` | `APITOOL` | List all workout days. |
+| `wger_get_deletion_log` | `APITOOL` | List deletion log entries. |
+| `wger_get_equipment` | `APITOOL` | List equipment (e.g., Barbell, Dumbbell, etc.). |
+| `wger_get_equipment_item` | `APITOOL` | Get a specific equipment. |
+| `wger_get_exercise` | `APITOOL` | Get a specific exercise. |
+| `wger_get_exercise_aliases` | `APITOOL` | List exercise aliases. |
+| `wger_get_exercise_categories` | `APITOOL` | List exercise categories (e.g., Arms, Legs, etc.). |
+| `wger_get_exercise_category` | `APITOOL` | Get a specific exercise category. |
+| `wger_get_exercise_comments` | `APITOOL` | List exercise comments. |
+| `wger_get_exercise_image` | `APITOOL` | Get a specific exercise image. |
+| `wger_get_exercise_images` | `APITOOL` | List exercise images. |
+| `wger_get_exercise_info` | `APITOOL` | Get detailed exercise info (includes translations, images, muscles, etc.). |
+| `wger_get_exercise_infos` | `APITOOL` | List exercise infos. |
+| `wger_get_exercise_translations` | `APITOOL` | List exercise translations. |
+| `wger_get_exercise_videos` | `APITOOL` | List exercise videos. |
+| `wger_get_exercises` | `APITOOL` | List exercises. Supports filters: language, category, muscles, equipment, etc. |
+| `wger_get_gallery` | `APITOOL` | List progress gallery images. |
+| `wger_get_ingredient` | `APITOOL` | Get a specific ingredient. |
+| `wger_get_ingredient_images` | `APITOOL` | List ingredient images. |
+| `wger_get_ingredient_info` | `APITOOL` | Get detailed ingredient info (includes weight units). |
+| `wger_get_ingredient_weight_units` | `APITOOL` | List ingredient weight units. |
+| `wger_get_ingredients` | `APITOOL` | List ingredients. Supports filters: language, name, etc. |
+| `wger_get_languages` | `APITOOL` | List available languages. |
+| `wger_get_licenses` | `APITOOL` | List content licenses. |
+| `wger_get_max_repetitions_configs` | `APITOOL` | List max repetitions configs. |
+| `wger_get_max_rest_configs` | `APITOOL` | List max rest configs. |
+| `wger_get_max_rir_configs` | `APITOOL` | List max RiR configs. |
+| `wger_get_max_sets_configs` | `APITOOL` | List max sets configs. |
+| `wger_get_max_weight_configs` | `APITOOL` | List max weight configs. |
+| `wger_get_meal` | `APITOOL` | Get a specific meal. |
+| `wger_get_meal_item` | `APITOOL` | Get a specific meal item. |
+| `wger_get_meal_items` | `APITOOL` | List meal items. |
+| `wger_get_meals` | `APITOOL` | List meals. |
+| `wger_get_measurement` | `APITOOL` | Get a specific measurement. |
+| `wger_get_measurement_categories` | `APITOOL` | List measurement categories (e.g., Biceps, Chest, etc.). |
+| `wger_get_measurement_category` | `APITOOL` | Get a specific measurement category. |
+| `wger_get_measurements` | `APITOOL` | List body measurements. |
+| `wger_get_muscle` | `APITOOL` | Get a specific muscle. |
+| `wger_get_muscles` | `APITOOL` | List muscles. |
+| `wger_get_nutrition_diary` | `APITOOL` | List nutrition diary entries. |
+| `wger_get_nutrition_plan` | `APITOOL` | Get a specific nutrition plan. |
+| `wger_get_nutrition_plan_info` | `APITOOL` | Get detailed nutrition plan info (includes meals, items, nutritional values). |
+| `wger_get_nutrition_plans` | `APITOOL` | List nutrition plans. |
+| `wger_get_public_templates` | `APITOOL` | List public workout templates. |
+| `wger_get_repetition_units` | `APITOOL` | List repetition unit settings. |
+| `wger_get_repetitions_configs` | `APITOOL` | List repetitions configs. |
+| `wger_get_rest_configs` | `APITOOL` | List rest time configs. |
+| `wger_get_rir_configs` | `APITOOL` | List RiR configs. |
+| `wger_get_routine` | `APITOOL` | Get a specific routine by ID. |
+| `wger_get_routines` | `APITOOL` | List all routines. |
+| `wger_get_sets_configs` | `APITOOL` | List sets configs. |
+| `wger_get_slot` | `APITOOL` | Get a specific slot. |
+| `wger_get_slot_entries` | `APITOOL` | List all slot entries. |
+| `wger_get_slot_entry` | `APITOOL` | Get a specific slot entry. |
+| `wger_get_slots` | `APITOOL` | List all slots (sets). |
+| `wger_get_template` | `APITOOL` | Get a specific template. |
+| `wger_get_templates` | `APITOOL` | List user's workout templates. |
+| `wger_get_trophies` | `APITOOL` | List available trophies. |
+| `wger_get_user_profile` | `APITOOL` | Get the current user's profile. |
+| `wger_get_user_statistics` | `APITOOL` | Get user statistics (workout count, etc.). |
+| `wger_get_user_trophies` | `APITOOL` | List user's earned trophies. |
+| `wger_get_variations` | `APITOOL` | List exercise variations. |
+| `wger_get_weight_config` | `APITOOL` | Get a specific weight config. |
+| `wger_get_weight_configs` | `APITOOL` | List weight progression configs. |
+| `wger_get_weight_entries` | `APITOOL` | List body weight entries. |
+| `wger_get_weight_entry` | `APITOOL` | Get a specific weight entry. |
+| `wger_get_weight_unit_settings` | `APITOOL` | List weight unit settings. |
+| `wger_get_weight_units` | `APITOOL` | List weight units. |
+| `wger_get_workout_log` | `APITOOL` | Get a specific workout log. |
+| `wger_get_workout_logs` | `APITOOL` | List workout logs. |
+| `wger_get_workout_session` | `APITOOL` | Get a specific workout session. |
+| `wger_get_workout_sessions` | `APITOOL` | List workout sessions. |
+| `wger_search_exercises` | `APITOOL` | Search exercises. |
+| `wger_update_day` | `APITOOL` | Update a day. |
+| `wger_update_meal` | `APITOOL` | Update a meal. |
+| `wger_update_meal_item` | `APITOOL` | Update a meal item. |
+| `wger_update_measurement` | `APITOOL` | Update a measurement. |
+| `wger_update_nutrition_plan` | `APITOOL` | Update a nutrition plan. |
+| `wger_update_repetitions_config` | `APITOOL` | Update a repetitions config. |
+| `wger_update_rest_config` | `APITOOL` | Update a rest config. |
+| `wger_update_rir_config` | `APITOOL` | Update a RiR config. |
+| `wger_update_routine` | `APITOOL` | Update a routine. |
+| `wger_update_sets_config` | `APITOOL` | Update a sets config. |
+| `wger_update_slot` | `APITOOL` | Update a slot. |
+| `wger_update_slot_entry` | `APITOOL` | Update a slot entry. |
+| `wger_update_user_profile` | `APITOOL` | Update user profile. Fields: age, height, gender, etc. |
+| `wger_update_weight_config` | `APITOOL` | Update a weight config. |
+| `wger_update_weight_entry` | `APITOOL` | Update a weight entry. |
+| `wger_update_workout_log` | `APITOOL` | Update a workout log. |
+| `wger_update_workout_session` | `APITOOL` | Update a workout session. |
+
+</details>
+
+_7 action-routed tool(s) (default) · 132 verbose 1:1 tool(s). Each is enabled unless its `<DOMAIN>TOOL` toggle is set false; `MCP_TOOL_MODE` selects the surface (`condensed` default · `verbose` 1:1 · `both`). Auto-generated — do not edit._
 <!-- MCP-TOOLS-TABLE:END -->
 
 Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/mcp.md](docs/mcp.md).
@@ -122,9 +266,7 @@ Configure your IDE's `mcp.json` to launch the MCP server via `uvx`:
       ],
       "env": {
         "WGER_URL": "your_wger_url_here",
-        "WGER_API_KEY": "your_wger_api_key_here",
-        "WGER_DEFAULT_EMAIL": "your_wger_default_email_here",
-        "WGER_DEFAULT_PASSWORD": "your_wger_default_password_here"
+        "WGER_TOKEN": "your_wger_api_token_here"
       }
     }
   }
@@ -149,9 +291,7 @@ Configure your client's `mcp.json` to launch the Streamable-HTTP server via `uvx
         "HOST": "0.0.0.0",
         "PORT": "8000",
         "WGER_URL": "your_wger_url_here",
-        "WGER_API_KEY": "your_wger_api_key_here",
-        "WGER_DEFAULT_EMAIL": "your_wger_default_email_here",
-        "WGER_DEFAULT_PASSWORD": "your_wger_default_password_here"
+        "WGER_TOKEN": "your_wger_api_token_here"
       }
     }
   }
@@ -179,9 +319,7 @@ docker run -d \
   -e TRANSPORT=streamable-http \
   -e PORT=8000 \
   -e WGER_URL="your_value" \
-  -e WGER_API_KEY="your_value" \
-  -e WGER_DEFAULT_EMAIL="your_value" \
-  -e WGER_DEFAULT_PASSWORD="your_value" \
+  -e WGER_TOKEN="your_value" \
   knucklessg1/wger-agent:mcp
 ```
 
@@ -230,10 +368,12 @@ consumed from a **remote deployment**. The
 | `EUNOMIA_TYPE` | `none` | options: none, embedded, remote |
 | `EUNOMIA_POLICY_FILE` | `mcp_policies.json` |  |
 | `EUNOMIA_REMOTE_URL` | `http://eunomia-server:8000` |  |
-| `WGER_URL` | `http://localhost:8000` |  |
-| `WGER_API_KEY` | `your_api_key_here` |  |
-| `WGER_DEFAULT_EMAIL` | `user@wger.com` |  |
-| `WGER_DEFAULT_PASSWORD` | `your_wger_default_password_here` |  |
+| `WGER_URL` | `http://localhost:8000` | Wger instance base URL (preferred) |
+| `WGER_INSTANCE` | `https://wger.de` | Wger instance base URL (fallback when WGER_URL is unset) |
+| `WGER_TOKEN` | `your_api_token_here` | Wger API token (preferred auth) |
+| `WGER_ACCESS_TOKEN` | `your_api_token_here` | Wger API token (fallback when WGER_TOKEN is unset) |
+| `WGER_SSL_VERIFY` | `True` | Verify TLS certificates (preferred) |
+| `WGER_VERIFY` | `True` | Verify TLS certificates (fallback when WGER_SSL_VERIFY is unset) |
 | `ROUTINETOOL` | `True` |  |
 | `ROUTINECONFIGTOOL` | `True` |  |
 | `EXERCISETOOL` | `True` |  |
@@ -261,7 +401,7 @@ consumed from a **remote deployment**. The
 | `MODEL_ID` | `gpt-4o` | Model id for the agent |
 | `ENABLE_WEB_UI` | `True` | Serve the AG-UI web interface |
 
-_22 package + 14 inherited variable(s). Auto-generated from `.env.example` + the shared agent-utilities set — do not edit._
+_24 package + 14 inherited variable(s). Auto-generated from `.env.example` + the shared agent-utilities set — do not edit._
 <!-- ENV-VARS-TABLE:END -->
 
 
@@ -270,10 +410,12 @@ Every variable the server reads, grouped by purpose.
 ### Connection & Credentials
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `WGER_URL` | Base URL of the Wger Workout Manager instance | `http://localhost:8000` |
-| `WGER_API_KEY` | Wger API token (preferred auth) | — |
-| `WGER_DEFAULT_EMAIL` | Account email for username/password auth (fallback) | `user@wger.com` |
-| `WGER_DEFAULT_PASSWORD` | Account password for username/password auth (fallback) | — |
+| `WGER_URL` | Base URL of the Wger Workout Manager instance (preferred) | `http://localhost:8000` |
+| `WGER_INSTANCE` | Base URL fallback when `WGER_URL` is unset | `https://wger.de` |
+| `WGER_TOKEN` | Wger API token (preferred auth) | — |
+| `WGER_ACCESS_TOKEN` | Wger API token fallback when `WGER_TOKEN` is unset | — |
+| `WGER_SSL_VERIFY` | Verify TLS certificates (preferred) | `True` |
+| `WGER_VERIFY` | Verify TLS certificates fallback when `WGER_SSL_VERIFY` is unset | `True` |
 
 ### MCP server / transport
 | Variable | Description | Default |
@@ -331,9 +473,7 @@ To start the interactive command-line agent:
 ```bash
 # Set credentials
 export WGER_URL="your_value"
-export WGER_API_KEY="your_value"
-export WGER_DEFAULT_EMAIL="your_value"
-export WGER_DEFAULT_PASSWORD="your_value"
+export WGER_TOKEN="your_value"
 
 # Run the agent server
 wger-agent --provider openai --model-id gpt-4o

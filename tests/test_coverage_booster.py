@@ -824,7 +824,8 @@ async def test_health_check_endpoint():
     # Retrieve mcp instance and test custom health route
     mcp, _, _ = get_mcp_instance()
     health_route = next(r for r in mcp._additional_http_routes if r.path == "/health")
-    response = await health_route.endpoint()
+    # The framework health endpoint accepts the inbound Request (it is ignored).
+    response = await health_route.endpoint(None)
     assert response.status_code == 200
 
 
