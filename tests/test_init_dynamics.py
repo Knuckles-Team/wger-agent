@@ -8,11 +8,29 @@ PKG_NAME = __name__.rsplit(".", 1)[0] if "." in __name__ else None
 
 
 def _get_pkg_name():
-    """Derive package name from test location."""
+    """Derive the import package name from the project, robust to the checkout dir name.
+
+    Reads ``pyproject.toml`` (``project.name``) so it works in a git worktree whose
+    directory is named after the branch rather than the package; falls back to the
+    importable package dir, then the project directory name.
+    """
     import pathlib
+    import tomllib
 
     test_dir = pathlib.Path(__file__).resolve().parent
     project_dir = test_dir.parent
+
+    pyproject = project_dir / "pyproject.toml"
+    if pyproject.exists():
+        data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+        name = (data.get("project") or {}).get("name")
+        if name:
+            return name.replace("-", "_")
+
+    for child in project_dir.iterdir():
+        if child.is_dir() and (child / "__init__.py").exists() and child.name != "tests":
+            return child.name
+
     return project_dir.name.replace("-", "_")
 
 
