@@ -243,21 +243,20 @@ When query strings or parameters are supplied, an LLM-free **Knowledge Graph res
 
 ### MCP Configuration Examples
 
-> **Install the slim `[mcp]` extra.** All examples below install
-> `wger-agent[mcp]` — the MCP-server extra that pulls only the FastMCP /
-> FastAPI tooling (`agent-utilities[mcp]`). It deliberately **excludes** the heavy
-> agent runtime (the epistemic-graph engine, `pydantic-ai`, `dspy`, `llama-index`,
-> `tree-sitter`), so `uvx`/container installs are dramatically smaller and faster.
-> Use the full `[agent]` extra only when you need the integrated Pydantic AI agent
-> (see [Installation](#installation)).
+<!-- MCP-CONFIG-EXAMPLES:START -->
 
-#### stdio Transport (Recommended for local IDEs e.g., Cursor, Claude Desktop)
-Configure your IDE's `mcp.json` to launch the MCP server via `uvx`:
+> **Install the slim `[mcp]` extra.** All examples install `wger-agent[mcp]` — the
+> MCP-server extra that pulls only the FastMCP / FastAPI tooling (`agent-utilities[mcp]`).
+> It deliberately **excludes** the heavy agent runtime (`pydantic-ai`, the epistemic-graph
+> engine, `dspy`, `llama-index`), so `uvx` / container installs are far smaller. Use the
+> full `[agent]` extra only when you need the integrated Pydantic AI agent.
+
+#### stdio Transport (local IDEs — Cursor, Claude Desktop, VS Code)
 
 ```json
 {
   "mcpServers": {
-    "wger-agent": {
+    "wger-mcp": {
       "command": "uvx",
       "args": [
         "--from",
@@ -265,46 +264,69 @@ Configure your IDE's `mcp.json` to launch the MCP server via `uvx`:
         "wger-mcp"
       ],
       "env": {
-        "WGER_URL": "your_wger_url_here",
-        "WGER_TOKEN": "your_wger_api_token_here"
+        "MCP_TOOL_MODE": "condensed",
+        "BODYTOOL": "True",
+        "EXERCISETOOL": "True",
+        "NUTRITIONTOOL": "True",
+        "ROUTINECONFIGTOOL": "True",
+        "ROUTINETOOL": "True",
+        "USERTOOL": "True",
+        "WGER_ACCESS_TOKEN": "your_api_token_here",
+        "WGER_TOKEN": "your_api_token_here",
+        "WGER_URL": "http://localhost:8000",
+        "WGER_VERIFY": "True",
+        "WORKOUTTOOL": "True"
       }
     }
   }
 }
 ```
 
-#### Streamable-HTTP Transport (Recommended for production deployments)
-Configure your client's `mcp.json` to launch the Streamable-HTTP server via `uvx` with explicit host and port definition:
+#### Streamable-HTTP Transport (networked / production)
 
 ```json
 {
   "mcpServers": {
-    "wger-agent": {
+    "wger-mcp": {
       "command": "uvx",
       "args": [
         "--from",
         "wger-agent[mcp]",
-        "wger-mcp"
+        "wger-mcp",
+        "--transport",
+        "streamable-http",
+        "--port",
+        "8000"
       ],
       "env": {
         "TRANSPORT": "streamable-http",
         "HOST": "0.0.0.0",
         "PORT": "8000",
-        "WGER_URL": "your_wger_url_here",
-        "WGER_TOKEN": "your_wger_api_token_here"
+        "MCP_TOOL_MODE": "condensed",
+        "BODYTOOL": "True",
+        "EXERCISETOOL": "True",
+        "NUTRITIONTOOL": "True",
+        "ROUTINECONFIGTOOL": "True",
+        "ROUTINETOOL": "True",
+        "USERTOOL": "True",
+        "WGER_ACCESS_TOKEN": "your_api_token_here",
+        "WGER_TOKEN": "your_api_token_here",
+        "WGER_URL": "http://localhost:8000",
+        "WGER_VERIFY": "True",
+        "WORKOUTTOOL": "True"
       }
     }
   }
 }
 ```
 
-Alternatively, connect to a pre-deployed remote or local Streamable-HTTP instance:
+Alternatively, connect to a pre-deployed Streamable-HTTP instance by `url`:
 
 ```json
 {
   "mcpServers": {
-    "wger-agent": {
-      "url": "http://localhost:8000/wger-agent/mcp"
+    "wger-mcp": {
+      "url": "http://localhost:8000/wger-mcp/mcp"
     }
   }
 }
@@ -314,23 +336,28 @@ Deploying the Streamable-HTTP server via Docker:
 
 ```bash
 docker run -d \
-  --name wger-agent-mcp \
+  --name wger-mcp-mcp \
   -p 8000:8000 \
   -e TRANSPORT=streamable-http \
+  -e HOST=0.0.0.0 \
   -e PORT=8000 \
-  -e WGER_URL="your_value" \
-  -e WGER_TOKEN="your_value" \
+  -e MCP_TOOL_MODE=condensed \
+  -e BODYTOOL=True \
+  -e EXERCISETOOL=True \
+  -e NUTRITIONTOOL=True \
+  -e ROUTINECONFIGTOOL=True \
+  -e ROUTINETOOL=True \
+  -e USERTOOL=True \
+  -e WGER_ACCESS_TOKEN=your_api_token_here \
+  -e WGER_TOKEN=your_api_token_here \
+  -e WGER_URL=http://localhost:8000 \
+  -e WGER_VERIFY=True \
+  -e WORKOUTTOOL=True \
   knucklessg1/wger-agent:mcp
 ```
 
-> The `:mcp` tag is the **slim MCP-server image** (built from
-> `docker/Dockerfile --target mcp`, installing `wger-agent[mcp]`). The default
-> `:latest` tag is the **full agent image** (`--target agent`, `wger-agent[agent]`)
-> which also bundles the Pydantic AI agent and the epistemic-graph engine — use it
-> when you run `wger-agent` (the agent), not just the MCP server. See
-> [Container images](#container-images-mcp-vs-agent).
-
----
+_Auto-generated from the code-read env surface (`MCP_TOOL_MODE` + package vars) — do not edit._
+<!-- MCP-CONFIG-EXAMPLES:END -->
 
 <!-- BEGIN GENERATED: additional-deployment-options -->
 ### Additional Deployment Options
