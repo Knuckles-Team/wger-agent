@@ -334,3 +334,60 @@ def register_user_tools(mcp: FastMCP):
         if action == "get_weight_unit_settings":
             return client.get_weight_unit_settings(**kwargs)
         raise ValueError(f"Unknown action: {action}")
+
+
+def register_ingest_tools(mcp: FastMCP):
+    """CONCEPT:AU-KG.ingest.enterprise-source-extractor: Wire-First native KG ingestion tools.
+
+    Lists wger records via the real client and natively pushes them into the
+    epistemic-graph knowledge graph as typed OWL nodes (``:Exercise``,
+    ``:WorkoutRoutine``, ``:WorkoutSession``, ``:NutritionPlan``). Best-effort:
+    ``ingested`` is ``None`` when no KG engine is reachable.
+    """
+
+    @mcp.tool(tags={"Ingest"})
+    async def wger_ingest(
+        action: str = Field(
+            description=(
+                "Modality to ingest. Must be one of: 'exercises', 'routines', "
+                "'workout_sessions', 'nutrition_plans'"
+            )
+        ),
+        params_json: str = Field(
+            default="{}",
+            description="JSON string of list filters (e.g. {'limit': 100}).",
+        ),
+        client=Depends(get_client),
+        ctx: Context | None = Field(
+            default=None, description="MCP context for progress reporting"
+        ),
+    ) -> dict:
+        """Natively ingest wger records into epistemic-graph as typed nodes."""
+        if ctx:
+            ctx.info("Ingesting wger records into the knowledge graph...")
+
+        try:
+            kwargs = json.loads(params_json)
+        except Exception as e:
+            return {"error": f"Invalid params_json: {e}"}
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
+        from wger_agent import kg_ingest
+
+        if action == "exercises":
+            resp = client.get_exercises(**kwargs)
+            result = kg_ingest.ingest_exercises(resp)
+        elif action == "routines":
+            resp = client.get_routines(**kwargs)
+            result = kg_ingest.ingest_routines(resp)
+        elif action == "workout_sessions":
+            resp = client.get_workout_sessions(**kwargs)
+            result = kg_ingest.ingest_workout_sessions(resp)
+        elif action == "nutrition_plans":
+            resp = client.get_nutrition_plans(**kwargs)
+            result = kg_ingest.ingest_nutrition_plans(resp)
+        else:
+            raise ValueError(f"Unknown action: {action}")
+
+        listed = len(kg_ingest._records(resp))
+        return {"listed": listed, "ingested": result}

@@ -320,3 +320,30 @@ Aligned to schema:NutritionInformation.""" ;
     rdfs:seeAlso schema:NutritionInformation ;
     rdfs:subClassOf :Observation .
 
+
+:NutritionPlan a owl:Class ;
+    rdfs:label "Nutrition Plan" ;
+    rdfs:comment """A wger nutrition plan: a user's dietary program tracking daily
+macro goals (energy, protein, carbohydrates, fat) and the meals logged against it.
+BFO:Process — unfolds over time. Aligned to schema:Diet. Distinct from the
+Mealie-sourced :MealPlan; a NutritionPlan is the wger goal/logging container.""" ;
+    rdfs:seeAlso schema:Diet ;
+    rdfs:subClassOf :Procedure .
+
+:goalEnergy a owl:DatatypeProperty ;
+    rdfs:label "goal energy (kcal)" ;
+    rdfs:comment "Target daily energy intake for a NutritionPlan." ;
+    rdfs:domain :NutritionPlan ;
+    rdfs:range xsd:float .
+
+:goalProtein a owl:DatatypeProperty ;
+    rdfs:label "goal protein (g)" ;
+    rdfs:comment "Target daily protein intake for a NutritionPlan." ;
+    rdfs:domain :NutritionPlan ;
+    rdfs:range xsd:float .
+
+:sessionOfRoutine a owl:ObjectProperty ;
+    rdfs:label "session of routine" ;
+    rdfs:comment "Links a completed WorkoutSession to the WorkoutRoutine it was logged under." ;
+    rdfs:domain :WorkoutSession ;
+    rdfs:range :WorkoutRoutine .

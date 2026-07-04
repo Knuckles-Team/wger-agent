@@ -10,6 +10,7 @@ from wger_agent.mcp.mcp_server import (
 from wger_agent.mcp.tools import (
     register_body_tools,
     register_exercise_tools,
+    register_ingest_tools,
     register_nutrition_tools,
     register_routine_tools,
     register_routineconfig_tools,
@@ -27,6 +28,7 @@ __all__ = [
     "register_nutrition_tools",
     "register_body_tools",
     "register_user_tools",
+    "register_ingest_tools",
 ]
 
 if __name__ == "__main__":
