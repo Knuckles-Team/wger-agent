@@ -34,6 +34,9 @@ wger-agent = "wger_agent.skills"
 [project.entry-points."agent_utilities.prompt_providers"]
 wger-agent = "wger_agent.prompts"
 
+[project.entry-points."agent_utilities.ontology_providers"]
+wger-agent = "wger_agent.ontology"
+
 [tool.setuptools]
 include-package-data = true
 
@@ -52,7 +55,7 @@ dev = [
 ]
 
 [tool.setuptools.package-data]
-wger_agent = [ "mcp_config.json", "agent_data/**", "skills/**", "prompts/**",]
+wger_agent = [ "mcp_config.json", "agent_data/**", "skills/**", "prompts/**", "ontology/**",]
 
 [tool.ruff.lint]
 select = [ "E", "F", "I", "UP", "B",]
