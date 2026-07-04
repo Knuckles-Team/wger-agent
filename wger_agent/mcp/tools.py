@@ -7,11 +7,11 @@ from pydantic import Field
 
 from wger_agent.auth import get_client
 
-# CONCEPT:WGER-04: Wger Resource API Adapters
+# CONCEPT:WG-OS.config.register-routine-configuration-tools: Wger Resource API Adapters
 
 
 def register_routine_tools(mcp: FastMCP):
-    """CONCEPT:WGER-04: Register routine tools with FastMCP."""
+    """CONCEPT:WG-OS.config.register-routine-configuration-tools: Register routine tools with FastMCP."""
 
     @mcp.tool(tags={"Routine"})
     async def wger_routine(
@@ -65,7 +65,7 @@ def register_routine_tools(mcp: FastMCP):
 
 
 def register_routineconfig_tools(mcp: FastMCP):
-    """CONCEPT:WGER-04: Register routine configuration tools with FastMCP."""
+    """CONCEPT:WG-OS.config.register-routine-configuration-tools: Register routine configuration tools with FastMCP."""
 
     @mcp.tool(tags={"RoutineConfig"})
     async def wger_routineconfig(
@@ -109,7 +109,7 @@ def register_routineconfig_tools(mcp: FastMCP):
 
 
 def register_exercise_tools(mcp: FastMCP):
-    """CONCEPT:WGER-04: Register exercise tools with FastMCP."""
+    """CONCEPT:WG-OS.config.register-routine-configuration-tools: Register exercise tools with FastMCP."""
 
     @mcp.tool(tags={"Exercise"})
     async def wger_exercise(
@@ -155,7 +155,7 @@ def register_exercise_tools(mcp: FastMCP):
 
 
 def register_workout_tools(mcp: FastMCP):
-    """CONCEPT:WGER-04: Register workout tools with FastMCP."""
+    """CONCEPT:WG-OS.config.register-routine-configuration-tools: Register workout tools with FastMCP."""
 
     @mcp.tool(tags={"Workout"})
     async def wger_workout(
@@ -199,7 +199,7 @@ def register_workout_tools(mcp: FastMCP):
 
 
 def register_nutrition_tools(mcp: FastMCP):
-    """CONCEPT:WGER-04: Register nutrition tools with FastMCP."""
+    """CONCEPT:WG-OS.config.register-routine-configuration-tools: Register nutrition tools with FastMCP."""
 
     @mcp.tool(tags={"Nutrition"})
     async def wger_nutrition(
@@ -249,7 +249,7 @@ def register_nutrition_tools(mcp: FastMCP):
 
 
 def register_body_tools(mcp: FastMCP):
-    """CONCEPT:WGER-04: Register body measurement tools with FastMCP."""
+    """CONCEPT:WG-OS.config.register-routine-configuration-tools: Register body measurement tools with FastMCP."""
 
     @mcp.tool(tags={"Body"})
     async def wger_body(
@@ -295,7 +295,7 @@ def register_body_tools(mcp: FastMCP):
 
 
 def register_user_tools(mcp: FastMCP):
-    """CONCEPT:WGER-04: Register user configuration tools with FastMCP."""
+    """CONCEPT:WG-OS.config.register-routine-configuration-tools: Register user configuration tools with FastMCP."""
 
     @mcp.tool(tags={"User"})
     async def wger_user(

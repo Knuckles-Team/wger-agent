@@ -773,7 +773,7 @@ async def test_mcp_tools_and_server(mock_requests_session):
 
 
 def test_mcp_server_run_and_startup(mock_requests_session):
-    """CONCEPT:WGER-03: Verifies that the FastMCP server can startup and run under stdio, SSE, and HTTP transport modes."""
+    """CONCEPT:WG-OS.scaling.verifies-that-fastmcp-server: Verifies that the FastMCP server can startup and run under stdio, SSE, and HTTP transport modes."""
     # Test get_mcp_instance
     with patch.dict(
         os.environ, {"ROUTINETOOL": "True", "BODYTOOL": "True", "USERTOOL": "True"}
@@ -820,7 +820,7 @@ def test_mcp_server_run_and_startup(mock_requests_session):
 
 @pytest.mark.asyncio
 async def test_health_check_endpoint():
-    """CONCEPT:WGER-03: Verifies that the custom /health endpoint returns a successful HTTP 200 response."""
+    """CONCEPT:WG-OS.scaling.verifies-that-fastmcp-server: Verifies that the custom /health endpoint returns a successful HTTP 200 response."""
     # Retrieve mcp instance and test custom health route
     mcp, _, _ = get_mcp_instance()
     health_route = next(r for r in mcp._additional_http_routes if r.path == "/health")
