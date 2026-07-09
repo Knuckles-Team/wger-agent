@@ -1,5 +1,6 @@
 ---
 name: wger-workout-routines
+skill_type: skill
 description: >-
   Training-program operations on wger via the wger-agent MCP server — read, build,
   and audit workout routines, their scheduled days/slots, and the sessions/logs

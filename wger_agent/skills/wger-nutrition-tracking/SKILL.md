@@ -1,5 +1,6 @@
 ---
 name: wger-nutrition-tracking
+skill_type: skill
 description: >-
   Nutrition & body-progress operations on wger via the wger-agent MCP server — read and
   build nutrition plans, meals, diary entries, ingredients, and track body weight and

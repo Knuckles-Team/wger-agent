@@ -1,5 +1,6 @@
 ---
 name: wger-agent-docs
+skill_type: skill
 description: Wger Workout Manager documentation
 crawl_depth: 2
 source_url: https://wger.readthedocs.io/en/latest/

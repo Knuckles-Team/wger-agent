@@ -1,5 +1,6 @@
 ---
 name: wger-exercise-library
+skill_type: skill
 description: >-
   Exercise-database operations on wger via the wger-agent MCP server — search and read
   exercises, their categories, target muscles, equipment, and images. Use when the agent
