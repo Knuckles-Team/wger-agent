@@ -520,6 +520,7 @@ sync:
   updated_field: last_update
   pagination: offset
   doc_type: exercise
+  tool_schema_sha256: 46c06fb46595c3e294e8e39b8e5a9d6e53dabd63a1859f7f0ae0455403ef466b
   raw:
     server: wger-agent
     tool: wger_exercise
@@ -545,6 +546,7 @@ sync:
   updated_field: creation_date
   pagination: offset
   doc_type: nutrition_plan
+  tool_schema_sha256: 4676ee3a0c4fc76592c936e8c5118ce40965745c0ed5847237a4ce5268f601f3
   raw:
     server: wger-agent
     tool: wger_nutrition
@@ -561,17 +563,20 @@ sync:
     doc_type: nutrition_plan
 provenance:
   generated_by: scripts/generate_connector_manifests.py
-  generated_at: '2026-07-09T00:00:00Z'
+  generated_at: '2026-07-18T00:00:00Z'
   source_artifacts:
   - a2a.json
   - wger_agent/connectors/mcp_source_presets.json
+  - wger_agent/connectors/tool_schema_fingerprints.json
   - wger_agent/ontology/wellness.ttl
   integrity:
     algorithm: urdna2015-sha256
     hash: 0cefd2f7260450e7a338cb64409f6ee841f465c929b8232bdc65db574928fd46
     triple_count: 178
   signer: ontology-manifest-generator
-  signature: 369297aa8f664fb228ed07f54a0b2bc11cf5c94d09b859d61b5ef8b45306de65
+  signature_algorithm: ed25519
+  signing_public_key: q0Cp7bmQMqJhbofGKKw8xXC6KbFzukBDDke0UYVi8y4
+  signature: NI5f1ZARZPbnkNaSW3AyPQYnfLFjxVW8dHuQRsBHKKDlbTLhYeSEKLyH176T0Ei6FwsG2RSb-mD-TYV9SW3rDg
 policy:
   pii_fields: {}
   tenant_boundary: null

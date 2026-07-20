@@ -51,7 +51,6 @@ from wger_agent.api_client import WgerApi
 api = WgerApi(
     base_url="https://your-wger:8000",
     token="your_api_key",
-    verify=True,
 )
 
 ingredients = api.get_ingredients()

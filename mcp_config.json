@@ -7,7 +7,7 @@
         "wger-mcp"
       ],
       "env": {
-        "MCP_TOOL_MODE": "condensed",
+        "MCP_TOOL_MODE": "intent",
         "BODYTOOL": "True",
         "EXERCISETOOL": "True",
         "NUTRITIONTOOL": "True",
@@ -15,9 +15,9 @@
         "ROUTINETOOL": "True",
         "USERTOOL": "True",
         "WGER_ACCESS_TOKEN": "your_api_token_here",
+        "WGER_INSTANCE": "https://wger.de",
         "WGER_TOKEN": "your_api_token_here",
         "WGER_URL": "http://localhost:8000",
-        "WGER_VERIFY": "True",
         "WORKOUTTOOL": "True"
       }
     }

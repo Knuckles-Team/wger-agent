@@ -175,7 +175,7 @@ web:
 To add a web interface for the celery queue, add a new service to the override file
 ```
 celery_flower:
-  image: wger/server:latest
+  image: wger/server@sha256:<digest>
   container_name: wger_celery_flower
   command: /start-flower
   env_file:
@@ -338,7 +338,7 @@ DJANGO_DB_DATABASE=/home/wger/db/database.sqlite
 In the `docker-compose.yml` file, change the volume mapping for the web and celery services, remove the dependency on the db service and remove the entire db service definition:
 ```
 web:
-  image: docker.io/wger/server:latest
+  image: docker.io/wger/server@sha256:<digest>
   depends_on:
     # delete this
     db:
@@ -349,7 +349,7 @@ web:
     [...]
 
 celery_worker:
-  image: docker.io/wger/server:latest
+  image: docker.io/wger/server@sha256:<digest>
   volumes:
     - ./database.sqlite:/home/wger/db/database.sqlite
     [...]

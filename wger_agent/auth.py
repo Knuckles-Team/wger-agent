@@ -1,12 +1,9 @@
 #!/usr/bin/python
-import urllib3
-
-from wger_agent.api_client import WgerApi
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 from agent_utilities.core.config import setting
 from agent_utilities.core.exceptions import AuthError, UnauthorizedError
+
+from wger_agent.api_client import WgerApi
 
 _client = None
 
@@ -19,22 +16,16 @@ def get_client() -> WgerApi:
             "WGER_INSTANCE", "https://wger.de"
         )
         token: str = setting("WGER_TOKEN", "") or setting("WGER_ACCESS_TOKEN", "")
-        ssl_verify = setting("WGER_SSL_VERIFY", None, cast=bool)
-        verify: bool = (
-            ssl_verify if ssl_verify is not None else setting("WGER_VERIFY", True)
-        )
-
         try:
             _client = WgerApi(
                 base_url=base_url,
                 token=token,
-                verify=verify,
             )
         except (AuthError, UnauthorizedError) as e:
             raise RuntimeError(
-                f"AUTHENTICATION ERROR: The Wger API token provided is not valid for '{base_url}'. "
+                "AUTHENTICATION ERROR: The configured API token was rejected. "
                 f"Please check your WGER_ACCESS_TOKEN and WGER_INSTANCE environment variables. "
-                f"Error details: {str(e)}"
+                f"Error details: {type(e).__name__}"
             ) from e
 
     return _client

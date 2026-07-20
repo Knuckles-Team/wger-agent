@@ -1,0 +1,4 @@
+interface:
+  display_name: "Wger Agent Operations"
+  short_description: "Help with Wger Agent Operations tasks"
+  default_prompt: "Use $wger-agent-operations to complete a governed provider workflow."

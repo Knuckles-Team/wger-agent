@@ -48,15 +48,15 @@ uv run wger-mcp
 
 ## Prebuilt Docker image
 
-A multi-stage, slim image is published on every release (entrypoint `wger-mcp`):
+A multi-stage runtime image is published on every release (entrypoint `wger-mcp`):
 
 ```bash
-docker pull knucklessg1/wger-agent:latest
+docker pull example/wger-agent@sha256:<digest>
 
 docker run --rm -i \
   -e WGER_URL=https://your-wger:8000 \
   -e WGER_API_KEY=your_api_key \
-  knucklessg1/wger-agent:latest        # stdio transport (default)
+  example/wger-agent@sha256:<digest>        # stdio transport (default)
 ```
 
 For an HTTP server with a published port, or to run the agent server, see

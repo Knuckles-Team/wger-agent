@@ -41,8 +41,8 @@
 - **FR-025**: No @pytest.mark.parametrize usage — consider data-driven tests
 - **FR-026**: 3 tests have no assertions
 - **FR-027**: 2 tests exceed 100 lines — likely doing too much per test
-- **FR-028**: Undocumented env vars: AUTH_TYPE, DEFAULT_AGENT_NAME, EUNOMIA_POLICY_FILE, EUNOMIA_TYPE, OTEL_EXPORTER_OTLP_ENDPOINT, WGER_ACCESS_TOKEN, WGER_SSL_VERIFY, WGER_TOKEN
-- **FR-029**: 4 Python env vars not in .env.example: DEFAULT_AGENT_NAME, WGER_ACCESS_TOKEN, WGER_SSL_VERIFY, WGER_TOKEN
+- **FR-028**: Undocumented env vars: AUTH_TYPE, DEFAULT_AGENT_NAME, EUNOMIA_POLICY_FILE, EUNOMIA_TYPE, OTEL_EXPORTER_OTLP_ENDPOINT, WGER_ACCESS_TOKEN, TLS_PROFILE, WGER_TOKEN
+- **FR-029**: 4 Python env vars not in .env.example: DEFAULT_AGENT_NAME, WGER_ACCESS_TOKEN, TLS_PROFILE, WGER_TOKEN
 - **FR-030**: Analysis error: No module named 'agent_utilities.knowledge_graph'
 
 ## Success Criteria

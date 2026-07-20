@@ -3,10 +3,12 @@ import logging
 from typing import Any
 
 import requests
-import urllib3
 from agent_utilities.core.exceptions import AuthError, UnauthorizedError
+from agent_utilities.core.transport_security import (
+    ResolvedTLSProfile,
+    resolve_configured_tls_profile,
+)
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 logger = logging.getLogger(__name__)
 
 
@@ -15,12 +17,12 @@ class BaseApiClient:
         self,
         base_url: str = "https://wger.de",
         token: str = "",  # nosec B107
-        verify: bool = True,
+        tls_profile: ResolvedTLSProfile | None = None,
     ):
         self.base_url = base_url.rstrip("/")
         self.api_base = f"{self.base_url}/api/v2"
-        self.session = requests.Session()
-        self.session.verify = verify
+        self.tls_profile = tls_profile or resolve_configured_tls_profile("wger")
+        self.session = self.tls_profile.configure_requests_session(requests.Session())
         if token:
             self.session.headers.update({"Authorization": f"Token {token}"})
         self.session.headers.update({"Accept": "application/json"})
@@ -38,6 +40,11 @@ class BaseApiClient:
             if isinstance(e, (AuthError, UnauthorizedError)):
                 raise e
             pass
+
+    def close(self) -> None:
+        """Release transport resources and runtime-only TLS material."""
+        self.session.close()
+        self.tls_profile.cleanup()
 
     def _url(self, endpoint: str) -> str:
         return f"{self.api_base}/{endpoint.strip('/')}/"

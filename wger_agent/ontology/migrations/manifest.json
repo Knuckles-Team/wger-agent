@@ -1,0 +1,6 @@
+{
+  "connector": "wger-agent",
+  "current_ontology_source": "wellness",
+  "migrations": [],
+  "schema_version": "1"
+}

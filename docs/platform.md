@@ -21,7 +21,7 @@ with its database, cache, and Celery worker:
 # docker/wger-platform.compose.yml
 services:
   wger:
-    image: docker.io/wger/server:latest
+    image: docker.io/wger/server@sha256:<digest>
     container_name: wger
     depends_on:
       - wger-database
@@ -56,7 +56,7 @@ services:
       - postgres-data:/var/lib/postgresql/data/
 
   wger-cache:
-    image: docker.io/redis:latest
+    image: docker.io/redis@sha256:<digest>
     volumes:
       - redis-data:/data
 
@@ -95,7 +95,7 @@ so the server reaches Wger by container name:
 # docker/stack.compose.yml
 services:
   wger:
-    image: docker.io/wger/server:latest
+    image: docker.io/wger/server@sha256:<digest>
     ports: ["8000:80"]
     environment:
       - DJANGO_DB_HOST=wger-database
@@ -112,10 +112,10 @@ services:
       - POSTGRES_DB=wger
 
   wger-cache:
-    image: docker.io/redis:latest
+    image: docker.io/redis@sha256:<digest>
 
   wger-agent-mcp:
-    image: knucklessg1/wger-agent:latest
+    image: example/wger-agent@sha256:<digest>
     depends_on: [wger]
     environment:
       - WGER_URL=http://wger:80

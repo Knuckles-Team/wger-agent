@@ -178,12 +178,12 @@
     },
     {
       "id": "FR-028",
-      "description": "Undocumented env vars: AUTH_TYPE, DEFAULT_AGENT_NAME, EUNOMIA_POLICY_FILE, EUNOMIA_TYPE, OTEL_EXPORTER_OTLP_ENDPOINT, WGER_ACCESS_TOKEN, WGER_SSL_VERIFY, WGER_TOKEN",
+      "description": "Undocumented env vars: AUTH_TYPE, DEFAULT_AGENT_NAME, EUNOMIA_POLICY_FILE, EUNOMIA_TYPE, OTEL_EXPORTER_OTLP_ENDPOINT, WGER_ACCESS_TOKEN, TLS_PROFILE, WGER_TOKEN",
       "testable": true
     },
     {
       "id": "FR-029",
-      "description": "4 Python env vars not in .env.example: DEFAULT_AGENT_NAME, WGER_ACCESS_TOKEN, WGER_SSL_VERIFY, WGER_TOKEN",
+      "description": "4 Python env vars not in .env.example: DEFAULT_AGENT_NAME, WGER_ACCESS_TOKEN, TLS_PROFILE, WGER_TOKEN",
       "testable": true
     },
     {
