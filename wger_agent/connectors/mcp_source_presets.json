@@ -1,7 +1,7 @@
 {
   "_comment": "Tier-1 mcp_tool source presets for wger-agent (AU-KG.ingest.mcp-tool-connector). Syncs wger wellness data into the KG as typed documents via the wger-agent MCP server. Contributed presets win over the central MCP_TOOL_PRESETS.",
   "wger-exercises": {
-    "server": "wger-agent",
+    "server": "wger-mcp",
     "tool": "wger_exercise",
     "action": "get_exercises",
     "records_path": "results",
@@ -16,7 +16,7 @@
     "doc_type": "exercise"
   },
   "wger-nutrition-plans": {
-    "server": "wger-agent",
+    "server": "wger-mcp",
     "tool": "wger_nutrition",
     "action": "get_nutrition_plans",
     "records_path": "results",
