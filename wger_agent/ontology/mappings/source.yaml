@@ -3,7 +3,7 @@ connector: wger-agent
 ontology_source: wellness
 sync:
 - preset: wger-exercises
-  server: wger-agent
+  server: wger-mcp
   tool: wger_exercise
   action: get_exercises
   records_path: results
@@ -14,7 +14,7 @@ sync:
   doc_type: exercise
   tool_schema_sha256: 46c06fb46595c3e294e8e39b8e5a9d6e53dabd63a1859f7f0ae0455403ef466b
 - preset: wger-nutrition-plans
-  server: wger-agent
+  server: wger-mcp
   tool: wger_nutrition
   action: get_nutrition_plans
   records_path: results
