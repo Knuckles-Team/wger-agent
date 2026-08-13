@@ -40,6 +40,9 @@ wger-agent = "wger_agent.ontology"
 [project.entry-points."agent_utilities.source_connector_providers"]
 wger-agent = "wger_agent.connectors"
 
+[tool.uv.workspace]
+members = ["."]
+
 [tool.setuptools]
 include-package-data = true
 
