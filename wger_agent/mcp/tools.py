@@ -32,7 +32,7 @@ def register_routine_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -86,7 +86,7 @@ def register_routineconfig_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -130,7 +130,7 @@ def register_exercise_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -176,7 +176,7 @@ def register_workout_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -220,7 +220,7 @@ def register_nutrition_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -270,7 +270,7 @@ def register_body_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -316,7 +316,7 @@ def register_user_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -368,7 +368,7 @@ def register_ingest_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 

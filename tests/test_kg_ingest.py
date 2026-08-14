@@ -8,8 +8,14 @@ CONCEPT:AU-KG.ingest.enterprise-source-extractor.
 
 from __future__ import annotations
 
+from typing import Any
+
+import msgpack
 import pytest
 from agent_utilities.knowledge_graph.memory.native_ingest import NativeIngestError
+from agent_utilities.security.brain_context import ActorContext, use_actor
+from agent_utilities.models.company_brain import ActorType
+from agent_utilities.knowledge_graph.core.session import GraphSession, use_session
 
 from wger_agent.kg_ingest import (
     ingest_entities,
@@ -20,30 +26,92 @@ from wger_agent.kg_ingest import (
 )
 
 
-class _FakeTxn:
-    def __init__(self):
-        self.nodes = {}
-        self.edges = []
-        self.committed = False
+@pytest.fixture(autouse=True)
+def _governed_session():
+    actor = ActorContext(
+        actor_id="subject:opaque:synthetic",
+        actor_type=ActorType.AUTOMATED_SERVICE,
+        roles=(),
+        tenant_id="tenant:opaque:synthetic",
+        authenticated=True,
+    )
+    session = GraphSession(
+        actor=actor,
+        tenant=actor.tenant_id,
+        scopes=frozenset({"kg:write"}),
+        graph="graph:opaque:synthetic",
+        policy_version="policy:opaque:synthetic",
+        audience="epistemic-graph",
+    )
+    with use_actor(actor), use_session(session):
+        yield
 
-    def begin(self, graph=None):
-        self.graph = graph
-        return "txn-1"
 
-    def add_node(self, txn, node_id, props):
-        self.nodes[node_id] = props
+class _FakeNodes:
+    def __init__(self) -> None:
+        self.values: dict[str, dict[str, Any]] = {}
 
-    def add_edge(self, txn, source, target, props):
-        self.edges.append((source, target, props))
+    def properties(self, node_id: str) -> dict[str, Any] | None:
+        return self.values.get(node_id)
 
-    def commit(self, txn):
-        self.committed = True
-        return True
+    def list(self) -> list[tuple[str, dict[str, Any]]]:
+        return list(self.values.items())
+
+
+class _FakeChanges:
+    def __init__(self, nodes: _FakeNodes) -> None:
+        self.nodes = nodes
+        self.edges: list[tuple[str, str, dict[str, Any]]] = []
+        self.applied: list[dict[str, Any]] = []
+        self.records: dict[str, dict[str, Any]] = {}
+        self.versions: dict[str, dict[str, Any]] = {}
+
+    def get(self, envelope_id: str) -> dict[str, Any] | None:
+        return self.records.get(envelope_id)
+
+    def content_version(self, object_id: str) -> dict[str, Any] | None:
+        return self.versions.get(object_id)
+
+    def cursor(self, _source: str, _partition: str = "") -> None:
+        return None
+
+    def apply(self, envelope: dict[str, Any]) -> dict[str, Any]:
+        self.applied.append(envelope)
+        mutation = envelope["mutation"]
+        for operation in mutation["operations"]:
+            method = operation["method"]
+            params = method["params"]
+            properties = msgpack.unpackb(params["properties_msgpack"], raw=False)
+            if method["method"] == "AddNode":
+                self.nodes.values[params["node_id"]] = properties
+            elif method["method"] == "AddEdge":
+                self.edges.append(
+                    (params["source_id"], params["target_id"], properties)
+                )
+        version = envelope["content_version"]
+        self.versions[version["object_id"]] = version
+        self.records[envelope["envelope_id"]] = envelope
+        return {
+            "batch_id": mutation["batch_id"],
+            "replayed": False,
+            "projection_pending": False,
+        }
+
+
+class _FakeRdf:
+    def validate_shacl(self, _shapes: str, _data_graph: str) -> dict[str, Any]:
+        return {"conforms": True, "results": []}
 
 
 class _FakeClient:
-    def __init__(self):
-        self.txn = _FakeTxn()
+    def __init__(self) -> None:
+        self.nodes = _FakeNodes()
+        self.changes = _FakeChanges(self.nodes)
+        self.rdf = _FakeRdf()
+
+    @staticmethod
+    def supports(operation: str) -> bool:
+        return operation == "ApplyChangeEnvelope"
 
 
 def test_ingest_entities_writes_nodes_and_edges():
@@ -55,15 +123,14 @@ def test_ingest_entities_writes_nodes_and_edges():
         ],
         [{"source": "a", "target": "b", "relationship": "sessionOfRoutine"}],
         client=c,
-        graph="__commons__",
     )
     assert res == {"nodes": 2, "edges": 1}
-    assert c.txn.committed is True
-    assert set(c.txn.nodes) == {"a", "b"}
+    assert len(c.changes.applied) == 1
+    assert set(c.nodes.values) == {"a", "b"}
     # provenance is stamped
-    assert c.txn.nodes["a"]["source"] == "wger-agent"
-    assert c.txn.nodes["a"]["domain"] == "wellness"
-    assert c.txn.edges == [("a", "b", {"relationship": "sessionOfRoutine"})]
+    assert c.nodes.values["a"]["source"] == "wger-agent"
+    assert c.nodes.values["a"]["domain"] == "wellness"
+    assert c.changes.edges == [("a", "b", {"relationship": "sessionOfRoutine"})]
 
 
 def test_ingest_exercises_maps_typed_nodes():
@@ -71,10 +138,9 @@ def test_ingest_exercises_maps_typed_nodes():
     res = ingest_exercises(
         {"results": [{"id": 345, "name": "Bench Press", "category": 11}]},
         client=c,
-        graph="__commons__",
     )
     assert res == {"nodes": 1, "edges": 0}
-    node = c.txn.nodes["wellness:exercise:345"]
+    node = c.nodes.values["wellness:exercise:345"]
     assert node["node_type"] == "Exercise"
     assert node["name"] == "Bench Press"
     assert node["externalToolId"] == "345"
@@ -85,10 +151,9 @@ def test_ingest_routines_maps_typed_nodes():
     res = ingest_routines(
         [{"id": 42, "name": "PPL", "description": "push/pull/legs"}],
         client=c,
-        graph="__commons__",
     )
     assert res == {"nodes": 1, "edges": 0}
-    node = c.txn.nodes["wellness:routine:42"]
+    node = c.nodes.values["wellness:routine:42"]
     assert node["node_type"] == "WorkoutRoutine"
     assert node["name"] == "PPL"
 
@@ -102,11 +167,10 @@ def test_ingest_workout_sessions_links_routine():
             ]
         },
         client=c,
-        graph="__commons__",
     )
     assert res == {"nodes": 1, "edges": 1}
-    assert c.txn.nodes["wellness:session:9"]["node_type"] == "WorkoutSession"
-    assert c.txn.edges == [
+    assert c.nodes.values["wellness:session:9"]["node_type"] == "WorkoutSession"
+    assert c.changes.edges == [
         ("wellness:session:9", "wellness:routine:42", {"relationship": "sessionOfRoutine"})
     ]
 
@@ -116,10 +180,9 @@ def test_ingest_nutrition_plans_maps_goals():
     res = ingest_nutrition_plans(
         [{"id": 12, "description": "Cut", "goal_energy": 2400, "goal_protein": 180}],
         client=c,
-        graph="__commons__",
     )
     assert res == {"nodes": 1, "edges": 0}
-    node = c.txn.nodes["wellness:nutritionplan:12"]
+    node = c.nodes.values["wellness:nutritionplan:12"]
     assert node["node_type"] == "NutritionPlan"
     assert node["goalEnergy"] == 2400
     assert node["goalProtein"] == 180
