@@ -1,7 +1,7 @@
 {
   "api_version": "graphos.io/v1",
   "artifacts": {
-    "connector_manifest.yml": "659c52388c6a9f99ef8f689506a252dd6ad59b8160eea314cd928299a96c9152",
+    "connector_manifest.yml": "4d222620dc9c1c9c2f09646509d20bc04676f2b43753d9c002d675762595f4f1",
     "wger_agent/connectors/mcp_source_presets.json": "e220cd80f8422da4a689d57996b7f2776796cf5e88508d25ecc926f15603ac9f",
     "wger_agent/connectors/tool_schema_fingerprints.json": "4969dca42401b1d8b9caaf96179ecde428ff105d9cad9a4f0799a12eac5ae52a",
     "wger_agent/ontology/fixtures/records.json": "f6c8c8d2812681be6a26dacebcddb2cb8899e6ce3538012013ef52db34e256f2",
@@ -18,9 +18,9 @@
     "synthetic_fixture_contract": "passed"
   },
   "compatibility": {
-    "agent_utilities": ">=2.4.0,<3",
+    "agent_utilities": ">=2.5.0,<3",
     "bundle_schema": "2",
-    "epistemic_graph": ">=2.26.0,<3"
+    "epistemic_graph": ">=2.27.0,<3"
   },
   "connector": "wger-agent",
   "kind": "ConnectorSourceAttestation",
@@ -32,5 +32,5 @@
   "signer": "UNSIGNED-PREVIEW",
   "signing_public_key": "",
   "status": "source-validated",
-  "validated_at": "2026-08-21T04:30:39Z"
+  "validated_at": "2026-08-26T13:42:55Z"
 }
