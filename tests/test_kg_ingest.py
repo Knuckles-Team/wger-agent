@@ -18,6 +18,7 @@ from agent_utilities.models.company_brain import ActorType
 from agent_utilities.knowledge_graph.core.session import GraphSession, use_session
 
 from wger_agent.kg_ingest import (
+    _records,
     ingest_entities,
     ingest_exercises,
     ingest_nutrition_plans,
@@ -196,3 +197,18 @@ def test_retired_structural_alias_is_rejected():
 def test_empty_native_ingest_is_rejected():
     with pytest.raises(NativeIngestError, match="at least one entity"):
         ingest_entities([], client=_FakeClient())
+
+
+def test_records_normalizes_wger_response_shapes():
+    """Pins ``_records``'s response-shape normalisation (DRF list dict / single
+    dict / plain list / None / an unrecognised type), including that non-dict
+    items are filtered out of both the DRF ``results`` list and a bare list."""
+    assert _records(None) == []
+    assert _records({"id": 1, "name": "solo"}) == [{"id": 1, "name": "solo"}]
+    assert _records({"results": [{"id": 1}, "not-a-dict", {"id": 2}]}) == [
+        {"id": 1},
+        {"id": 2},
+    ]
+    assert _records([{"id": 1}, "not-a-dict", {"id": 2}]) == [{"id": 1}, {"id": 2}]
+    assert _records("unexpected-type") == []
+    assert _records(42) == []
