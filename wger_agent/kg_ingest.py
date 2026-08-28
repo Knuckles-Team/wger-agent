@@ -58,17 +58,23 @@ def ingest_documents(
     )
 
 
+def _dict_items(items: Any) -> list[dict[str, Any]]:
+    """Return only the dict elements of an iterable, dropping anything else."""
+    return [item for item in items if isinstance(item, dict)]
+
+
 def _records(resp: Any) -> list[dict[str, Any]]:
     """Normalise a wger API response (DRF list dict / single dict / list) to a list."""
     if resp is None:
         return []
-    if isinstance(resp, dict):
-        if isinstance(resp.get("results"), list):
-            return [r for r in resp["results"] if isinstance(r, dict)]
-        return [resp]
     if isinstance(resp, list):
-        return [r for r in resp if isinstance(r, dict)]
-    return []
+        return _dict_items(resp)
+    if not isinstance(resp, dict):
+        return []
+    results = resp.get("results")
+    if isinstance(results, list):
+        return _dict_items(results)
+    return [resp]
 
 
 def ingest_exercises(
