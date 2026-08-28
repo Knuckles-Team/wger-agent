@@ -40,20 +40,25 @@ def _import_module_safely(module_name: str):
         return None
 
 
-def __getattr__(name: str) -> Any:
-    # Handle availability flags dynamically without eager imports
-    if name == "_MCP_AVAILABLE":
-        mcp_key = next((k for k in OPTIONAL_MODULES if "mcp_server" in k), None)
-        if mcp_key:
-            return _import_module_safely(mcp_key) is not None
-        return False
-    if name == "_AGENT_AVAILABLE":
-        agent_key = next((k for k in OPTIONAL_MODULES if "agent_server" in k), None)
-        if agent_key:
-            return _import_module_safely(agent_key) is not None
-        return False
+# Attribute names that report whether an optional module is importable, and the
+# substring of its OPTIONAL_MODULES key that identifies which one each asks about.
+_AVAILABILITY_MARKERS = {"_MCP_AVAILABLE": "mcp_server", "_AGENT_AVAILABLE": "agent_server"}
 
-    # Check optional modules
+
+def _optional_module_available(marker: str) -> bool:
+    """Report whether the OPTIONAL_MODULES entry matching marker can be imported."""
+    module_key = next((k for k in OPTIONAL_MODULES if marker in k), None)
+    if module_key is None:
+        return False
+    return _import_module_safely(module_key) is not None
+
+
+def _find_in_optional_modules(name: str) -> Any:
+    """Lazily import each optional module, expose its members, and return name.
+
+    Raises AttributeError if no optional module (loaded or newly importable)
+    defines the attribute.
+    """
     for module_name in OPTIONAL_MODULES:
         if module_name not in _loaded_optional_modules:
             module = _import_module_safely(module_name)
@@ -66,6 +71,15 @@ def __getattr__(name: str) -> Any:
             return getattr(module, name)
 
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def __getattr__(name: str) -> Any:
+    # Handle availability flags dynamically without eager imports
+    marker = _AVAILABILITY_MARKERS.get(name)
+    if marker is not None:
+        return _optional_module_available(marker)
+
+    return _find_in_optional_modules(name)
 
 
 def __dir__() -> list[str]:
