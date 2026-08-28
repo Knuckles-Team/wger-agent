@@ -1,5 +1,6 @@
 # wger_agent/mcp/tools.py
 import json
+from typing import Any
 
 from fastmcp import Context, FastMCP
 from fastmcp.dependencies import Depends
@@ -8,6 +9,68 @@ from pydantic import Field
 from wger_agent.auth import get_client
 
 # CONCEPT:WG-OS.config.register-routine-configuration-tools: Wger Resource API Adapters
+
+
+def _parse_action_kwargs(params_json: str) -> dict[str, Any] | None:
+    """Parse an action's JSON parameter payload into kwargs, dropping None values.
+
+    Returns None if params_json is not valid JSON.
+    """
+    try:
+        raw_kwargs = json.loads(params_json)
+    except Exception:
+        return None
+    return {k: v for k, v in raw_kwargs.items() if v is not None}
+
+
+def _call_client_action(
+    client: Any, action: str, allowed_actions: frozenset[str], kwargs: dict[str, Any]
+) -> Any:
+    """Invoke the wger client method named by action, if action is allowed.
+
+    Every action in this adapter maps to a same-named method on the wger API
+    client; allowed_actions is the explicit allow-list so an unrecognised (or
+    otherwise-named) action can never reach an arbitrary client method.
+    """
+    if action not in allowed_actions:
+        raise ValueError(f"Unknown action: {action}")
+    return getattr(client, action)(**kwargs)
+
+
+async def _run_client_action(
+    ctx: Context | None,
+    action: str,
+    params_json: str,
+    client: Any,
+    allowed_actions: frozenset[str],
+) -> dict:
+    """Shared body for a wger_* dispatch tool: log, parse params, then dispatch."""
+    if ctx:
+        await ctx.info("Executing tool...")
+
+    kwargs = _parse_action_kwargs(params_json)
+    if kwargs is None:
+        return {"error": "Operation failed"}
+
+    return _call_client_action(client, action, allowed_actions, kwargs)
+
+
+_ROUTINE_ACTIONS = frozenset(
+    {
+        "get_routines",
+        "get_routine",
+        "create_routine",
+        "delete_routine",
+        "get_days",
+        "create_day",
+        "delete_day",
+        "get_slots",
+        "create_slot",
+        "create_slot_entry",
+        "get_templates",
+        "get_public_templates",
+    }
+)
 
 
 def register_routine_tools(mcp: FastMCP):
@@ -27,41 +90,20 @@ def register_routine_tools(mcp: FastMCP):
         ),
     ) -> dict:
         """Manage wger routine operations."""
-        if ctx:
-            await ctx.info("Executing tool...")
+        return await _run_client_action(ctx, action, params_json, client, _ROUTINE_ACTIONS)
 
-        try:
-            kwargs = json.loads(params_json)
-        except Exception:
-            return {"error": "Operation failed"}
 
-        kwargs = {k: v for k, v in kwargs.items() if v is not None}
-
-        if action == "get_routines":
-            return client.get_routines(**kwargs)
-        if action == "get_routine":
-            return client.get_routine(**kwargs)
-        if action == "create_routine":
-            return client.create_routine(**kwargs)
-        if action == "delete_routine":
-            return client.delete_routine(**kwargs)
-        if action == "get_days":
-            return client.get_days(**kwargs)
-        if action == "create_day":
-            return client.create_day(**kwargs)
-        if action == "delete_day":
-            return client.delete_day(**kwargs)
-        if action == "get_slots":
-            return client.get_slots(**kwargs)
-        if action == "create_slot":
-            return client.create_slot(**kwargs)
-        if action == "create_slot_entry":
-            return client.create_slot_entry(**kwargs)
-        if action == "get_templates":
-            return client.get_templates(**kwargs)
-        if action == "get_public_templates":
-            return client.get_public_templates(**kwargs)
-        raise ValueError(f"Unknown action: {action}")
+_ROUTINECONFIG_ACTIONS = frozenset(
+    {
+        "create_weight_config",
+        "get_weight_configs",
+        "create_repetitions_config",
+        "get_repetitions_configs",
+        "create_sets_config",
+        "create_rest_config",
+        "create_rir_config",
+    }
+)
 
 
 def register_routineconfig_tools(mcp: FastMCP):
@@ -81,31 +123,23 @@ def register_routineconfig_tools(mcp: FastMCP):
         ),
     ) -> dict:
         """Manage wger routineconfig operations."""
-        if ctx:
-            await ctx.info("Executing tool...")
+        return await _run_client_action(
+            ctx, action, params_json, client, _ROUTINECONFIG_ACTIONS
+        )
 
-        try:
-            kwargs = json.loads(params_json)
-        except Exception:
-            return {"error": "Operation failed"}
 
-        kwargs = {k: v for k, v in kwargs.items() if v is not None}
-
-        if action == "create_weight_config":
-            return client.create_weight_config(**kwargs)
-        if action == "get_weight_configs":
-            return client.get_weight_configs(**kwargs)
-        if action == "create_repetitions_config":
-            return client.create_repetitions_config(**kwargs)
-        if action == "get_repetitions_configs":
-            return client.get_repetitions_configs(**kwargs)
-        if action == "create_sets_config":
-            return client.create_sets_config(**kwargs)
-        if action == "create_rest_config":
-            return client.create_rest_config(**kwargs)
-        if action == "create_rir_config":
-            return client.create_rir_config(**kwargs)
-        raise ValueError(f"Unknown action: {action}")
+_EXERCISE_ACTIONS = frozenset(
+    {
+        "get_exercises",
+        "get_exercise_info",
+        "search_exercises",
+        "get_exercise_categories",
+        "get_equipment",
+        "get_muscles",
+        "get_exercise_images",
+        "get_variations",
+    }
+)
 
 
 def register_exercise_tools(mcp: FastMCP):
@@ -125,33 +159,22 @@ def register_exercise_tools(mcp: FastMCP):
         ),
     ) -> dict:
         """Manage wger exercise operations."""
-        if ctx:
-            await ctx.info("Executing tool...")
+        return await _run_client_action(
+            ctx, action, params_json, client, _EXERCISE_ACTIONS
+        )
 
-        try:
-            kwargs = json.loads(params_json)
-        except Exception:
-            return {"error": "Operation failed"}
 
-        kwargs = {k: v for k, v in kwargs.items() if v is not None}
-
-        if action == "get_exercises":
-            return client.get_exercises(**kwargs)
-        if action == "get_exercise_info":
-            return client.get_exercise_info(**kwargs)
-        if action == "search_exercises":
-            return client.search_exercises(**kwargs)
-        if action == "get_exercise_categories":
-            return client.get_exercise_categories(**kwargs)
-        if action == "get_equipment":
-            return client.get_equipment(**kwargs)
-        if action == "get_muscles":
-            return client.get_muscles(**kwargs)
-        if action == "get_exercise_images":
-            return client.get_exercise_images(**kwargs)
-        if action == "get_variations":
-            return client.get_variations(**kwargs)
-        raise ValueError(f"Unknown action: {action}")
+_WORKOUT_ACTIONS = frozenset(
+    {
+        "get_workout_sessions",
+        "get_workout_session",
+        "create_workout_session",
+        "delete_workout_session",
+        "get_workout_logs",
+        "create_workout_log",
+        "delete_workout_log",
+    }
+)
 
 
 def register_workout_tools(mcp: FastMCP):
@@ -171,31 +194,23 @@ def register_workout_tools(mcp: FastMCP):
         ),
     ) -> dict:
         """Manage wger workout operations."""
-        if ctx:
-            await ctx.info("Executing tool...")
+        return await _run_client_action(ctx, action, params_json, client, _WORKOUT_ACTIONS)
 
-        try:
-            kwargs = json.loads(params_json)
-        except Exception:
-            return {"error": "Operation failed"}
 
-        kwargs = {k: v for k, v in kwargs.items() if v is not None}
-
-        if action == "get_workout_sessions":
-            return client.get_workout_sessions(**kwargs)
-        if action == "get_workout_session":
-            return client.get_workout_session(**kwargs)
-        if action == "create_workout_session":
-            return client.create_workout_session(**kwargs)
-        if action == "delete_workout_session":
-            return client.delete_workout_session(**kwargs)
-        if action == "get_workout_logs":
-            return client.get_workout_logs(**kwargs)
-        if action == "create_workout_log":
-            return client.create_workout_log(**kwargs)
-        if action == "delete_workout_log":
-            return client.delete_workout_log(**kwargs)
-        raise ValueError(f"Unknown action: {action}")
+_NUTRITION_ACTIONS = frozenset(
+    {
+        "get_nutrition_plans",
+        "get_nutrition_plan_info",
+        "create_nutrition_plan",
+        "delete_nutrition_plan",
+        "create_meal",
+        "create_meal_item",
+        "get_ingredients",
+        "get_ingredient_info",
+        "get_nutrition_diary",
+        "log_nutrition",
+    }
+)
 
 
 def register_nutrition_tools(mcp: FastMCP):
@@ -215,37 +230,23 @@ def register_nutrition_tools(mcp: FastMCP):
         ),
     ) -> dict:
         """Manage wger nutrition operations."""
-        if ctx:
-            await ctx.info("Executing tool...")
+        return await _run_client_action(
+            ctx, action, params_json, client, _NUTRITION_ACTIONS
+        )
 
-        try:
-            kwargs = json.loads(params_json)
-        except Exception:
-            return {"error": "Operation failed"}
 
-        kwargs = {k: v for k, v in kwargs.items() if v is not None}
-
-        if action == "get_nutrition_plans":
-            return client.get_nutrition_plans(**kwargs)
-        if action == "get_nutrition_plan_info":
-            return client.get_nutrition_plan_info(**kwargs)
-        if action == "create_nutrition_plan":
-            return client.create_nutrition_plan(**kwargs)
-        if action == "delete_nutrition_plan":
-            return client.delete_nutrition_plan(**kwargs)
-        if action == "create_meal":
-            return client.create_meal(**kwargs)
-        if action == "create_meal_item":
-            return client.create_meal_item(**kwargs)
-        if action == "get_ingredients":
-            return client.get_ingredients(**kwargs)
-        if action == "get_ingredient_info":
-            return client.get_ingredient_info(**kwargs)
-        if action == "get_nutrition_diary":
-            return client.get_nutrition_diary(**kwargs)
-        if action == "log_nutrition":
-            return client.log_nutrition(**kwargs)
-        raise ValueError(f"Unknown action: {action}")
+_BODY_ACTIONS = frozenset(
+    {
+        "get_weight_entries",
+        "log_body_weight",
+        "delete_weight_entry",
+        "get_measurements",
+        "log_measurement",
+        "get_measurement_categories",
+        "create_measurement_category",
+        "get_gallery",
+    }
+)
 
 
 def register_body_tools(mcp: FastMCP):
@@ -265,33 +266,19 @@ def register_body_tools(mcp: FastMCP):
         ),
     ) -> dict:
         """Manage wger body operations."""
-        if ctx:
-            await ctx.info("Executing tool...")
+        return await _run_client_action(ctx, action, params_json, client, _BODY_ACTIONS)
 
-        try:
-            kwargs = json.loads(params_json)
-        except Exception:
-            return {"error": "Operation failed"}
 
-        kwargs = {k: v for k, v in kwargs.items() if v is not None}
-
-        if action == "get_weight_entries":
-            return client.get_weight_entries(**kwargs)
-        if action == "log_body_weight":
-            return client.log_body_weight(**kwargs)
-        if action == "delete_weight_entry":
-            return client.delete_weight_entry(**kwargs)
-        if action == "get_measurements":
-            return client.get_measurements(**kwargs)
-        if action == "log_measurement":
-            return client.log_measurement(**kwargs)
-        if action == "get_measurement_categories":
-            return client.get_measurement_categories(**kwargs)
-        if action == "create_measurement_category":
-            return client.create_measurement_category(**kwargs)
-        if action == "get_gallery":
-            return client.get_gallery(**kwargs)
-        raise ValueError(f"Unknown action: {action}")
+_USER_ACTIONS = frozenset(
+    {
+        "get_user_profile",
+        "get_user_statistics",
+        "get_user_trophies",
+        "get_languages",
+        "get_repetition_units",
+        "get_weight_unit_settings",
+    }
+)
 
 
 def register_user_tools(mcp: FastMCP):
@@ -311,29 +298,7 @@ def register_user_tools(mcp: FastMCP):
         ),
     ) -> dict:
         """Manage wger user operations."""
-        if ctx:
-            await ctx.info("Executing tool...")
-
-        try:
-            kwargs = json.loads(params_json)
-        except Exception:
-            return {"error": "Operation failed"}
-
-        kwargs = {k: v for k, v in kwargs.items() if v is not None}
-
-        if action == "get_user_profile":
-            return client.get_user_profile(**kwargs)
-        if action == "get_user_statistics":
-            return client.get_user_statistics(**kwargs)
-        if action == "get_user_trophies":
-            return client.get_user_trophies(**kwargs)
-        if action == "get_languages":
-            return client.get_languages(**kwargs)
-        if action == "get_repetition_units":
-            return client.get_repetition_units(**kwargs)
-        if action == "get_weight_unit_settings":
-            return client.get_weight_unit_settings(**kwargs)
-        raise ValueError(f"Unknown action: {action}")
+        return await _run_client_action(ctx, action, params_json, client, _USER_ACTIONS)
 
 
 def register_ingest_tools(mcp: FastMCP):
