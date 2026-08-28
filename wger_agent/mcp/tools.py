@@ -28,7 +28,7 @@ def register_routine_tools(mcp: FastMCP):
     ) -> dict:
         """Manage wger routine operations."""
         if ctx:
-            ctx.info("Executing tool...")
+            await ctx.info("Executing tool...")
 
         try:
             kwargs = json.loads(params_json)
@@ -82,7 +82,7 @@ def register_routineconfig_tools(mcp: FastMCP):
     ) -> dict:
         """Manage wger routineconfig operations."""
         if ctx:
-            ctx.info("Executing tool...")
+            await ctx.info("Executing tool...")
 
         try:
             kwargs = json.loads(params_json)
@@ -126,7 +126,7 @@ def register_exercise_tools(mcp: FastMCP):
     ) -> dict:
         """Manage wger exercise operations."""
         if ctx:
-            ctx.info("Executing tool...")
+            await ctx.info("Executing tool...")
 
         try:
             kwargs = json.loads(params_json)
@@ -172,7 +172,7 @@ def register_workout_tools(mcp: FastMCP):
     ) -> dict:
         """Manage wger workout operations."""
         if ctx:
-            ctx.info("Executing tool...")
+            await ctx.info("Executing tool...")
 
         try:
             kwargs = json.loads(params_json)
@@ -216,7 +216,7 @@ def register_nutrition_tools(mcp: FastMCP):
     ) -> dict:
         """Manage wger nutrition operations."""
         if ctx:
-            ctx.info("Executing tool...")
+            await ctx.info("Executing tool...")
 
         try:
             kwargs = json.loads(params_json)
@@ -266,7 +266,7 @@ def register_body_tools(mcp: FastMCP):
     ) -> dict:
         """Manage wger body operations."""
         if ctx:
-            ctx.info("Executing tool...")
+            await ctx.info("Executing tool...")
 
         try:
             kwargs = json.loads(params_json)
@@ -312,7 +312,7 @@ def register_user_tools(mcp: FastMCP):
     ) -> dict:
         """Manage wger user operations."""
         if ctx:
-            ctx.info("Executing tool...")
+            await ctx.info("Executing tool...")
 
         try:
             kwargs = json.loads(params_json)
@@ -364,7 +364,7 @@ def register_ingest_tools(mcp: FastMCP):
     ) -> dict:
         """Natively ingest wger records into epistemic-graph as typed nodes."""
         if ctx:
-            ctx.info("Ingesting wger records into the knowledge graph...")
+            await ctx.info("Ingesting wger records into the knowledge graph...")
 
         try:
             kwargs = json.loads(params_json)
