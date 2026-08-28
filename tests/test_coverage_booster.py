@@ -4,7 +4,7 @@ import json
 import pytest
 import importlib
 import runpy
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Any
 
 from agent_utilities.core.exceptions import AuthError, UnauthorizedError
@@ -374,6 +374,7 @@ async def test_mcp_tools_and_server(mock_requests_session):
     # Mock client and context
     mock_client = MagicMock()
     mock_ctx = MagicMock()
+    mock_ctx.info = AsyncMock()
 
     # Test wger_routine actions
     wger_routine = tools_dict["wger_routine"]
