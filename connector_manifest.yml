@@ -525,7 +525,7 @@ sync:
   updated_field: last_update
   pagination: offset
   doc_type: exercise
-  tool_schema_sha256: 46c06fb46595c3e294e8e39b8e5a9d6e53dabd63a1859f7f0ae0455403ef466b
+  tool_schema_sha256: fa569bf45e239353139b9681ea4a732832dfaadbeaf317a2d30d70244092ca15
   raw:
     server: wger-mcp
     tool: wger_exercise
@@ -551,7 +551,7 @@ sync:
   updated_field: creation_date
   pagination: offset
   doc_type: nutrition_plan
-  tool_schema_sha256: 4676ee3a0c4fc76592c936e8c5118ce40965745c0ed5847237a4ce5268f601f3
+  tool_schema_sha256: 966a19fcb680bf297981dce13a133a3411e747d3b392c9ffd42cead2b4bb1026
   raw:
     server: wger-mcp
     tool: wger_nutrition

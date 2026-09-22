@@ -1,6 +1,6 @@
 # wger_agent/mcp/tools.py
 import json
-from typing import Any
+from typing import Any, Literal
 
 from fastmcp import Context, FastMCP
 from fastmcp.dependencies import Depends
@@ -90,7 +90,9 @@ def register_routine_tools(mcp: FastMCP):
         ),
     ) -> dict:
         """Manage wger routine operations."""
-        return await _run_client_action(ctx, action, params_json, client, _ROUTINE_ACTIONS)
+        return await _run_client_action(
+            ctx, action, params_json, client, _ROUTINE_ACTIONS
+        )
 
 
 _ROUTINECONFIG_ACTIONS = frozenset(
@@ -147,7 +149,16 @@ def register_exercise_tools(mcp: FastMCP):
 
     @mcp.tool(tags={"Exercise"})
     async def wger_exercise(
-        action: str = Field(
+        action: Literal[
+            "get_equipment",
+            "get_exercise_categories",
+            "get_exercise_images",
+            "get_exercise_info",
+            "get_exercises",
+            "get_muscles",
+            "get_variations",
+            "search_exercises",
+        ] = Field(
             description="Action to perform. Must be one of: 'get_exercises', 'get_exercise_info', 'search_exercises', 'get_exercise_categories', 'get_equipment', 'get_muscles', 'get_exercise_images', 'get_variations'"
         ),
         params_json: str = Field(
@@ -194,7 +205,9 @@ def register_workout_tools(mcp: FastMCP):
         ),
     ) -> dict:
         """Manage wger workout operations."""
-        return await _run_client_action(ctx, action, params_json, client, _WORKOUT_ACTIONS)
+        return await _run_client_action(
+            ctx, action, params_json, client, _WORKOUT_ACTIONS
+        )
 
 
 _NUTRITION_ACTIONS = frozenset(
@@ -218,7 +231,18 @@ def register_nutrition_tools(mcp: FastMCP):
 
     @mcp.tool(tags={"Nutrition"})
     async def wger_nutrition(
-        action: str = Field(
+        action: Literal[
+            "create_meal",
+            "create_meal_item",
+            "create_nutrition_plan",
+            "delete_nutrition_plan",
+            "get_ingredient_info",
+            "get_ingredients",
+            "get_nutrition_diary",
+            "get_nutrition_plan_info",
+            "get_nutrition_plans",
+            "log_nutrition",
+        ] = Field(
             description="Action to perform. Must be one of: 'get_nutrition_plans', 'get_nutrition_plan_info', 'create_nutrition_plan', 'delete_nutrition_plan', 'create_meal', 'create_meal_item', 'get_ingredients', 'get_ingredient_info', 'get_nutrition_diary', 'log_nutrition'"
         ),
         params_json: str = Field(
