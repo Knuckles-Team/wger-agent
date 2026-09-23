@@ -147,7 +147,18 @@ _EXERCISE_ACTIONS = frozenset(
 def register_exercise_tools(mcp: FastMCP):
     """CONCEPT:WG-OS.config.register-routine-configuration-tools: Register exercise tools with FastMCP."""
 
-    @mcp.tool(tags={"Exercise"})
+    @mcp.tool(
+        tags={"Exercise"},
+        annotations={
+            "readOnlyHint": True,
+            "destructiveHint": False,
+            "idempotentHint": True,
+            "openWorldHint": True,
+        },
+        meta={
+            "eg.annotations": {"modalities_in": ["text"], "modalities_out": ["text"]}
+        },
+    )
     async def wger_exercise(
         action: Literal[
             "get_equipment",
@@ -229,7 +240,18 @@ _NUTRITION_ACTIONS = frozenset(
 def register_nutrition_tools(mcp: FastMCP):
     """CONCEPT:WG-OS.config.register-routine-configuration-tools: Register nutrition tools with FastMCP."""
 
-    @mcp.tool(tags={"Nutrition"})
+    @mcp.tool(
+        tags={"Nutrition"},
+        annotations={
+            "readOnlyHint": False,
+            "destructiveHint": True,
+            "idempotentHint": False,
+            "openWorldHint": True,
+        },
+        meta={
+            "eg.annotations": {"modalities_in": ["text"], "modalities_out": ["text"]}
+        },
+    )
     async def wger_nutrition(
         action: Literal[
             "create_meal",
