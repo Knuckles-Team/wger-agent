@@ -90,7 +90,9 @@ def register_routine_tools(mcp: FastMCP):
         ),
     ) -> dict:
         """Manage wger routine operations."""
-        return await _run_client_action(ctx, action, params_json, client, _ROUTINE_ACTIONS)
+        return await _run_client_action(
+            ctx, action, params_json, client, _ROUTINE_ACTIONS
+        )
 
 
 _ROUTINECONFIG_ACTIONS = frozenset(
@@ -194,7 +196,9 @@ def register_workout_tools(mcp: FastMCP):
         ),
     ) -> dict:
         """Manage wger workout operations."""
-        return await _run_client_action(ctx, action, params_json, client, _WORKOUT_ACTIONS)
+        return await _run_client_action(
+            ctx, action, params_json, client, _WORKOUT_ACTIONS
+        )
 
 
 _NUTRITION_ACTIONS = frozenset(

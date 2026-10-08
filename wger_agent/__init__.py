@@ -42,7 +42,10 @@ def _import_module_safely(module_name: str):
 
 # Attribute names that report whether an optional module is importable, and the
 # substring of its OPTIONAL_MODULES key that identifies which one each asks about.
-_AVAILABILITY_MARKERS = {"_MCP_AVAILABLE": "mcp_server", "_AGENT_AVAILABLE": "agent_server"}
+_AVAILABILITY_MARKERS = {
+    "_MCP_AVAILABLE": "mcp_server",
+    "_AGENT_AVAILABLE": "agent_server",
+}
 
 
 def _optional_module_available(marker: str) -> bool:
