@@ -30,7 +30,7 @@ action-routed MCP tools and a Pydantic-AI graph agent. It provides:
 
 <div class="grid cards" markdown>
 
-- :material-rocket-launch: **[Installation](installation.md)** — pip, source, extras, and the prebuilt Docker image.
+- :material-rocket-start: **[Installation](installation.md)** — pip, source, extras, and the prebuilt Docker image.
 - :material-server-network: **[Deployment](deployment.md)** — run the MCP and agent servers, Docker Compose, Caddy + Technitium.
 - :material-console: **[Usage](usage.md)** — the MCP tools, the `WgerApi` client, and the agent CLI.
 - :material-database-cog: **[Backing Platform](platform.md)** — deploy the Wger Workout Manager with Docker.
