@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Converted `wger_agent/mcp_server.py` into a lightweight, backward-compatible redirect wrapper.
-- Significantly boosted overall test coverage to 99.87% through comprehensive unit and modular integration testing.
+- Significantly boosted overall test coverage to 99.87% through complete unit and modular integration testing.
 
 ## [0.1.29] - 2026-04-29
 

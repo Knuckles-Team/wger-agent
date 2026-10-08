@@ -1,7 +1,7 @@
 # Usage — MCP / API / CLI
 
 `wger-agent` exposes the same capability three ways: as **MCP tools** an agent calls,
-as a **Python API** (`WgerApi`) you import, and as a **graph agent CLI**. The full
+as a **Python API** (`WgerApi`) the operator import, and as a **graph agent CLI**. The full
 tool surface is summarized in [Overview](overview.md).
 
 ## As an MCP server
@@ -71,7 +71,7 @@ api.create_workout_session(notes="Upper body")
 
 The integrated Pydantic-AI graph agent runs from the `wger-agent` console script. A
 confidence-gated router classifies each request and enables only the relevant tool
-domain, then a domain node executes against the MCP server.
+domain, then a domain node runs against the MCP server.
 
 ```bash
 export WGER_URL=https://your-wger:8000
