@@ -846,7 +846,7 @@
 
 <h1 id="usage-mcp-api-cli">Usage — MCP / API / CLI<a class="headerlink" href="#usage-mcp-api-cli" title="Permanent link">&para;</a></h1>
 <p><code>wger-agent</code> exposes the same capability three ways: as <strong>MCP tools</strong> an agent calls,
-as a <strong>Python API</strong> (<code>WgerApi</code>) you import, and as a <strong>graph agent CLI</strong>. The full
+as a <strong>Python API</strong> (<code>WgerApi</code>) the operator import, and as a <strong>graph agent CLI</strong>. The full
 tool surface is summarized in <a href="../overview/">Overview</a>.</p>
 <h2 id="as-an-mcp-server">As an MCP server<a class="headerlink" href="#as-an-mcp-server" title="Permanent link">&para;</a></h2>
 <p>Once <a href="../deployment/">deployed</a>, the server registers seven action-routed tool
@@ -937,7 +937,7 @@ environment via <code>get_client()</code>:</p>
 <h2 id="as-an-agent-cli">As an agent CLI<a class="headerlink" href="#as-an-agent-cli" title="Permanent link">&para;</a></h2>
 <p>The integrated Pydantic-AI graph agent runs from the <code>wger-agent</code> console script. A
 confidence-gated router classifies each request and enables only the relevant tool
-domain, then a domain node executes against the MCP server.</p>
+domain, then a domain node runs against the MCP server.</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">WGER_URL</span><span class="o">=</span>https://your-wger:8000
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">WGER_API_KEY</span><span class="o">=</span>your_api_key
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MCP_URL</span><span class="o">=</span>http://localhost:8000/mcp
