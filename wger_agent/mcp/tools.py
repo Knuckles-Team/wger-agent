@@ -345,16 +345,16 @@ def register_ingest_tools(mcp: FastMCP):
 
         if action == "exercises":
             resp = client.get_exercises(**kwargs)
-            result = kg_ingest.ingest_exercises(resp)
+            result = await kg_ingest.ingest_exercises(resp)
         elif action == "routines":
             resp = client.get_routines(**kwargs)
-            result = kg_ingest.ingest_routines(resp)
+            result = await kg_ingest.ingest_routines(resp)
         elif action == "workout_sessions":
             resp = client.get_workout_sessions(**kwargs)
-            result = kg_ingest.ingest_workout_sessions(resp)
+            result = await kg_ingest.ingest_workout_sessions(resp)
         elif action == "nutrition_plans":
             resp = client.get_nutrition_plans(**kwargs)
-            result = kg_ingest.ingest_nutrition_plans(resp)
+            result = await kg_ingest.ingest_nutrition_plans(resp)
         else:
             raise ValueError(f"Unknown action: {action}")
 
