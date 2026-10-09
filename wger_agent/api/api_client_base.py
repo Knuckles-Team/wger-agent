@@ -3,11 +3,9 @@ import logging
 from typing import Any
 
 import requests
-from agent_utilities.core.exceptions import AuthError, UnauthorizedError
-from agent_utilities.core.transport_security import (
-    ResolvedTLSProfile,
-    resolve_configured_tls_profile,
-)
+from agent_connector_sdk.exceptions import AuthError, UnauthorizedError
+from agent_connector_sdk.tls.profile import ResolvedTLSProfile
+from agent_connector_sdk.tls.resolve import resolve_tls_profile
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +19,7 @@ class BaseApiClient:
     ):
         self.base_url = base_url.rstrip("/")
         self.api_base = f"{self.base_url}/api/v2"
-        self.tls_profile = tls_profile or resolve_configured_tls_profile("wger")
+        self.tls_profile = tls_profile or resolve_tls_profile("wger")
         self.session = self.tls_profile.configure_requests_session(requests.Session())
         if token:
             self.session.headers.update({"Authorization": f"Token {token}"})

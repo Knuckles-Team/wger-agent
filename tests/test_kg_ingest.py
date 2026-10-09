@@ -1,21 +1,21 @@
-"""Native epistemic-graph typed-node ingestion — Wire-First coverage.
+"""Epistemic-graph typed-node ingestion -- Wire-First coverage for wger-agent.
 
-Exercises the real ``ingest_entities`` + wger record mappers with a fake engine
-client (no engine required), asserting the txn add_node/commit + edge calls and the
-wger record → :Exercise / :WorkoutRoutine / :WorkoutSession / :NutritionPlan mapping.
+Exercises the real ``ingest_entities`` + wger record mappers against a fake
+``agent_connector_sdk.ingest`` transport (no engine required). The real SDK request
+builder (``agent_connector_sdk.ingest.request.build_request``) still runs, so a
+malformed change set is still caught by the SDK's own contract, not re-derived here;
+only the final network commit is faked.
 CONCEPT:AU-KG.ingest.enterprise-source-extractor.
 """
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from typing import Any
 
-import msgpack
 import pytest
-from agent_utilities.knowledge_graph.memory.native_ingest import NativeIngestError
-from agent_utilities.security.brain_context import ActorContext, use_actor
-from agent_utilities.security.actor_identity import ActorType
-from agent_utilities.knowledge_graph.core.session import GraphSession, use_session
+from agent_connector_sdk.ingest import IngestError, KnowledgeIngest
+from epistemic_graph.generated.source_ingestion import SourceIngestionRequest
 
 from wger_agent.kg_ingest import (
     _records,
@@ -27,176 +27,127 @@ from wger_agent.kg_ingest import (
 )
 
 
-@pytest.fixture(autouse=True)
-def _governed_session():
-    actor = ActorContext(
-        actor_id="subject:opaque:synthetic",
-        actor_type=ActorType.AUTOMATED_SERVICE,
-        roles=(),
-        tenant_id="tenant:opaque:synthetic",
-        authenticated=True,
-    )
-    session = GraphSession(
-        actor=actor,
-        tenant=actor.tenant_id,
-        scopes=frozenset({"kg:write"}),
-        graph="graph:opaque:synthetic",
-        policy_version="policy:opaque:synthetic",
-        audience="epistemic-graph",
-    )
-    with use_actor(actor), use_session(session):
-        yield
+class _FakeTransport:
+    """Records every submitted request; no epistemic-graph engine required."""
 
-
-class _FakeNodes:
     def __init__(self) -> None:
-        self.values: dict[str, dict[str, Any]] = {}
+        self.requests: list[SourceIngestionRequest] = []
 
-    def properties(self, node_id: str) -> dict[str, Any] | None:
-        return self.values.get(node_id)
+    async def source_status(self, _connector: str, _stream: str) -> Any:
+        return SimpleNamespace(accepted_checkpoint=None)
 
-    def list(self) -> list[tuple[str, dict[str, Any]]]:
-        return list(self.values.items())
+    async def submit(self, request: SourceIngestionRequest) -> Any:
+        self.requests.append(request)
+        return SimpleNamespace(
+            affected_count=len(request.records),
+            relationship_count=len(request.relationships),
+        )
 
-
-class _FakeChanges:
-    def __init__(self, nodes: _FakeNodes) -> None:
-        self.nodes = nodes
-        self.edges: list[tuple[str, str, dict[str, Any]]] = []
-        self.applied: list[dict[str, Any]] = []
-        self.records: dict[str, dict[str, Any]] = {}
-        self.versions: dict[str, dict[str, Any]] = {}
-
-    def get(self, envelope_id: str) -> dict[str, Any] | None:
-        return self.records.get(envelope_id)
-
-    def content_version(self, object_id: str) -> dict[str, Any] | None:
-        return self.versions.get(object_id)
-
-    def cursor(self, _source: str, _partition: str = "") -> None:
-        return None
-
-    def apply(self, envelope: dict[str, Any]) -> dict[str, Any]:
-        self.applied.append(envelope)
-        mutation = envelope["mutation"]
-        for operation in mutation["operations"]:
-            method = operation["method"]
-            params = method["params"]
-            properties = msgpack.unpackb(params["properties_msgpack"], raw=False)
-            if method["method"] == "AddNode":
-                self.nodes.values[params["node_id"]] = properties
-            elif method["method"] == "AddEdge":
-                self.edges.append(
-                    (params["source_id"], params["target_id"], properties)
-                )
-        version = envelope["content_version"]
-        self.versions[version["object_id"]] = version
-        self.records[envelope["envelope_id"]] = envelope
-        return {
-            "batch_id": mutation["batch_id"],
-            "replayed": False,
-            "projection_pending": False,
-        }
+    async def store_blob(self, _data: bytes) -> str:
+        raise AssertionError("wger-agent wellness ingestion carries no media")
 
 
-class _FakeRdf:
-    def validate_shacl(self, _shapes: str, _data_graph: str) -> dict[str, Any]:
-        return {"conforms": True, "results": []}
+@pytest.fixture
+def ingest() -> tuple[KnowledgeIngest, _FakeTransport]:
+    transport = _FakeTransport()
+    return KnowledgeIngest(transport, loop=None), transport
 
 
-class _FakeClient:
-    def __init__(self) -> None:
-        self.nodes = _FakeNodes()
-        self.changes = _FakeChanges(self.nodes)
-        self.rdf = _FakeRdf()
-
-    @staticmethod
-    def supports(operation: str) -> bool:
-        return operation == "ApplyChangeEnvelope"
-
-
-def test_ingest_entities_writes_nodes_and_edges():
-    c = _FakeClient()
-    res = ingest_entities(
+@pytest.mark.asyncio
+async def test_ingest_entities_writes_nodes_and_edges(ingest):
+    service, transport = ingest
+    res = await ingest_entities(
         [
             {"id": "a", "node_type": "WorkoutSession"},
             {"id": "b", "node_type": "WorkoutRoutine"},
         ],
         [{"source": "a", "target": "b", "relationship": "sessionOfRoutine"}],
-        client=c,
+        ingest=service,
     )
     assert res == {"nodes": 2, "edges": 1}
-    assert len(c.changes.applied) == 1
-    assert set(c.nodes.values) == {"a", "b"}
-    # provenance is stamped
-    assert c.nodes.values["a"]["source"] == "wger-agent"
-    assert c.nodes.values["a"]["domain"] == "wellness"
-    assert c.changes.edges == [("a", "b", {"relationship": "sessionOfRoutine"})]
+    assert len(transport.requests) == 1
+    request = transport.requests[0]
+    record_ids = {record.record_id for record in request.records}
+    assert record_ids == {"a", "b"}
+    assert request.relationships[0].relation_reference.endswith(
+        "resources/WorkoutSession/relations/sessionOfRoutine"
+    )
 
 
-def test_ingest_exercises_maps_typed_nodes():
-    c = _FakeClient()
-    res = ingest_exercises(
+@pytest.mark.asyncio
+async def test_ingest_exercises_maps_typed_nodes(ingest):
+    service, transport = ingest
+    res = await ingest_exercises(
         {"results": [{"id": 345, "name": "Bench Press", "category": 11}]},
-        client=c,
+        ingest=service,
     )
     assert res == {"nodes": 1, "edges": 0}
-    node = c.nodes.values["wellness:exercise:345"]
-    assert node["node_type"] == "Exercise"
-    assert node["name"] == "Bench Press"
-    assert node["externalToolId"] == "345"
+    request = transport.requests[0]
+    node = next(r for r in request.records if r.record_id == "wellness:exercise:345")
+    assert node.payload["name"] == "Bench Press"
+    assert node.payload["externalToolId"] == "345"
 
 
-def test_ingest_routines_maps_typed_nodes():
-    c = _FakeClient()
-    res = ingest_routines(
+@pytest.mark.asyncio
+async def test_ingest_routines_maps_typed_nodes(ingest):
+    service, transport = ingest
+    res = await ingest_routines(
         [{"id": 42, "name": "PPL", "description": "push/pull/legs"}],
-        client=c,
+        ingest=service,
     )
     assert res == {"nodes": 1, "edges": 0}
-    node = c.nodes.values["wellness:routine:42"]
-    assert node["node_type"] == "WorkoutRoutine"
-    assert node["name"] == "PPL"
+    request = transport.requests[0]
+    node = next(r for r in request.records if r.record_id == "wellness:routine:42")
+    assert node.payload["name"] == "PPL"
 
 
-def test_ingest_workout_sessions_links_routine():
-    c = _FakeClient()
-    res = ingest_workout_sessions(
+@pytest.mark.asyncio
+async def test_ingest_workout_sessions_links_routine(ingest):
+    service, transport = ingest
+    res = await ingest_workout_sessions(
         {
             "results": [
                 {"id": 9, "routine": 42, "date": "2026-07-04", "impression": "4"}
             ]
         },
-        client=c,
+        ingest=service,
     )
     assert res == {"nodes": 1, "edges": 1}
-    assert c.nodes.values["wellness:session:9"]["node_type"] == "WorkoutSession"
-    assert c.changes.edges == [
-        ("wellness:session:9", "wellness:routine:42", {"relationship": "sessionOfRoutine"})
-    ]
+    request = transport.requests[0]
+    assert any(r.record_id == "wellness:session:9" for r in request.records)
+    assert request.relationships[0].relation_reference.endswith(
+        "resources/WorkoutSession/relations/sessionOfRoutine"
+    )
 
 
-def test_ingest_nutrition_plans_maps_goals():
-    c = _FakeClient()
-    res = ingest_nutrition_plans(
+@pytest.mark.asyncio
+async def test_ingest_nutrition_plans_maps_goals(ingest):
+    service, transport = ingest
+    res = await ingest_nutrition_plans(
         [{"id": 12, "description": "Cut", "goal_energy": 2400, "goal_protein": 180}],
-        client=c,
+        ingest=service,
     )
     assert res == {"nodes": 1, "edges": 0}
-    node = c.nodes.values["wellness:nutritionplan:12"]
-    assert node["node_type"] == "NutritionPlan"
-    assert node["goalEnergy"] == 2400
-    assert node["goalProtein"] == 180
+    request = transport.requests[0]
+    node = next(
+        r for r in request.records if r.record_id == "wellness:nutritionplan:12"
+    )
+    assert node.payload["goalEnergy"] == 2400
+    assert node.payload["goalProtein"] == 180
 
 
-def test_retired_structural_alias_is_rejected():
-    with pytest.raises(NativeIngestError, match="canonical node_type"):
-        ingest_entities([{"id": "a", "type": "Exercise"}], client=_FakeClient())
+@pytest.mark.asyncio
+async def test_retired_structural_alias_is_rejected(ingest):
+    service, _transport = ingest
+    with pytest.raises(IngestError, match="node_type"):
+        await ingest_entities([{"id": "a", "type": "Exercise"}], ingest=service)
 
 
-def test_empty_native_ingest_is_rejected():
-    with pytest.raises(NativeIngestError, match="at least one entity"):
-        ingest_entities([], client=_FakeClient())
+@pytest.mark.asyncio
+async def test_empty_native_ingest_is_rejected(ingest):
+    service, _transport = ingest
+    with pytest.raises(IngestError, match="at least one entity"):
+        await ingest_entities([], ingest=service)
 
 
 def test_records_normalizes_wger_response_shapes():

@@ -7,7 +7,7 @@ import runpy
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Any
 
-from agent_utilities.core.exceptions import AuthError, UnauthorizedError
+from agent_connector_sdk.exceptions import AuthError, UnauthorizedError
 from wger_agent.api_client import WgerApi
 from wger_agent.api.api_client_base import BaseApiClient
 from wger_agent import __getattr__, __dir__
