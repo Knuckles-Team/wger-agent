@@ -1,5 +1,5 @@
 site_name: "wger-agent"
-site_description: "Wger Workout Manager MCP server + A2A agent — exercise database, workout routines, nutrition plans, body measurements, and progress tracking for the agent-utilities ecosystem."
+site_description: "Wger Workout Manager MCP server + A2A agent — exercise database, workout routines, nutrition plans, body measurements, and progress tracking for the Graph OS ecosystem."
 site_url: "https://knuckles-team.github.io/wger-agent/"
 repo_name: "Knuckles-Team/wger-agent"
 repo_url: "https://github.com/Knuckles-Team/wger-agent"

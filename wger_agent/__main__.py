@@ -1,4 +1,4 @@
-from wger_agent.agent_server import agent_server
+from wger_agent.mcp_server import mcp_server
 
 if __name__ == "__main__":
-    agent_server()
+    mcp_server()
