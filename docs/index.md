@@ -1,6 +1,6 @@
 # wger-agent
 
-Wger Workout Manager **MCP server + A2A agent** for the Graph OS ecosystem
+Wger Workout Manager **MCP server + A2A agent** for the Arbora ecosystem
 — exercise database, workout routines, nutrition plans, body measurements, and
 progress tracking, exposed as typed, deterministic tools.
 

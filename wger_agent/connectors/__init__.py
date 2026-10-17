@@ -2,7 +2,7 @@
 
 Data-only subpackage: it carries ``mcp_source_presets.json`` (Tier-1 ``mcp_tool``
 source presets that sync wger wellness data into the KG via the wger-agent MCP
-server) which the Graph OS hub discovers via the
+server) which the Arbora hub discovers via the
 ``agent_connector_sdk.source_connector_providers`` entry-point. It holds no business
 logic and no heavy imports so the hub can resolve it cheaply.
 """
