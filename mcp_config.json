@@ -7,7 +7,6 @@
         "wger-mcp"
       ],
       "env": {
-        "MCP_TOOL_MODE": "intent",
         "BODYTOOL": "True",
         "EXERCISETOOL": "True",
         "NUTRITIONTOOL": "True",

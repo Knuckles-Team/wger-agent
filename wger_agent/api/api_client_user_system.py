@@ -10,8 +10,30 @@ class Api(BaseApiClient):
             return result["results"][0] if result["results"] else result
         return result
 
-    def update_user_profile(self, **kwargs) -> dict:
-        """Update user profile. Fields: age, height, gender, etc."""
+    def update_user_profile(
+        self,
+        age: int | None = None,
+        height: int | None = None,
+        gender: str | None = None,
+        birthdate: str | None = None,
+        weight_unit: str | None = None,
+        sleep_hours: int | None = None,
+        workout_duration: int | None = None,
+    ) -> dict:
+        """Update user profile. Only the fields that are set are changed."""
+        kwargs = {
+            key: value
+            for key, value in {
+                "age": age,
+                "height": height,
+                "gender": gender,
+                "birthdate": birthdate,
+                "weight_unit": weight_unit,
+                "sleep_hours": sleep_hours,
+                "workout_duration": workout_duration,
+            }.items()
+            if value is not None
+        }
         profile = self.get_user_profile()
         if "id" in profile:
             return self._patch(f"userprofile/{profile['id']}", data=kwargs)
