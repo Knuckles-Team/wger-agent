@@ -15,7 +15,7 @@
 ## Functional Requirements
 
 - **FR-001**: Detected 1 agent skill(s) — will grade in CE-026
-- **FR-002**: Minor update: agent-utilities 0.2.40 (installed) -> 0.16.0
+- **FR-002**: Minor update: agent-connector-sdk 0.2.40 (installed) -> 0.16.0
 - **FR-003**: Minor update: pytest-xdist 3.6.0 (constraint — not installed) -> 3.8.0
 - **FR-004**: 1 functions exceed 200 lines (actionable refactoring targets): test_mcp_tools_and_server (431L)
 - **FR-005**: Test suite lacks intent diversity (only one type)
@@ -43,7 +43,7 @@
 - **FR-027**: 2 tests exceed 100 lines — likely doing too much per test
 - **FR-028**: Undocumented env vars: AUTH_TYPE, DEFAULT_AGENT_NAME, EUNOMIA_POLICY_FILE, EUNOMIA_TYPE, OTEL_EXPORTER_OTLP_ENDPOINT, WGER_ACCESS_TOKEN, TLS_PROFILE, WGER_TOKEN
 - **FR-029**: 4 Python env vars not in .env.example: DEFAULT_AGENT_NAME, WGER_ACCESS_TOKEN, TLS_PROFILE, WGER_TOKEN
-- **FR-030**: Analysis error: No module named 'agent_utilities.knowledge_graph'
+- **FR-030**: Analysis error: No module named 'agent_connector_sdk.knowledge_graph'
 
 ## Success Criteria
 

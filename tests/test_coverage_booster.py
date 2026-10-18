@@ -1,17 +1,12 @@
 import os
 import sys
-import json
 import pytest
 import importlib
 import runpy
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Any
 
-from agent_connector_sdk.exceptions import AuthError, UnauthorizedError
 from wger_agent.api_client import WgerApi
-from wger_agent.api.api_client_base import BaseApiClient
-from wger_agent import __getattr__, __dir__
-import wger_agent
 from wger_agent.auth import get_client
 import wger_agent.auth as auth_mod
 from wger_agent.mcp_server import (
@@ -24,29 +19,10 @@ from wger_agent.mcp_server import (
     register_body_tools,
     register_user_tools,
 )
-import wger_agent.mcp.mcp_server
 
 mcp_server_mod = sys.modules["wger_agent.mcp.mcp_server"]
-from wger_agent.agent_server import agent_server
-import wger_agent.agent_server as agent_server_mod
 
 
-def test_init_getattr_and_dir():
-    # Test availability flags in __init__.py
-    assert wger_agent._MCP_AVAILABLE
-    assert wger_agent._AGENT_AVAILABLE
-
-    # Test availability flags missing branch
-    with patch.dict(wger_agent.OPTIONAL_MODULES, {}, clear=True):
-        assert not wger_agent._MCP_AVAILABLE
-        assert not wger_agent._AGENT_AVAILABLE
-
-    # Test attribute error
-    with pytest.raises(AttributeError):
-        _ = wger_agent.non_existent_attribute_name
-
-    # Check that dir includes CORE_MODULES
-    assert "CORE_MODULES" in dir(wger_agent)
 
 
 def test_import_module_safely_error():
@@ -841,97 +817,10 @@ def test_mcp_server_exceptions_reload():
             importlib.reload(mcp_module)
 
 
-def test_agent_server(mock_requests_session):
-    # Test agent_server in agent_server.py
-    mock_agent_utils = MagicMock()
-    mock_meta = MagicMock()
-    mock_meta.get.side_effect = lambda key, default=None: {
-        "name": "TestWger",
-        "description": "TestDesc",
-        "content": "TestContent",
-    }.get(key, default)
-    mock_agent_utils.load_identity.return_value = mock_meta
-
-    mock_parser = MagicMock()
-    mock_parser.parse_args.return_value = MagicMock(
-        debug=True,
-        mcp_url="http://localhost:8000",
-        mcp_config="mcp_config.json",
-        host="localhost",
-        port=8080,
-        provider="openai",
-        model_id="gpt-4",
-        base_url="http://base",
-        api_key="key",
-        custom_skills_directory=None,
-        web=True,
-        otel=True,
-        otel_endpoint="otel",
-        otel_headers={},
-        otel_public_key="pub",
-        otel_secret_key="sec",
-        otel_protocol="grpc",
-    )
-    mock_agent_utils.create_agent_parser.return_value = mock_parser
-
-    with patch.dict("sys.modules", {"agent_utilities": mock_agent_utils}):
-        agent_server()
-
-    mock_agent_utils.initialize_workspace.assert_called_once()
-    mock_agent_utils.load_identity.assert_called_once()
-    mock_agent_utils.create_agent_server.assert_called_once()
 
 
-def test_main_execution(mock_requests_session):
-    # Cover wger_agent.__main__ logic (using runpy)
-    with (
-        patch("wger_agent.agent_server.agent_server") as mock_agent_server,
-        patch("sys.argv", ["main"]),
-    ):
-        runpy.run_module("wger_agent.__main__", run_name="__main__")
-        mock_agent_server.assert_called_once()
 
 
-def test_agent_server_main():
-    # Cover wger_agent.agent_server __main__ logic
-    mock_agent_utils = MagicMock()
-    mock_meta = MagicMock()
-    mock_meta.get.side_effect = lambda key, default=None: {
-        "name": "TestWger",
-        "description": "TestDesc",
-        "content": "TestContent",
-    }.get(key, default)
-    mock_agent_utils.load_identity.return_value = mock_meta
-
-    mock_parser = MagicMock()
-    mock_parser.parse_args.return_value = MagicMock(
-        debug=True,
-        mcp_url="http://localhost:8000",
-        mcp_config="mcp_config.json",
-        host="localhost",
-        port=8080,
-        provider="openai",
-        model_id="gpt-4",
-        base_url="http://base",
-        api_key="key",
-        custom_skills_directory=None,
-        web=True,
-        otel=True,
-        otel_endpoint="otel",
-        otel_headers={},
-        otel_public_key="pub",
-        otel_secret_key="sec",
-        otel_protocol="grpc",
-    )
-    mock_agent_utils.create_agent_parser.return_value = mock_parser
-
-    with (
-        patch.dict("sys.modules", {"agent_utilities": mock_agent_utils}),
-        patch("sys.argv", ["agent-server"]),
-    ):
-        runpy.run_module("wger_agent.agent_server", run_name="__main__")
-
-    mock_agent_utils.initialize_workspace.assert_called_once()
 
 
 def test_mcp_server_main():

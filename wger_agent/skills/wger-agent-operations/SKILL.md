@@ -2,12 +2,12 @@
 name: wger-agent-operations
 skill_type: skill
 description: >-
-  Operate wger-agent through its governed MCP and GraphOS capabilities, including wger agent docs, wger exercise library, wger nutrition tracking, wger workout routines. Use when a request requires this provider's read, change, automation, ingestion, troubleshooting, or evidence workflows.
+  Operate wger-agent through its governed MCP and Arbora capabilities, including wger agent docs, wger exercise library, wger nutrition tracking, wger workout routines. Use when a request requires this provider's read, change, automation, ingestion, troubleshooting, or evidence workflows.
 ---
 
 # Wger Agent Operations
 
-Use the provider's governed MCP tools through GraphOS delegation.
+Use the provider's governed MCP tools through Arbora delegation.
 
 ## Workflow
 

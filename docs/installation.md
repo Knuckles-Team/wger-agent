@@ -21,7 +21,7 @@ The base install ships the MCP server runtime. Install the extra for what the op
 
 | Extra | Install | Pulls in |
 |---|---|---|
-| _(base)_ | `pip install wger-agent` | `agent-utilities[mcp]` — the FastMCP MCP-server runtime |
+| _(base)_ | `pip install wger-agent` | `agent-connector-sdk[mcp]` — the FastMCP MCP-server runtime |
 | `agent` | `pip install "wger-agent[agent]"` | Pydantic-AI agent + Logfire tracing |
 | `all` | `pip install "wger-agent[all]"` | MCP server, agent, and Logfire tracing |
 | `test` | `pip install "wger-agent[test]"` | `pytest`, `pytest-asyncio`, `pytest-cov`, `pytest-xdist` |
