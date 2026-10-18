@@ -1,9 +1,9 @@
 {
-  "algorithm": "agent-connector-sdk:mcp-tool-schema-compat:v1",
+  "algorithm": "agent-connector-sdk:mcp-tool-contract-compat:v2",
   "connector": "wger-agent",
   "schema_version": "1",
   "tools": {
-    "wger_exercise": "46c06fb46595c3e294e8e39b8e5a9d6e53dabd63a1859f7f0ae0455403ef466b",
-    "wger_nutrition": "4676ee3a0c4fc76592c936e8c5118ce40965745c0ed5847237a4ce5268f601f3"
+    "wger_get_exercises": "f755debbe50137f56a3ab4df927cec9b99fd17dab5a11509ea87edf66eda38e4",
+    "wger_get_nutrition_plans": "e65b76b3fc27ff55186ce1e0cbe7536ccff11a24fa9def490e4713986612bd1e"
   }
 }
