@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Wger Workout Manager MCP server + A2A agent — exercise database, workout routines, nutrition plans, body measurements, and progress tracking for the agent-utilities ecosystem.">
+        <meta name="description" content="Wger Workout Manager MCP server + A2A agent — exercise database, workout routines, nutrition plans, body measurements, and progress tracking for the Arbora ecosystem.">
       
       
       
@@ -809,7 +809,7 @@
 
 
 <h1 id="wger-agent">wger-agent<a class="headerlink" href="#wger-agent" title="Permanent link">&para;</a></h1>
-<p>Wger Workout Manager <strong>MCP server + A2A agent</strong> for the agent-utilities ecosystem
+<p>Wger Workout Manager <strong>MCP server + A2A agent</strong> for the Arbora ecosystem
 — exercise database, workout routines, nutrition plans, body measurements, and
 progress tracking, exposed as typed, deterministic tools.</p>
 <div class="admonition info">
@@ -828,7 +828,7 @@ action-routed MCP tools and a Pydantic-AI graph agent. It provides:</p>
 <li><strong><code>WgerApi</code></strong> — a unified Python client composed of domain-specific sub-clients
   (routine, exercise, nutrition, workout, body, user) over the Wger REST surface.</li>
 <li><strong>Action-routed MCP tools</strong> across seven togglable domains, registered through the
-  <code>agent-utilities</code> FastMCP middleware to minimize token overhead in LLM contexts.</li>
+  <code>agent-connector-sdk</code> FastMCP middleware to minimize token overhead in LLM contexts.</li>
 <li><strong>An integrated graph agent</strong> (the <code>wger-agent</code> console script) that speaks the
   Agent Control Protocol and the Agent Web UI, with a confidence-gated router that
   enables only the tools relevant to each request.</li>
