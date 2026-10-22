@@ -1,6 +1,6 @@
 {
   "algorithm": "agent-connector-sdk:mcp-tool-contract-compat:v2",
-  "connector": "wger-agent",
+  "connector": "wger-mcp",
   "schema_version": "1",
   "tools": {
     "wger_get_exercises": "f755debbe50137f56a3ab4df927cec9b99fd17dab5a11509ea87edf66eda38e4",
