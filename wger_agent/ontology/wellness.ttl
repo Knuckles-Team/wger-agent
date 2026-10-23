@@ -212,8 +212,8 @@ balance, training load vs. recovery, and longitudinal body composition
 trends.
 
 Standards alignment: schema:Recipe, schema:NutritionInformation,
-schema:ExerciseAction, W3C PROV-O for temporal provenance.""" ;
-    owl:imports <http://knuckles.team/kg> .
+schema:ExerciseAction, W3C PROV-O for temporal provenance.""" .
+
 
 :FitnessGoal a owl:Class ;
     rdfs:label "Fitness Goal" ;

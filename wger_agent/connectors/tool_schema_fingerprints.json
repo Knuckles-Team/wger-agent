@@ -1,9 +1,0 @@
-{
-  "algorithm": "agent-connector-sdk:mcp-tool-contract-compat:v2",
-  "connector": "wger-mcp",
-  "schema_version": "1",
-  "tools": {
-    "wger_get_exercises": "f755debbe50137f56a3ab4df927cec9b99fd17dab5a11509ea87edf66eda38e4",
-    "wger_get_nutrition_plans": "e65b76b3fc27ff55186ce1e0cbe7536ccff11a24fa9def490e4713986612bd1e"
-  }
-}

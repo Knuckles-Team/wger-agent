@@ -4,8 +4,6 @@
   "schema_version": "1.0",
   "prompt_version": "0.1.0",
   "source": "wger-agent",
-  "extends": "agent-connector-sdk:base",
-  "compose": "append",
   "description": "wger fitness & wellness specialist: workout routines, exercise programming, nutrition planning, and body-progress tracking over the wger-agent MCP server, mapped into the knowledge graph.",
   "metadata": {
     "topic": "Fitness & Wellness Coaching",
