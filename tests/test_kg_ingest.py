@@ -70,7 +70,7 @@ async def test_ingest_entities_writes_nodes_and_edges(ingest):
     record_ids = {record.record_id for record in request.records}
     assert record_ids == {"a", "b"}
     assert request.relationships[0].relation_reference.endswith(
-        "resources/WorkoutSession/relations/sessionOfRoutine"
+        "relations/WorkoutSession/sessionOfRoutine"
     )
 
 
@@ -116,7 +116,7 @@ async def test_ingest_workout_sessions_links_routine(ingest):
     request = transport.requests[0]
     assert any(r.record_id == "wellness:session:9" for r in request.records)
     assert request.relationships[0].relation_reference.endswith(
-        "resources/WorkoutSession/relations/sessionOfRoutine"
+        "relations/WorkoutSession/sessionOfRoutine"
     )
 
 

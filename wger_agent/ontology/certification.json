@@ -1,9 +1,6 @@
 {
   "api_version": "arbora.io/v1",
   "artifacts": {
-    "connector_manifest.yml": "ec42d9e8395c783f9e6edf26290f27aa51d69c134b94d848d98d21305926b904",
-    "wger_agent/connectors/mcp_source_presets.json": "e220cd80f8422da4a689d57996b7f2776796cf5e88508d25ecc926f15603ac9f",
-    "wger_agent/connectors/tool_schema_fingerprints.json": "063fece7fbf61364829f4be96f44e9edbe81d3da336408efd4704bcec0e0127f",
     "wger_agent/ontology/fixtures/records.json": "f6c8c8d2812681be6a26dacebcddb2cb8899e6ce3538012013ef52db34e256f2",
     "wger_agent/ontology/mappings/source.yaml": "a40c7cecb2d747f8d5fadad9dbf1360a2322d7b85ae864e41f6e5f3e3ed955fe",
     "wger_agent/ontology/migrations/manifest.json": "d74f82f86b1e6f8bf7b9a3a033dcfbad422933ca21f4779b9a4073f0c89fc77f",
