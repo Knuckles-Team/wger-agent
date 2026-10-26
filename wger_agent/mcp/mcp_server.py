@@ -23,7 +23,8 @@ import sys
 from typing import Any
 
 from agent_connector_sdk.config import load_config
-from agent_connector_sdk.mcp.server import create_mcp_server
+from agent_connector_sdk.connector import build_server
+from agent_connector_sdk.connector_identity import connector_version
 from agent_connector_sdk.mcp.tool_surface import register_tool_surface
 from starlette.requests import Request
 from starlette.responses import JSONResponse
@@ -32,23 +33,14 @@ from wger_agent.api_client import WgerApi
 from wger_agent.auth import get_client
 from wger_agent.mcp import tools
 
-__version__ = "0.14.0"
+__version__ = connector_version("wger_agent")
 
 logger = get_logger(name="wger-agent")
 logger.setLevel(logging.INFO)
 
 
-def get_mcp_instance() -> tuple[Any, ...]:
-    """Initialize and return the MCP instance.
-
-    Bootstraps FastMCP instance, custom routes, and conditionally registers tools.
-    """
-    load_config()
-    args, mcp, middlewares = create_mcp_server(
-        name="wger-agent MCP",
-        version=__version__,
-        instructions="wger-agent MCP Server — Condensed Action-Routed Tools.",
-    )
+def register_server_surface(mcp):
+    """Reuse the existing health route and Wger API registrations."""
 
     @mcp.custom_route("/health", methods=["GET"])
     async def health_check(request: Request | None = None) -> JSONResponse:
@@ -63,9 +55,12 @@ def get_mcp_instance() -> tuple[Any, ...]:
         tools_module=tools,
     )
 
-    for mw in middlewares:
-        mcp.add_middleware(mw)
-    return mcp, args, middlewares
+
+def get_mcp_instance(*, command_args=None) -> tuple[Any, ...]:
+    """Load legacy configuration and compose the declared SDK connector."""
+    load_config()
+    args, mcp = build_server("wger_agent", command_args=command_args)
+    return mcp, args, list(mcp.middleware)
 
 
 def mcp_server() -> None:

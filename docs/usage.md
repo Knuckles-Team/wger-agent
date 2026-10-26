@@ -34,7 +34,7 @@ environment via `get_client()`:
 ```python
 from wger_agent.auth import get_client
 
-api = get_client()        # reads WGER_URL / WGER_API_KEY from the environment / .env
+api = get_client()  # reads WGER_URL / WGER_API_KEY from the environment / .env
 
 # Reads
 exercises = api.search_exercises("bench press")

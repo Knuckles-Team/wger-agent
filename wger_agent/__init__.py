@@ -86,3 +86,20 @@ def __getattr__(name: str) -> Any:
 
 def __dir__() -> list[str]:
     return sorted(list(globals().keys()) + __all__)
+
+
+from agent_connector_sdk.connector import Connector
+from agent_connector_sdk.connector_hooks import RegistrationContext
+
+
+def _register_legacy_surface(context: RegistrationContext) -> None:
+    """Register the existing Wger surface through the public SDK hook."""
+    from wger_agent.mcp.mcp_server import register_server_surface
+
+    register_server_surface(context.server)
+
+
+connector = Connector(
+    instructions="wger-agent MCP Server — Condensed Action-Routed Tools.",
+    extra_registrations=(_register_legacy_surface,),
+)
