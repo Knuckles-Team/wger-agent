@@ -72,6 +72,53 @@ def test_release_workflow_uses_shared_connector_publishers():
     assert not (ROOT / ".github/workflows/container-release.yml").exists()
 
 
+def test_sdk_rebuild_workflow_exposes_only_reviewed_manual_repair():
+    workflow = _workflow("sdk-rebuild.yml")
+    actions = _actions_on(workflow)
+    assert set(actions) == {"workflow_dispatch"}
+    inputs = actions["workflow_dispatch"]["inputs"]
+    assert set(inputs) == {
+        "release_repair",
+        "release_source_sha",
+        "release_source_epoch",
+    }
+    assert inputs["release_repair"] == {
+        "description": "Republish the already published container after the reviewed public-wheel guard.",
+        "required": False,
+        "default": False,
+        "type": "boolean",
+    }
+    for name, description in (
+        (
+            "release_source_sha",
+            "Full SHA of the original package source that produced the public wheel.",
+        ),
+        (
+            "release_source_epoch",
+            "Exact SOURCE_DATE_EPOCH used to generate the public connector payload.",
+        ),
+    ):
+        assert inputs[name] == {
+            "description": description,
+            "required": False,
+            "default": "",
+            "type": "string",
+        }
+
+    assert workflow["permissions"] == {"contents": "read"}
+    assert set(workflow["jobs"]) == {"rebuild"}
+    rebuild = workflow["jobs"]["rebuild"]
+    assert rebuild["uses"] == (
+        "Knuckles-Team/pipelines/.github/workflows/connector_sdk_rebuild_pipeline.yml@main"
+    )
+    assert rebuild["with"] == {
+        "release_repair": "${{ inputs.release_repair || false }}",
+        "release_source_sha": "${{ inputs.release_source_sha || '' }}",
+        "release_source_epoch": "${{ inputs.release_source_epoch || '' }}",
+    }
+    assert rebuild["secrets"] == "inherit"
+
+
 def test_precommit_uses_the_canonical_pipelines_contract():
     config = yaml.safe_load((ROOT / ".pre-commit-config.yaml").read_text())
     pipelines = next(
