@@ -26,7 +26,15 @@ def _clean_build_source(root, destination):
 def test_wheel_matches_the_full_tracked_package_inventory(tmp_path):
     root = Path(__file__).resolve().parents[1]
     tracked = subprocess.check_output(
-        ["git", "ls-tree", "-r", "--name-only", "HEAD", "--", "wger_agent/"],
+        [
+            "git",
+            "ls-files",
+            "--cached",
+            "--others",
+            "--exclude-standard",
+            "--",
+            "wger_agent/",
+        ],
         cwd=root,
         text=True,
     ).splitlines()

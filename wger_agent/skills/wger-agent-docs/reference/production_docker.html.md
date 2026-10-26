@@ -331,7 +331,7 @@ chmod 664 ./database.sqlite
 In the env file:
 ```
 DJANGO_DB_ENGINE=django.db.backends.sqlite3
-DJANGO_DB_DATABASE=/home/wger/db/database.sqlite
+DJANGO_DB_DATABASE=/home/app/db/database.sqlite
 
 ```
 
@@ -345,13 +345,13 @@ web:
       condition: service_healthy
     [...]
   volumes:
-    - ./database.sqlite:/home/wger/db/database.sqlite
+    - ./database.sqlite:/home/app/db/database.sqlite
     [...]
 
 celery_worker:
   image: docker.io/wger/server@sha256:<digest>
   volumes:
-    - ./database.sqlite:/home/wger/db/database.sqlite
+    - ./database.sqlite:/home/app/db/database.sqlite
     [...]
 
 # remove the db service

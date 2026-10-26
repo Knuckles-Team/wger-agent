@@ -1,28 +1,27 @@
-import os
-import sys
-import pytest
 import importlib
+import os
 import runpy
-from unittest.mock import AsyncMock, MagicMock, patch
+import sys
 from typing import Any
+from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
+
+import wger_agent.auth as auth_mod
 from wger_agent.api_client import WgerApi
 from wger_agent.auth import get_client
-import wger_agent.auth as auth_mod
 from wger_agent.mcp_server import (
     get_mcp_instance,
+    register_body_tools,
+    register_exercise_tools,
+    register_nutrition_tools,
     register_routine_tools,
     register_routineconfig_tools,
-    register_exercise_tools,
-    register_workout_tools,
-    register_nutrition_tools,
-    register_body_tools,
     register_user_tools,
+    register_workout_tools,
 )
 
 mcp_server_mod = sys.modules["wger_agent.mcp.mcp_server"]
-
-
 
 
 def test_import_module_safely_error():
@@ -815,12 +814,6 @@ def test_mcp_server_exceptions_reload():
             importlib.reload(wrapper_module)
         if mcp_module:
             importlib.reload(mcp_module)
-
-
-
-
-
-
 
 
 def test_mcp_server_main():

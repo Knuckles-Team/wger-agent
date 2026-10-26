@@ -1751,7 +1751,7 @@ wheels = [
 
 [[package]]
 name = "wger-agent"
-version = "2.2.5"
+version = "2.2.6"
 source = { editable = "." }
 dependencies = [
     { name = "requests" },
