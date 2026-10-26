@@ -28,7 +28,11 @@ def _get_pkg_name():
             return name.replace("-", "_")
 
     for child in project_dir.iterdir():
-        if child.is_dir() and (child / "__init__.py").exists() and child.name != "tests":
+        if (
+            child.is_dir()
+            and (child / "__init__.py").exists()
+            and child.name != "tests"
+        ):
             return child.name
 
     return project_dir.name.replace("-", "_")

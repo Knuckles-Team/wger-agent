@@ -18,7 +18,9 @@ pytestmark = pytest.mark.spec("CONN-WGER-AGENT-CONNECTOR-CONTENT-R001")
 def _server():
     from wger_agent.mcp_server import get_mcp_instance
 
-    return get_mcp_instance(command_args=["--transport", "stdio", "--auth-type", "none"])[0]
+    return get_mcp_instance(
+        command_args=["--transport", "stdio", "--auth-type", "none"]
+    )[0]
 
 
 async def _listings():
@@ -58,7 +60,6 @@ def _no_outbound_network(monkeypatch):
 
     monkeypatch.setenv("MCP_FLEET_REGISTRATION", "false")
     monkeypatch.setattr(socket.socket, "connect", refuse)
-
 
 
 def test_sdk_floor_supports_content_identity_and_current_pack_protocol() -> None:
@@ -108,18 +109,32 @@ def test_canonical_and_legacy_routes_preserve_the_full_tool_surface():
     from agent_connector_sdk.connector import build_server
 
     async def capture():
-        _, canonical = build_server(PACKAGE, command_args=["--transport", "stdio", "--auth-type", "none"])
-        async with Client(_server()) as legacy_client, Client(canonical) as canonical_client:
-            legacy = {tool.name: tool.model_dump(mode="json") for tool in await legacy_client.list_tools()}
-            declared = {tool.name: tool.model_dump(mode="json") for tool in await canonical_client.list_tools()}
+        _, canonical = build_server(
+            PACKAGE, command_args=["--transport", "stdio", "--auth-type", "none"]
+        )
+        async with (
+            Client(_server()) as legacy_client,
+            Client(canonical) as canonical_client,
+        ):
+            legacy = {
+                tool.name: tool.model_dump(mode="json")
+                for tool in await legacy_client.list_tools()
+            }
+            declared = {
+                tool.name: tool.model_dump(mode="json")
+                for tool in await canonical_client.list_tools()
+            }
         assert len(legacy) == 135
         assert declared == legacy
 
     asyncio.run(capture())
 
 
-def test_legacy_cli_configuration_file_still_controls_host_and_port(tmp_path, monkeypatch):
+def test_legacy_cli_configuration_file_still_controls_host_and_port(
+    tmp_path, monkeypatch
+):
     import json
+
     from wger_agent.mcp_server import get_mcp_instance
 
     config = tmp_path / "connector.json"
@@ -127,5 +142,7 @@ def test_legacy_cli_configuration_file_still_controls_host_and_port(tmp_path, mo
     monkeypatch.delenv("HOST", raising=False)
     monkeypatch.delenv("PORT", raising=False)
     monkeypatch.setenv("CONNECTOR_CONFIG_FILE", str(config))
-    _, args, _ = get_mcp_instance(command_args=["--transport", "stdio", "--auth-type", "none"])
+    _, args, _ = get_mcp_instance(
+        command_args=["--transport", "stdio", "--auth-type", "none"]
+    )
     assert (args.host, args.port) == ("127.0.0.1", 9187)

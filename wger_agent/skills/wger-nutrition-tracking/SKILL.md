@@ -11,7 +11,7 @@ description: >-
 license: MIT
 tags: [wger, nutrition, diet, macros, body-measurement, mcp]
 metadata:
-  author: Genius
+  author: Repository Maintainers
   version: '0.1.0'
 ---
 # wger Nutrition & Progress Tracking

@@ -37,8 +37,8 @@ services:
       - DJANGO_CACHE_BACKEND=django_redis.cache.RedisCache
       - DJANGO_CACHE_LOCATION=redis://wger-cache:6379/1
     volumes:
-      - static:/home/wger/static
-      - media:/home/wger/media
+      - static:/home/app/static
+      - media:/home/app/media
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost"]
       interval: 10s

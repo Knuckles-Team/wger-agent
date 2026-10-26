@@ -20,7 +20,7 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/wger-agent)
 ![PyPI - Implementation](https://img.shields.io/pypi/implementation/wger-agent)
 
-*Version: 2.2.5*
+*Version: 2.2.6*
 
 > **Documentation** — Installation, deployment, usage across the MCP, API, and agent
 > interfaces, and guidance for provisioning the Wger Workout Manager platform are

@@ -74,7 +74,7 @@ sudo vim /etc/apache2/sites-available/wger.conf
 
 Configure apache to serve the application:
 ```
-<Directory /home/wger/src>
+<Directory /home/app/src>
     <Files wsgi.py>
         Require all granted
     </Files>
@@ -83,18 +83,18 @@ Configure apache to serve the application:
 
 <VirtualHost *:80>
     WSGIApplicationGroup %{GLOBAL}
-    WSGIDaemonProcess wger python-path=/home/wger/src python-home=/home/wger/venv
+    WSGIDaemonProcess wger python-path=/home/app/src python-home=/home/app/venv
     WSGIProcessGroup wger
-    WSGIScriptAlias / /home/wger/src/wger/wsgi.py
+    WSGIScriptAlias / /home/app/src/wger/wsgi.py
     WSGIPassAuthorization On
 
-    Alias /static/ /home/wger/static/
-    <Directory /home/wger/static>
+    Alias /static/ /home/app/static/
+    <Directory /home/app/static>
         Require all granted
     </Directory>
 
-    Alias /media/ /home/wger/media/
-    <Directory /home/wger/media>
+    Alias /media/ /home/app/media/
+    <Directory /home/app/media>
         Require all granted
     </Directory>
 
@@ -178,39 +178,39 @@ You might want or need to edit your `pg_hba.conf` file to allow local socket con
 **SQLite**
 If using sqlite, create a folder for it (must be writable by the apache user):
 ```
-mkdir /home/wger/db
-touch /home/wger/db/database.sqlite
-chown :www-data -R /home/wger/db
-chmod g+w /home/wger/db /home/wger/db/database.sqlite
+mkdir /home/app/db
+touch /home/app/db/database.sqlite
+chown :www-data -R /home/app/db
+chmod g+w /home/app/db /home/app/db/database.sqlite
 
 ```
 
 ## Application[](https://wger.readthedocs.io/en/latest/production/installation.html#application "Link to this heading")
 As the wger user, make a virtualenv for python and activate it:
 ```
-python3 -m venv /home/wger/venv
-source /home/wger/venv/bin/activate
+python3 -m venv /home/app/venv
+source /home/app/venv/bin/activate
 
 ```
 
 Create folders to collect all static resources and save uploaded files. The `static` folder will only contain CSS and JS files, so it must be readable by the apache process while `media` will contain the uploaded files and must be writeable as well:
 ```
-mkdir /home/wger/{static,media}
-chmod o+w /home/wger/media
+mkdir /home/app/{static,media}
+chmod o+w /home/app/media
 
 ```
 
 Get the application:
 ```
-git clone https://github.com/wger-project/wger.git /home/wger/src
-cd /home/wger/src
+git clone https://github.com/wger-project/wger.git /home/app/src
+cd /home/app/src
 pip install .
 
 ```
 
 Set the python path so that the settings file can be imported from anywhere:
 ```
-export PYTHONPATH=/home/wger/src
+export PYTHONPATH=/home/app/src
 
 ```
 
@@ -220,8 +220,8 @@ Some important ones are:
 ```
 export DJANGO_SECRET_KEY='your-very-long-and-random-secret-key'
 export TIME_ZONE='Europe/Berlin'
-export MEDIA_ROOT='/home/wger/media'
-export STATIC_ROOT='/home/wger/static'
+export MEDIA_ROOT='/home/app/media'
+export STATIC_ROOT='/home/app/static'
 export ALLOWED_HOSTS='example.com,www.example.com'
 
 # Postgres
@@ -234,7 +234,7 @@ export DJANGO_DB_PORT='5432'
 
 # Sqlite
 export DJANGO_DB_ENGINE='django.db.backends.sqlite3'
-export DJANGO_DB_NAME='/home/wger/db/database.sqlite'
+export DJANGO_DB_NAME='/home/app/db/database.sqlite'
 
 ```
 

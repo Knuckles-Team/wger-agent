@@ -1,82 +1,120 @@
-"""Keep docs pushes separate from guarded package publication."""
+"""Keep shared publication, Pages, and development contracts explicit."""
 
-from fnmatch import fnmatchcase
+from __future__ import annotations
+
+import json
+import re
+import tomllib
 from pathlib import Path
 
-import pytest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def _workflow(name):
+def _workflow(name: str):
     return yaml.safe_load((ROOT / ".github/workflows" / name).read_text())
 
 
-def _push_matches(workflow, ref):
-    # PyYAML's YAML 1.1 reader represents the Actions "on" key as True.
-    push = workflow[True]["push"]
-    kind, name = ref.removeprefix("refs/").split("/", 1)
-    filters = push.get({"heads": "branches", "tags": "tags"}[kind], [])
-    return any(fnmatchcase(name, pattern) for pattern in filters)
+def _actions_on(workflow: dict):
+    # PyYAML's YAML 1.1 reader represents the Actions ``on`` key as True.
+    return workflow["on"] if "on" in workflow else workflow[True]
 
 
-@pytest.mark.parametrize(
-    "ref, expected",
-    [
-        ("refs/heads/main", True),
-        ("refs/heads/docs-update", False),
-        ("refs/tags/v2.1.0", False),
-    ],
-)
-def test_only_main_starts_package_publication(ref, expected):
-    assert _push_matches(_workflow("pipeline.yml"), ref) is expected
+def test_pages_publishes_spec_dashboard_and_supports_manual_refresh():
+    workflow = _workflow("pages.yml")
+    publisher = workflow["jobs"]["publish-pages"]
+    push = _actions_on(workflow)["push"]
 
-
-def test_each_package_publisher_uses_the_shared_pipelines():
-    jobs = _workflow("pipeline.yml")["jobs"]
-    assert set(jobs) == {"publish-pypi"}
-    assert jobs["publish-pypi"]["uses"].endswith("/python_pipeline.yml@main")
-    assert _workflow("pipeline.yml")[True]["push"]["paths-ignore"] == [
-        "docker/Dockerfile",
-        ".bumpversion.cfg",
-        "specs/**/status.json",
-    ]
-    container = _workflow("container-release.yml")
-    assert container[True]["push"] == {
-        "branches": ["main"],
-        "paths": ["docker/Dockerfile"],
-    }
-    assert container["jobs"]["publish-docker"]["needs"] == "verify-public-wheel"
-    assert container["jobs"]["publish-docker"]["uses"].endswith(
-        "/container_pipeline.yml@main"
+    assert publisher["uses"] == (
+        "Knuckles-Team/pipelines/.github/workflows/pages_pipeline.yml@main"
     )
-    for publisher in (jobs["publish-pypi"], container["jobs"]["publish-docker"]):
+    assert publisher["with"] == {
+        "content_source": "docs",
+        "spec_dashboard_enabled": True,
+        "spec_dashboard_config": ".config/spec-dashboard.json",
+    }
+    assert "workflow_dispatch" in _actions_on(workflow)
+    assert {
+        "docs/**",
+        "mkdocs.yml",
+        "README.md",
+        "specs/**",
+        ".config/spec-dashboard.json",
+        ".github/workflows/pages.yml",
+    } <= set(push["paths"])
+
+    config = json.loads((ROOT / ".config/spec-dashboard.json").read_text())
+    assert config == {
+        "version": 1,
+        "sources": [{"glob": "specs/*/status.json", "kind": "spec"}],
+    }
+
+
+def test_release_workflow_uses_shared_connector_publishers():
+    workflow = _workflow("pipeline.yml")
+    jobs = workflow["jobs"]
+    assert set(jobs) == {"publish-pypi", "publish-docker"}
+
+    pypi = jobs["publish-pypi"]
+    assert pypi["uses"].endswith("/python_pipeline.yml@main")
+    assert pypi["with"] == {"connector": True}
+
+    docker = jobs["publish-docker"]
+    assert docker["needs"] == "publish-pypi"
+    assert docker["uses"].endswith("/container_pipeline.yml@main")
+    assert docker["with"] == {"render_connector": True}
+    for publisher in (pypi, docker):
         assert "if" not in publisher
         assert not publisher.get("continue-on-error", False)
-    guard = container["jobs"]["verify-public-wheel"]["steps"][-1]
-    assert guard["with"] == {
-        "mode": "published-wheel",
-        "distribution": "wger-agent",
-        "module": "wger_agent",
+
+    assert not (ROOT / ".github/workflows/docs.yml").exists()
+    assert not (ROOT / ".github/workflows/container-release.yml").exists()
+
+
+def test_precommit_uses_the_canonical_pipelines_contract():
+    config = yaml.safe_load((ROOT / ".pre-commit-config.yaml").read_text())
+    pipelines = next(
+        repo
+        for repo in config["repos"]
+        if repo["repo"] == "https://github.com/Knuckles-Team/pipelines"
+    )
+    assert pipelines["rev"] == "main"
+    assert {hook["id"] for hook in pipelines["hooks"]} == {
+        "connector-standard",
+        "secrets",
+        "spec",
+        "tests-fast",
+        "dependency-readiness",
     }
 
 
+def test_development_skill_has_real_delivery_contract_and_actual_tests():
+    skill = ROOT / "wger_agent/skills/wger-agent-development/SKILL.md"
+    content = skill.read_text()
 
-@pytest.mark.parametrize(
-    "path, expected",
-    [
-        ("docker/Dockerfile", False),
-        (".bumpversion.cfg", False),
-        ("specs/connector-content/status.json", False),
-        ("wger_agent/specs/openapi.json", True),
-        ("pyproject.toml", True),
-        ("uv.lock", True),
-        ("wger_agent/mcp_server.py", True),
-        ("README.md", True),
-        (".github/workflows/pipeline.yml", True),
-    ],
-)
-def test_package_publication_skips_only_container_pin_refresh(path, expected):
-    ignores = _workflow("pipeline.yml")[True]["push"]["paths-ignore"]
-    assert (not any(fnmatchcase(path, pattern) for pattern in ignores)) is expected
+    assert "name: wger-agent-development" in content
+    assert "## Rapid delivery: the 5-minute contract" in content
+    for test_path in (
+        "tests/test_publication_workflow.py",
+        "tests/test_default_content_surfaces.py",
+        "tests/test_fleet_name.py",
+        "tests/test_wheel_inventory.py",
+    ):
+        assert test_path in content
+        assert (ROOT / test_path).exists()
+    assert "WGER_API_KEY" in content
+
+
+def test_packaged_skill_and_version_mirrors_are_coherent():
+    project = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]
+    version = project["version"]
+    readme = (ROOT / "README.md").read_text()
+    assert re.search(rf"\*Version: {re.escape(version)}\*", readme)
+    lock = (ROOT / "uv.lock").read_text()
+    assert f'name = "wger-agent"\nversion = "{version}"' in lock
+    package_data = tomllib.loads((ROOT / "pyproject.toml").read_text())["tool"][
+        "setuptools"
+    ]["package-data"]
+    assert "skills/**" in package_data["wger_agent"]
+    assert (ROOT / "wger_agent/skills/wger-agent-development/SKILL.md").is_file()
