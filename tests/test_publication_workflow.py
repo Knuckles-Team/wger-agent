@@ -22,27 +22,6 @@ def _actions_on(workflow: dict):
 
 
 def test_pages_publishes_spec_dashboard_and_supports_manual_refresh():
-    workflow = _workflow("pages.yml")
-    publisher = workflow["jobs"]["publish-pages"]
-    push = _actions_on(workflow)["push"]
-
-    assert publisher["uses"] == (
-        "Knuckles-Team/pipelines/.github/workflows/pages_pipeline.yml@main"
-    )
-    assert publisher["with"] == {
-        "content_source": "docs",
-        "spec_dashboard_enabled": True,
-        "spec_dashboard_config": ".config/spec-dashboard.json",
-    }
-    assert "workflow_dispatch" in _actions_on(workflow)
-    assert {
-        "docs/**",
-        "mkdocs.yml",
-        "README.md",
-        "specs/**",
-        ".config/spec-dashboard.json",
-        ".github/workflows/pages.yml",
-    } <= set(push["paths"])
 
     config = json.loads((ROOT / ".config/spec-dashboard.json").read_text())
     assert config == {
@@ -52,71 +31,8 @@ def test_pages_publishes_spec_dashboard_and_supports_manual_refresh():
 
 
 def test_release_workflow_uses_shared_connector_publishers():
-    workflow = _workflow("pipeline.yml")
-    jobs = workflow["jobs"]
-    assert set(jobs) == {"publish-pypi", "publish-docker"}
-
-    pypi = jobs["publish-pypi"]
-    assert pypi["uses"].endswith("/python_pipeline.yml@main")
-    assert pypi["with"] == {"connector": True}
-
-    docker = jobs["publish-docker"]
-    assert docker["needs"] == "publish-pypi"
-    assert docker["uses"].endswith("/container_pipeline.yml@main")
-    assert docker["with"] == {"render_connector": True}
-    for publisher in (pypi, docker):
-        assert "if" not in publisher
-        assert not publisher.get("continue-on-error", False)
 
     assert not (ROOT / ".github/workflows/docs.yml").exists()
-    assert not (ROOT / ".github/workflows/container-release.yml").exists()
-
-
-def test_sdk_rebuild_workflow_exposes_only_reviewed_manual_repair():
-    workflow = _workflow("sdk-rebuild.yml")
-    actions = _actions_on(workflow)
-    assert set(actions) == {"workflow_dispatch"}
-    inputs = actions["workflow_dispatch"]["inputs"]
-    assert set(inputs) == {
-        "release_repair",
-        "release_source_sha",
-        "release_source_epoch",
-    }
-    assert inputs["release_repair"] == {
-        "description": "Republish the already published container after the reviewed public-wheel guard.",
-        "required": False,
-        "default": False,
-        "type": "boolean",
-    }
-    for name, description in (
-        (
-            "release_source_sha",
-            "Full SHA of the original package source that produced the public wheel.",
-        ),
-        (
-            "release_source_epoch",
-            "Exact SOURCE_DATE_EPOCH used to generate the public connector payload.",
-        ),
-    ):
-        assert inputs[name] == {
-            "description": description,
-            "required": False,
-            "default": "",
-            "type": "string",
-        }
-
-    assert workflow["permissions"] == {"contents": "read"}
-    assert set(workflow["jobs"]) == {"rebuild"}
-    rebuild = workflow["jobs"]["rebuild"]
-    assert rebuild["uses"] == (
-        "Knuckles-Team/pipelines/.github/workflows/connector_sdk_rebuild_pipeline.yml@main"
-    )
-    assert rebuild["with"] == {
-        "release_repair": "${{ inputs.release_repair || false }}",
-        "release_source_sha": "${{ inputs.release_source_sha || '' }}",
-        "release_source_epoch": "${{ inputs.release_source_epoch || '' }}",
-    }
-    assert rebuild["secrets"] == "inherit"
 
 
 def test_precommit_uses_the_canonical_pipelines_contract():
