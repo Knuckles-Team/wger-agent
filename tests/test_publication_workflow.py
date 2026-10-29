@@ -23,7 +23,6 @@ def _actions_on(workflow: dict):
 
 def test_pages_publishes_spec_dashboard_and_supports_manual_refresh():
 
-
     config = json.loads((ROOT / ".config/spec-dashboard.json").read_text())
     assert config == {
         "version": 1,
@@ -33,11 +32,7 @@ def test_pages_publishes_spec_dashboard_and_supports_manual_refresh():
 
 def test_release_workflow_uses_shared_connector_publishers():
 
-
-
     assert not (ROOT / ".github/workflows/docs.yml").exists()
-
-
 
 
 def test_precommit_uses_the_canonical_pipelines_contract():
