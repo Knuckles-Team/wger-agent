@@ -1,7 +1,7 @@
 # wger_agent/mcp_server.py
 """Backward compatibility wrapper redirecting to wger_agent/mcp/ package."""
 
-from agent_connector_sdk.connector_identity import connector_version
+from scion_sdk.connector_identity import connector_version
 
 __version__ = connector_version("wger_agent")
 
