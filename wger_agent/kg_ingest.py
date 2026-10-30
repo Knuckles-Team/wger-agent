@@ -3,7 +3,7 @@
 CONCEPT:AU-KG.ingest.enterprise-source-extractor. The wger-agent connector pushes
 wger wellness records into the ONE epistemic-graph knowledge graph as **typed OWL
 nodes** (``:Exercise``, ``:WorkoutRoutine``, ``:WorkoutSession``, ``:NutritionPlan``)
-+ links through ``agent_connector_sdk.ingest`` -- the generated ``SourceIngest``
++ links through ``scion_sdk.ingest`` -- the generated ``SourceIngest``
 client, not a local ingestion helper. Node ids follow ``wellness:<class>:<externalId>``.
 """
 
@@ -12,7 +12,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from agent_connector_sdk.ingest import (
+from scion_sdk.ingest import (
     ChangeSet,
     Document,
     Entity,

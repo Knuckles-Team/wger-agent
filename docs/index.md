@@ -21,7 +21,7 @@ action-routed MCP tools and a Pydantic-AI graph agent. It provides:
 - **`WgerApi`** — a unified Python client composed of domain-specific sub-clients
   (routine, exercise, nutrition, workout, body, user) over the Wger REST surface.
 - **Action-routed MCP tools** across seven togglable domains, registered through the
-  `agent-connector-sdk` FastMCP middleware to minimize token overhead in LLM contexts.
+  `scion-sdk` FastMCP middleware to minimize token overhead in LLM contexts.
 - **An integrated graph agent** (the `wger-agent` console script) that speaks the
   Agent Control Protocol and the Agent Web UI, with a confidence-gated router that
   enables only the tools relevant to each request.
