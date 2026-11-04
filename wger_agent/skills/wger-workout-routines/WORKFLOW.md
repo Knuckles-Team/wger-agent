@@ -62,7 +62,7 @@ Sync all routines into the knowledge graph (`wger_ingest`, action `routines`):
 - `create_workout_session` requires a `routine` id and an ISO `date`; `impression` is a
   string `"1"`–`"5"`.
 - KG ingestion is best-effort: `wger_ingest` returns `{"ingested": null}` when no
-  epistemic-graph engine is reachable — the API read still succeeds.
+  medulla engine is reachable — the API read still succeeds.
 - Node ids are `wellness:routine:<id>` / `wellness:session:<id>`; a session links to its
   routine via `:sessionOfRoutine`.
 
