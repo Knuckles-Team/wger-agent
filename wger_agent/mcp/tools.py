@@ -309,7 +309,7 @@ def register_ingest_tools(mcp: FastMCP):
     """CONCEPT:AU-KG.ingest.enterprise-source-extractor: Wire-First native KG ingestion tools.
 
     Lists wger records via the real client and natively pushes them into the
-    epistemic-graph knowledge graph as typed OWL nodes (``:Exercise``,
+    medulla knowledge graph as typed OWL nodes (``:Exercise``,
     ``:WorkoutRoutine``, ``:WorkoutSession``, ``:NutritionPlan``). Best-effort:
     ``ingested`` is ``None`` when no KG engine is reachable.
     """
@@ -331,7 +331,7 @@ def register_ingest_tools(mcp: FastMCP):
             default=None, description="MCP context for progress reporting"
         ),
     ) -> dict:
-        """Natively ingest wger records into epistemic-graph as typed nodes."""
+        """Natively ingest wger records into medulla as typed nodes."""
         if ctx:
             await ctx.info("Ingesting wger records into the knowledge graph...")
 
