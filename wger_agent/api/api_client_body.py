@@ -43,22 +43,22 @@ class Api(BaseApiClient):
             "measurement", limit=limit, offset=offset, ordering=ordering, **filters
         )
 
-    def get_measurement(self, measurement_id: int) -> dict:
+    def get_measurement(self, measurement_id: int | str) -> dict:
         """Get a specific measurement."""
         return self._get(f"measurement/{measurement_id}")
 
-    def create_measurement(self, category: int, date: str, value: float) -> dict:
+    def create_measurement(self, category: int | str, date: str, value: float) -> dict:
         """Log a body measurement."""
         return self._post(
             "measurement",
             data={"category": category, "date": date, "value": str(value)},
         )
 
-    def update_measurement(self, measurement_id: int, **kwargs) -> dict:
+    def update_measurement(self, measurement_id: int | str, **kwargs) -> dict:
         """Update a measurement."""
         return self._patch(f"measurement/{measurement_id}", data=kwargs)
 
-    def delete_measurement(self, measurement_id: int) -> bool:
+    def delete_measurement(self, measurement_id: int | str) -> bool:
         """Delete a measurement."""
         return self._delete(f"measurement/{measurement_id}")
 
@@ -68,7 +68,7 @@ class Api(BaseApiClient):
         """List measurement categories (e.g., Biceps, Chest, etc.)."""
         return self._list("measurement-category", limit=limit, offset=offset)
 
-    def get_measurement_category(self, category_id: int) -> dict:
+    def get_measurement_category(self, category_id: int | str) -> dict:
         """Get a specific measurement category."""
         return self._get(f"measurement-category/{category_id}")
 
@@ -76,7 +76,7 @@ class Api(BaseApiClient):
         """Create a measurement category."""
         return self._post("measurement-category", data={"name": name, "unit": unit})
 
-    def delete_measurement_category(self, category_id: int) -> bool:
+    def delete_measurement_category(self, category_id: int | str) -> bool:
         """Delete a measurement category."""
         return self._delete(f"measurement-category/{category_id}")
 
