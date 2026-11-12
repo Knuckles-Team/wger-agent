@@ -1,4 +1,4 @@
-"""Epistemic-graph ingestion for wger wellness records.
+"""Medulla ingestion for wger wellness records.
 
 CONCEPT:AU-KG.ingest.enterprise-source-extractor. The wger-agent connector pushes
 wger wellness records into the ONE medulla knowledge graph as **typed OWL
