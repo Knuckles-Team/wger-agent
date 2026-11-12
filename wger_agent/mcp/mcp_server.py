@@ -28,7 +28,6 @@ from scion_sdk.connector_identity import connector_version
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-
 __version__ = connector_version("wger_agent")
 
 logger = get_logger(name="wger-agent")
