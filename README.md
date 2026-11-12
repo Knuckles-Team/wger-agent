@@ -20,7 +20,7 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/wger-agent)
 ![PyPI - Implementation](https://img.shields.io/pypi/implementation/wger-agent)
 
-*Version: 2.2.9*
+*Version: 2.2.10*
 
 > **Documentation** — Installation, deployment, usage across the MCP, API, and agent
 > interfaces, and guidance for provisioning the Wger Workout Manager platform are
@@ -53,7 +53,7 @@ Detailed instructions on how to use the underlying API wrappers, extended schema
 
 ## MCP
 
-This server use dynamic Action-Routed tools to optimize token overhead and maximize IDE compatibility.
+This server serves one typed tool per wger API operation, plus tools that ingest each modality into the knowledge graph.
 
 ### Available MCP Tools
 
@@ -61,20 +61,16 @@ _Auto-generated from the live MCP server — do not edit by hand._
 
 <!-- MCP-TOOLS-TABLE:START -->
 
-#### Condensed action-routed tools (`MCP_TOOL_MODE=condensed`)
+#### Ingestion tools
 
 | MCP Tool | Toggle Env Var | Description |
 |----------|----------------|-------------|
-| `wger_body` | `BODYTOOL` | Manage wger body operations. |
-| `wger_exercise` | `EXERCISETOOL` | Manage wger exercise operations. |
-| `wger_ingest` | `INGESTTOOL` | Natively ingest wger records into medulla as typed nodes. |
-| `wger_nutrition` | `NUTRITIONTOOL` | Manage wger nutrition operations. |
-| `wger_routine` | `ROUTINETOOL` | Manage wger routine operations. |
-| `wger_routineconfig` | `ROUTINECONFIGTOOL` | Manage wger routineconfig operations. |
-| `wger_user` | `USERTOOL` | Manage wger user operations. |
-| `wger_workout` | `WORKOUTTOOL` | Manage wger workout operations. |
+| `wger_ingest_exercises` | `INGESTTOOL` | List exercises and ingest them as `:Exercise` nodes. |
+| `wger_ingest_nutrition_plans` | `INGESTTOOL` | List nutrition plans and ingest them as `:NutritionPlan` nodes. |
+| `wger_ingest_routines` | `INGESTTOOL` | List routines and ingest them as `:WorkoutRoutine` nodes. |
+| `wger_ingest_workout_sessions` | `INGESTTOOL` | List workout sessions and ingest them as `:WorkoutSession` nodes. |
 
-#### Verbose 1:1 API-mapped tools (`MCP_TOOL_MODE=verbose` or `both`)
+#### Per-operation API tools
 
 <details>
 <summary>132 per-operation tools — one per public API method (click to expand)</summary>
@@ -216,7 +212,7 @@ _Auto-generated from the live MCP server — do not edit by hand._
 
 </details>
 
-_8 action-routed tool(s) · 132 verbose 1:1 tool(s). Each is enabled unless its `<DOMAIN>TOOL` toggle is set false; `MCP_TOOL_MODE` selects the surface (**`intent` default** — the six verb-tools, granular set loaded on demand · `condensed` action-routed · `verbose` 1:1 · `both`). Auto-generated — do not edit._
+_132 per-operation tool(s) · 4 ingestion tool(s). Auto-generated — do not edit._
 <!-- MCP-TOOLS-TABLE:END -->
 
 Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/usage.md](docs/usage.md).
@@ -463,13 +459,13 @@ Every variable the server reads, grouped by purpose.
 | `TRANSPORT` | `stdio`, `streamable-http`, or `sse` | `stdio` |
 | `HOST` | Bind host (HTTP transports) | `0.0.0.0` |
 | `PORT` | Bind port (HTTP transports) | `8000` |
-| `MCP_TOOL_MODE` | Tool surface: `condensed`, `verbose`, or `both` | `condensed` |
+| `MCP_TOOL_MODE` | Tool surface: `intent`, `verbose`, or `both` | `intent` |
 | `MCP_ENABLED_TOOLS` / `MCP_DISABLED_TOOLS` | Comma-separated tool allow/deny list | — |
 | `MCP_ENABLED_TAGS` / `MCP_DISABLED_TAGS` | Comma-separated tag allow/deny list | — |
 | `PYTHONUNBUFFERED` | Unbuffered stdout (recommended in containers) | `1` |
 
 ### Tool toggles
-Each action-routed tool can be disabled individually via its toggle env var (set to `false`).
+The ingestion tools can be disabled with `INGESTTOOL=false`.
 The full list is in the [Available MCP Tools](#available-mcp-tools) table above.
 
 | Variable | Description | Default |

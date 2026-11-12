@@ -25,13 +25,8 @@ from typing import Any
 from scion_sdk.config import load_config
 from scion_sdk.connector import build_server
 from scion_sdk.connector_identity import connector_version
-from scion_sdk.mcp.tool_surface import register_tool_surface
 from starlette.requests import Request
 from starlette.responses import JSONResponse
-
-from wger_agent.api_client import WgerApi
-from wger_agent.auth import get_client
-from wger_agent.mcp import tools
 
 __version__ = connector_version("wger_agent")
 
@@ -40,20 +35,12 @@ logger.setLevel(logging.INFO)
 
 
 def register_server_surface(mcp):
-    """Reuse the existing health route and Wger API registrations."""
+    """Register the health route; the SDK derives the API tools from the client."""
 
     @mcp.custom_route("/health", methods=["GET"])
     async def health_check(request: Request | None = None) -> JSONResponse:
         """Standard Starlette endpoint for health status checking."""
         return JSONResponse({"status": "OK"})
-
-    register_tool_surface(
-        mcp,
-        client_cls=WgerApi,
-        get_client=get_client,
-        service="wger-agent",
-        tools_module=tools,
-    )
 
 
 def get_mcp_instance(*, command_args=None) -> tuple[Any, ...]:
