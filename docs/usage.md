@@ -6,25 +6,25 @@ tool surface is summarized in [Overview](overview.md).
 
 ## As an MCP server
 
-Once [deployed](deployment.md), the server registers seven action-routed tool
-domains, each grouping related methods to keep the LLM context lean. Every domain is
-togglable through its environment variable (all default `True`):
+Once [deployed](deployment.md), the server registers one typed tool per wger API
+operation, named `wger_<operation>`, plus four ingestion tools (`wger_ingest_exercises`,
+`wger_ingest_routines`, `wger_ingest_workout_sessions`, `wger_ingest_nutrition_plans`).
 
-| Tool domain | Toggle | Representative actions |
-|---|---|---|
-| Routine | `ROUTINETOOL` | `create_routine`, `get_routines`, `create_day`, `get_templates` |
-| Routine config | `ROUTINECONFIGTOOL` | `create_sets_config`, `create_weight_config`, `get_repetitions_configs` |
-| Exercise | `EXERCISETOOL` | `search_exercises`, `get_exercises`, `get_muscles`, `get_equipment` |
-| Workout | `WORKOUTTOOL` | `create_workout_session`, `create_workout_log`, `get_workout_logs` |
-| Nutrition | `NUTRITIONTOOL` | `create_nutrition_plan`, `log_nutrition`, `get_ingredients` |
-| Body | `BODYTOOL` | `log_body_weight`, `log_measurement`, `get_weight_entries` |
-| User | `USERTOOL` | `get_user_profile`, `get_user_statistics`, `get_languages` |
+| Area | Representative tools |
+|---|---|
+| Routines | `wger_create_routine`, `wger_get_routines`, `wger_create_day`, `wger_get_templates` |
+| Progression configs | `wger_create_sets_config`, `wger_create_weight_config`, `wger_get_repetitions_configs` |
+| Exercises | `wger_search_exercises`, `wger_get_exercises`, `wger_get_muscles`, `wger_get_equipment` |
+| Workouts | `wger_create_workout_session`, `wger_create_workout_log`, `wger_get_workout_logs` |
+| Nutrition | `wger_create_nutrition_plan`, `wger_create_nutrition_diary_entry`, `wger_get_ingredients` |
+| Body | `wger_create_weight_entry`, `wger_create_measurement`, `wger_get_weight_entries` |
+| User | `wger_get_user_profile`, `wger_get_user_statistics`, `wger_get_languages` |
 
 Example agent prompts that map onto these tools:
 
-- *"Find a barbell bench-press exercise"* → `search_exercises`
-- *"Log a body weight of 80 kg for today"* → `log_body_weight`
-- *"Show my active workout routines"* → `get_routines`
+- *"Find a barbell bench-press exercise"* -> `wger_search_exercises`
+- *"Log a body weight of 80 kg for today"* -> `wger_create_weight_entry`
+- *"Show my active workout routines"* -> `wger_get_routines`
 
 ## As a Python API
 

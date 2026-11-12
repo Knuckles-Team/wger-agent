@@ -16,7 +16,7 @@ progress tracking, exposed as typed, deterministic tools.
 ## Overview
 
 `wger-agent` wraps the [Wger Workout Manager](https://wger.de) REST API with
-action-routed MCP tools and a Pydantic-AI graph agent. It provides:
+typed per-operation MCP tools and a Pydantic-AI graph agent. It provides:
 
 - **`WgerApi`** — a unified Python client composed of domain-specific sub-clients
   (routine, exercise, nutrition, workout, body, user) over the Wger REST surface.

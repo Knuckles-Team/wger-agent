@@ -20,10 +20,10 @@ Domain-typed access to wger **nutrition plans**, meals, the food diary, and **bo
 weight/measurement** history — the diet and progress side of the wellness graph.
 
 ## When to use
-- Read or build nutrition plans and their meals/items (`get_nutrition_plans`, `create_meal`).
-- Compare logged intake against goal energy/protein/carb/fat (`get_nutrition_diary`).
-- Look up ingredients and their nutritional values (`get_ingredients`, `get_ingredient_info`).
-- Track body weight and measurements over time (`get_weight_entries`, `get_measurements`).
+- Read or build nutrition plans and their meals/items (`wger_get_nutrition_plans`, `wger_create_meal`).
+- Compare logged intake against goal energy/protein/carb/fat (`wger_get_nutrition_diary`).
+- Look up ingredients and their nutritional values (`wger_get_ingredients`, `wger_get_ingredient_info`).
+- Track body weight and measurements over time (`wger_get_weight_entries`, `wger_get_measurements`).
 - Natively sync plans into the KG as `:NutritionPlan` (and measurements as `:BodyMeasurement`).
 
 ## When NOT to use
@@ -39,44 +39,86 @@ Connect via the `mcp-client` skill against the **`wger-agent`** MCP server.
 | `WGER_ACCESS_TOKEN` / `WGER_TOKEN` | ✅ | API token — nutrition/body data is user-scoped |
 | `WGER_SSL_VERIFY` | optional | TLS verification toggle |
 
-`MCP_TOOL_MODE` (`condensed`|`verbose`|`both`) selects the condensed action-routed
-tool vs. the 1:1 verbose surface.
+## Tools
+One typed tool per API operation.
 
-## Tools & actions
-| Condensed tool | Actions |
-|----------------|---------|
-| `wger_nutrition` | `get_nutrition_plans`, `get_nutrition_plan_info`, `create_nutrition_plan`, `delete_nutrition_plan`, `create_meal`, `create_meal_item`, `get_ingredients`, `get_ingredient_info`, `get_nutrition_diary`, `log_nutrition` |
-| `wger_body` | `get_weight_entries`, `log_body_weight`, `get_measurements`, `log_measurement`, `get_measurement_categories`, `create_measurement_category`, `get_gallery` |
-| `wger_ingest` | `nutrition_plans` |
+### Nutrition
+| Tool | Purpose |
+|------|---------|
+| `wger_get_nutrition_plans` | List nutrition plans. |
+| `wger_get_nutrition_plan` | Get a specific nutrition plan. |
+| `wger_get_nutrition_plan_info` | Get detailed nutrition plan info (includes meals, items, nutritional values). |
+| `wger_create_nutrition_plan` | Create a nutrition plan. |
+| `wger_update_nutrition_plan` | Update a nutrition plan. |
+| `wger_delete_nutrition_plan` | Delete a nutrition plan. |
+| `wger_get_meals` | List meals. |
+| `wger_get_meal` | Get a specific meal. |
+| `wger_create_meal` | Create a meal in a nutrition plan. |
+| `wger_update_meal` | Update a meal. |
+| `wger_delete_meal` | Delete a meal. |
+| `wger_get_meal_items` | List meal items. |
+| `wger_get_meal_item` | Get a specific meal item. |
+| `wger_create_meal_item` | Add an ingredient to a meal. |
+| `wger_update_meal_item` | Update a meal item. |
+| `wger_delete_meal_item` | Delete a meal item. |
+| `wger_get_ingredients` | List ingredients. Supports filters: language, name, etc. |
+| `wger_get_ingredient` | Get a specific ingredient. |
+| `wger_get_ingredient_info` | Get detailed ingredient info (includes weight units). |
+| `wger_get_ingredient_weight_units` | List ingredient weight units. |
+| `wger_get_weight_units` | List weight units. |
+| `wger_get_ingredient_images` | List ingredient images. |
+| `wger_get_nutrition_diary` | List nutrition diary entries. |
+| `wger_create_nutrition_diary_entry` | Log a nutrition diary entry. |
+| `wger_delete_nutrition_diary_entry` | Delete a nutrition diary entry. |
+| `wger_ingest_nutrition_plans` | Ingest the listed nutrition plans into the knowledge graph. |
 
-## Recipes (`params_json`)
-List nutrition plans:
+### Body progress
+| Tool | Purpose |
+|------|---------|
+| `wger_get_weight_entries` | List body weight entries. |
+| `wger_get_weight_entry` | Get a specific weight entry. |
+| `wger_create_weight_entry` | Log a body weight entry. |
+| `wger_update_weight_entry` | Update a weight entry. |
+| `wger_delete_weight_entry` | Delete a weight entry. |
+| `wger_get_measurements` | List body measurements. |
+| `wger_get_measurement` | Get a specific measurement. |
+| `wger_create_measurement` | Log a body measurement. |
+| `wger_update_measurement` | Update a measurement. |
+| `wger_delete_measurement` | Delete a measurement. |
+| `wger_get_measurement_categories` | List measurement categories (e.g., Biceps, Chest, etc.). |
+| `wger_get_measurement_category` | Get a specific measurement category. |
+| `wger_create_measurement_category` | Create a measurement category. |
+| `wger_delete_measurement_category` | Delete a measurement category. |
+| `wger_get_gallery` | List progress gallery images. |
+
+## Recipes
+List nutrition plans (`wger_get_nutrition_plans`):
 ```json
 {"limit": 25}
 ```
-Read a plan with its meals and computed nutritional values:
+Read a plan with its meals and computed nutritional values (`wger_get_nutrition_plan_info`):
 ```json
 {"plan_id": 12}
 ```
-Create a nutrition plan with macro goals:
+Create a nutrition plan with macro goals (`wger_create_nutrition_plan`):
 ```json
 {"description": "Cut - 2400 kcal", "goal_energy": 2400, "goal_protein": 180, "goal_carbohydrates": 220, "goal_fat": 70}
 ```
-Log a body-weight entry:
+Log a body-weight entry (`wger_create_weight_entry`):
 ```json
 {"date": "2026-07-04", "weight": 82.4}
 ```
-Sync all nutrition plans into the knowledge graph (`wger_ingest`, action `nutrition_plans`):
+Sync all nutrition plans into the knowledge graph (`wger_ingest_nutrition_plans`):
 ```json
 {"limit": 100}
 ```
 
 ## Gotchas
-- Use `get_nutrition_plan_info` (not `get_nutrition_plan`) when you need meals + computed
+- Use `wger_get_nutrition_plan_info` (not `wger_get_nutrition_plan`) when you need meals + computed
   nutritional totals in one call.
-- List responses are DRF-paginated under `results`; the `wger_ingest` mapper unwraps this.
-- Body weight is logged via `log_body_weight` (date + weight); measurements need a
-  `category` id first — create one with `create_measurement_category` if none exists.
+- List responses are DRF-paginated under `results`; the ingestion tools unwrap this.
+- Body weight is logged with `wger_create_weight_entry` (date + weight); measurements need a
+  `category` id first - create one with `wger_create_measurement_category` if none exists.
 - KG ingestion is best-effort: `{"ingested": null}` means no engine was reachable; the
   read still succeeds. Node ids are `wellness:nutritionplan:<id>`.
 

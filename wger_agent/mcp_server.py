@@ -1,5 +1,9 @@
 # wger_agent/mcp_server.py
-"""Backward compatibility wrapper redirecting to wger_agent/mcp/ package."""
+"""Server entry points of the wger connector.
+
+The SDK derives one typed tool per client operation; this module binds the connector's
+own ingestion tools for the SDK's tool discovery.
+"""
 
 from scion_sdk.connector_identity import connector_version
 
@@ -9,27 +13,11 @@ from wger_agent.mcp.mcp_server import (
     get_mcp_instance,
     mcp_server,
 )
-from wger_agent.mcp.tools import (
-    register_body_tools,
-    register_exercise_tools,
-    register_ingest_tools,
-    register_nutrition_tools,
-    register_routine_tools,
-    register_routineconfig_tools,
-    register_user_tools,
-    register_workout_tools,
-)
+from wger_agent.mcp.tools import register_ingest_tools
 
 __all__ = [
     "get_mcp_instance",
     "mcp_server",
-    "register_routine_tools",
-    "register_routineconfig_tools",
-    "register_exercise_tools",
-    "register_workout_tools",
-    "register_nutrition_tools",
-    "register_body_tools",
-    "register_user_tools",
     "register_ingest_tools",
 ]
 

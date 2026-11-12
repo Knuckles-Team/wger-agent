@@ -4,20 +4,20 @@
 `ctx.info(...)` is an async coroutine method on fastmcp's `Context`. Calling
 it without `await` creates a coroutine object that is discarded, the log
 line never emits, and Python raises `RuntimeWarning: coroutine
-'Context.info' was never awaited`. This test proves the tool under test
-actually awaits `ctx.info(...)`.
+'Context.info' was never awaited`. This test proves the ingestion tools
+actually await `ctx.info(...)`.
 """
 
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from wger_agent.mcp.tools import register_routine_tools
+from wger_agent.mcp.tools import register_ingest_tools
 
 
 @pytest.mark.asyncio
-async def test_wger_routine_awaits_ctx_info(mock_requests_session):
+async def test_wger_ingest_tools_await_ctx_info(mock_requests_session):
     tools_dict = {}
 
     class MockMCP:
@@ -29,18 +29,26 @@ async def test_wger_routine_awaits_ctx_info(mock_requests_session):
             return decorator
 
     mock_mcp: Any = MockMCP()
-    register_routine_tools(mock_mcp)  # type: ignore
+    register_ingest_tools(mock_mcp)  # type: ignore
 
-    mock_client = MagicMock()
-    mock_ctx = MagicMock()
-    mock_ctx.info = AsyncMock()
-
-    wger_routine = tools_dict["wger_routine"]
-    await wger_routine(
-        action="get_routines",
-        params_json="{}",
-        client=mock_client,
-        ctx=mock_ctx,
-    )
-
-    mock_ctx.info.assert_awaited_once()
+    assert set(tools_dict) == {
+        "wger_ingest_exercises",
+        "wger_ingest_routines",
+        "wger_ingest_workout_sessions",
+        "wger_ingest_nutrition_plans",
+    }
+    for name, tool in tools_dict.items():
+        mock_client = MagicMock()
+        mock_client.get_exercises.return_value = {"results": []}
+        mock_client.get_routines.return_value = {"results": []}
+        mock_client.get_workout_sessions.return_value = {"results": []}
+        mock_client.get_nutrition_plans.return_value = {"results": []}
+        mock_ctx = MagicMock()
+        mock_ctx.info = AsyncMock()
+        with patch(
+            f"wger_agent.kg_ingest.ingest_{name.removeprefix('wger_ingest_')}",
+            AsyncMock(return_value=0),
+        ):
+            result = await tool(client=mock_client, ctx=mock_ctx, limit=5)
+        mock_ctx.info.assert_awaited_once()
+        assert result["listed"] == 0, name

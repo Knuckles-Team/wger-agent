@@ -92,14 +92,24 @@ from scion_sdk.connector import Connector
 from scion_sdk.connector_hooks import RegistrationContext
 
 
-def _register_legacy_surface(context: RegistrationContext) -> None:
-    """Register the existing Wger surface through the public SDK hook."""
+def _register_health(context: RegistrationContext) -> None:
+    """Register the health route through the public SDK hook."""
     from wger_agent.mcp.mcp_server import register_server_surface
 
     register_server_surface(context.server)
 
 
+from wger_agent.api_client import WgerApi  # noqa: E402
+from wger_agent.auth import get_client  # noqa: E402
+
 connector = Connector(
-    instructions="wger-agent MCP Server — Condensed Action-Routed Tools.",
-    extra_registrations=(_register_legacy_surface,),
+    api=WgerApi,
+    get_client=get_client,
+    tools="wger_agent.mcp.tools",
+    extra_registrations=(_register_health,),
+    instructions=(
+        "wger workout manager: one typed tool per API operation for the exercise "
+        "library, routines, workout logs, nutrition, body measurements and user "
+        "reference data, plus knowledge-graph ingestion of each modality."
+    ),
 )
