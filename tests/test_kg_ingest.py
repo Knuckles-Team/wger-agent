@@ -1,4 +1,4 @@
-"""Epistemic-graph typed-node ingestion -- Wire-First coverage for wger-agent.
+"""Medulla typed-node ingestion -- Wire-First coverage for wger-agent.
 
 Exercises the real ``ingest_entities`` + wger record mappers against a fake
 ``scion_sdk.ingest`` transport (no engine required). The real SDK request
