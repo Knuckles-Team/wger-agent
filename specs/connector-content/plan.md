@@ -16,7 +16,7 @@ This plan states how `wger-agent` delivers the rows of `CONN-WGER-AGENT-CONNECTO
 - **Project Type**: connector
 - **Performance Goals**: N/A, the vendor service sets the latency
 - **Constraints**: vendor calls go through the SDK governed client; no connector-local transport
-- **Scale/Scope**: 1 active row(s) in this spec
+- **Scale/Scope**: 2 active row(s) in this spec
 
 ## Constitution Check
 
@@ -49,7 +49,7 @@ This plan states how `wger-agent` delivers the rows of `CONN-WGER-AGENT-CONNECTO
 - **Project Type**: connector
 - **Performance Goals**: N/A, the vendor service sets the latency
 - **Constraints**: vendor calls go through the SDK governed client; no connector-local transport
-- **Scale/Scope**: 1 active row(s) in this spec
+- **Scale/Scope**: 2 active row(s) in this spec
 
 ### Constitution Check
 
@@ -82,7 +82,7 @@ This plan states how `wger-agent` delivers the rows of `CONN-WGER-AGENT-CONNECTO
 - **Project Type**: connector
 - **Performance Goals**: N/A, the vendor service sets the latency
 - **Constraints**: vendor calls go through the SDK governed client; no connector-local transport
-- **Scale/Scope**: 1 active row(s) in this spec
+- **Scale/Scope**: 2 active row(s) in this spec
 
 ### Constitution Check
 
@@ -115,7 +115,7 @@ This plan states how `wger-agent` delivers the rows of `CONN-WGER-AGENT-CONNECTO
 - **Project Type**: connector
 - **Performance Goals**: N/A, the vendor service sets the latency
 - **Constraints**: vendor calls go through the SDK governed client; no connector-local transport
-- **Scale/Scope**: 1 active row(s) in this spec
+- **Scale/Scope**: 2 active row(s) in this spec
 
 ### Constitution Check
 
@@ -148,7 +148,7 @@ This plan states how `wger-agent` delivers the rows of `CONN-WGER-AGENT-CONNECTO
 - **Project Type**: connector
 - **Performance Goals**: N/A, the vendor service sets the latency
 - **Constraints**: vendor calls go through the SDK governed client; no connector-local transport
-- **Scale/Scope**: 1 active row(s) in this spec
+- **Scale/Scope**: 2 active row(s) in this spec
 
 ### Constitution Check
 
@@ -276,6 +276,7 @@ None. The constitution check passed.
 ## Production caller chain
 
 - `CONN-WGER-AGENT-CONNECTOR-CONTENT-R001`: `wger-mcp` in `pyproject.toml` runs `wger_agent.mcp_server:mcp_server`, which builds the server from the `scion_sdk.connector` entry point `wger_agent:connector` (`wger_agent/__init__.py:102`); the SDK `Connector` then lists the packaged skills, ontology and prompts.
+- `CONN-WGER-AGENT-CONNECTOR-CONTENT-R002`: the ontology loader reads `wger_agent/ontology/` at server start; the engine imports the served pack and finds no redeclared core term.
 
 ## Cross-repo seams
 
