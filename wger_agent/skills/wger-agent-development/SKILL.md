@@ -39,6 +39,22 @@ owning spec row in the commit trailer.
 - One logical change per commit, with `Spec: <ID>` and the assisting agent
   trailer adjacent in the final paragraph.
 
+## Steps
+
+1. Find the owning spec row with `git grep -n "<term>" -- specs`. Verify one row owns the change before editing.
+2. Install the pinned environment with `uv sync --locked`. Verify the command exits 0 and leaves `uv.lock` unchanged.
+3. Change the API mapping or tool and add a bound test. Verify the new test passes with `uv run --all-extras pytest tests/test_default_content_surfaces.py -q`.
+4. Run the repository gate with `uvx pre-commit run --all-files`. Verify every hook reports Passed.
+5. Commit with `Spec: <ID>` directly above the assisting-agent trailer. Verify with `git log -1` that both lines are adjacent.
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---------|-------|----------|
+| `uv sync --locked` fails | `uv.lock` out of step with `pyproject.toml` | Run `uv lock`, review the diff and commit the lock file with the change |
+| Pre-commit hook rewrites files | Formatter or spelling hook applied fixes | Stage the rewritten paths with `git add -- <path>` and commit again |
+| Test needs live credentials | Provider call not mocked | Mock the Wger call in the test and keep `WGER_API_KEY` out of the local gate |
+
 ## Setup and gates
 
 Use the pinned environment from `uv sync --locked`, then run the repository gate

@@ -2,12 +2,7 @@
 name: wger-exercise-library
 skill_type: skill
 description: >-
-  Exercise-database operations on wger via the wger-agent MCP server — search and read
-  exercises, their categories, target muscles, equipment, and images. Use when the agent
-  must find an exercise, resolve its muscles/equipment for programming, or sync the
-  exercise catalog into the knowledge graph as typed :Exercise nodes. Do NOT use for
-  building routines/sessions (wger-workout-routines) or nutrition (wger-nutrition-tracking);
-  prefer those.
+  Exercise-database operations on wger via the wger-agent MCP server — search and read exercises, their categories, target muscles, equipment, and images. Use when the agent must find an exercise, resolve its muscles/equipment for programming, or sync the exercise catalog into the knowledge graph as typed :Exercise nodes.
 license: MIT
 tags: [wger, fitness, exercise, catalog, muscles, mcp]
 metadata:
@@ -15,6 +10,8 @@ metadata:
   version: '0.1.0'
 ---
 # wger Exercise Library
+
+Scope: Exercise-database operations on wger via the wger-agent MCP server — search and read exercises, their categories, target muscles, equipment, and images. Use when the agent must find an exercise, resolve its muscles/equipment for programming, or sync the exercise catalog into the knowledge graph as typed :Exercise nodes. Do NOT use for building routines/sessions (wger-workout-routines) or nutrition (wger-nutrition-tracking); prefer those.
 
 Domain-typed access to the wger **exercise database** — the read-only catalog of
 movements, categories, muscles, and equipment used to program routines.
@@ -37,6 +34,22 @@ Connect via the `mcp-client` skill against the **`wger-agent`** MCP server.
 | `WGER_INSTANCE` / `WGER_URL` | ✅ | wger base URL (defaults to `https://wger.de`) |
 | `WGER_ACCESS_TOKEN` / `WGER_TOKEN` | optional | Public exercise reads work unauthenticated; a token widens access |
 | `WGER_SSL_VERIFY` | optional | TLS verification toggle |
+
+## Steps
+
+1. Search with `wger_search_exercises` (`term`). Verify the result lists at least one exercise id.
+2. Narrow by catalog with `wger_get_exercises` (`category`, `language`, `limit`). Verify the `results` list matches the category.
+3. Read detail with `wger_get_exercise_info` (`exercise_id`). Verify the response includes translations, muscles and equipment.
+4. Resolve muscle and equipment ids with `wger_get_muscles` and `wger_get_equipment`. Verify every id you plan to use appears in the list.
+5. Sync the catalog on request with `wger_ingest_exercises` (`limit`). Verify the result reports a count and not `{"ingested": null}`.
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---------|-------|----------|
+| Exercise has no name | Names live in translations | Call `wger_get_exercise_info` for the display name |
+| Empty `results` | `language` passed as a code instead of a numeric id | Pass the numeric id such as `2` for English from `wger_get_exercises` filters |
+| `{"ingested": null}` | No engine reachable | Report the read as done, then call `wger_ingest_exercises` again once the engine is reachable |
 
 ## Tools
 One typed tool per API operation; list tools take `limit`, `offset` and DRF filters (`params_json`).
