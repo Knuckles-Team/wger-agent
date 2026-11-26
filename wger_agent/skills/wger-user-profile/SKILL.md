@@ -2,13 +2,7 @@
 name: wger-user-profile
 skill_type: skill
 description: >-
-  Read and update the wger user profile, statistics and trophies, and read the
-  instance reference data (languages, licenses, repetition and weight units,
-  deletion log) via the wger-agent MCP server. Use when the agent must resolve a
-  language or unit id, read the user's profile or statistics before programming
-  training, or audit what was deleted. Do NOT use for exercises (wger-exercise-library),
-  routines and logs (wger-workout-routines) or nutrition and body progress
-  (wger-nutrition-tracking); prefer those.
+  Read and update the wger user profile, statistics and trophies, and read the instance reference data (languages, licenses, repetition and weight units, deletion log) via the wger-agent MCP server. Use when the agent must resolve a language or unit id, read the user's profile or statistics before programming training, or audit what was deleted.
 license: MIT
 tags: [wger, fitness, profile, reference, mcp]
 metadata:
@@ -16,6 +10,8 @@ metadata:
   version: '0.1.0'
 ---
 # wger User Profile and Reference Data
+
+Scope: Read and update the wger user profile, statistics and trophies, and read the instance reference data (languages, licenses, repetition and weight units, deletion log) via the wger-agent MCP server. Use when the agent must resolve a language or unit id, read the user's profile or statistics before programming training, or audit what was deleted. Do NOT use for exercises (wger-exercise-library), routines and logs (wger-workout-routines) or nutrition and body progress (wger-nutrition-tracking); prefer those.
 
 Profile, statistics and instance reference data that the other wger skills depend on.
 
@@ -26,6 +22,21 @@ Profile, statistics and instance reference data that the other wger skills depen
 
 ## When NOT to use
 - Exercise search, routines, sessions, nutrition or body measurements; use the skill for that area.
+
+## Steps
+
+1. Read the profile with `wger_get_user_profile`. Verify the response holds the profile fields the request needs.
+2. Resolve ids with `wger_get_languages`, `wger_get_repetition_units` or `wger_get_weight_unit_settings`. Verify each numeric id maps to exactly one named entry.
+3. Read progress with `wger_get_user_statistics` or `wger_get_user_trophies`. Verify the counts are present before reporting them.
+4. Update only stated values with `wger_update_user_profile`. Verify with `wger_get_user_profile` that only the passed fields changed.
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---------|-------|----------|
+| 401 or 403 on profile read | `WGER_ACCESS_TOKEN` missing or wrong | Set `WGER_ACCESS_TOKEN` to a valid API token and call `wger_get_user_profile` again |
+| Unit or language id not found | Id guessed instead of resolved | Call `wger_get_languages` or `wger_get_weight_unit_settings` and use the id it lists |
+| Profile field unchanged after update | Field name not part of the profile | Compare the keys from `wger_get_user_profile` and pass those exact names |
 
 ## Tools
 One typed tool per API operation.

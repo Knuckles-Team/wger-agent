@@ -2,12 +2,7 @@
 name: wger-workout-routines
 skill_type: skill
 description: >-
-  Training-program operations on wger via the wger-agent MCP server — read, build,
-  and audit workout routines, their scheduled days/slots, and the sessions/logs
-  performed against them. Use when the agent must design or inspect a routine,
-  gauge training adherence and load from logged sessions, or sync a routine into the
-  knowledge graph. Do NOT use for browsing the exercise database (wger-exercise-library)
-  or diet/nutrition work (wger-nutrition-tracking); prefer those.
+  Training-program operations on wger via the wger-agent MCP server — read, build, and audit workout routines, their scheduled days/slots, and the sessions/logs performed against them. Use when the agent must design or inspect a routine, gauge training adherence and load from logged sessions, or sync a routine into the knowledge graph.
 license: MIT
 tags: [wger, fitness, workout, routine, training, mcp]
 metadata:
@@ -15,6 +10,8 @@ metadata:
   version: '0.1.0'
 ---
 # wger Workout Routines
+
+Scope: Training-program operations on wger via the wger-agent MCP server — read, build, and audit workout routines, their scheduled days/slots, and the sessions/logs performed against them. Use when the agent must design or inspect a routine, gauge training adherence and load from logged sessions, or sync a routine into the knowledge graph. Do NOT use for browsing the exercise database (wger-exercise-library) or diet/nutrition work (wger-nutrition-tracking); prefer those.
 
 Domain-typed access to wger **routines**, their day/slot structure, and the workout
 **sessions & logs** executed against them — the training-programming surface.
@@ -37,6 +34,24 @@ Connect via the `mcp-client` skill against the **`wger-agent`** MCP server.
 | `WGER_INSTANCE` / `WGER_URL` | ✅ | wger base URL (defaults to `https://wger.de`) |
 | `WGER_ACCESS_TOKEN` / `WGER_TOKEN` | ✅ | API token for authenticated reads/writes |
 | `WGER_SSL_VERIFY` | optional | TLS verification toggle |
+
+## Steps
+
+1. List routines with `wger_get_routines` (`limit`, `ordering`). Verify the routine id you need is in `results`.
+2. Read its structure with `wger_get_days` (`routine`) and `wger_get_slots`. Verify each day lists its slots.
+3. Build or change with `wger_create_routine`, `wger_create_day`, `wger_create_slot` and `wger_create_slot_entry`. Verify the matching list tool returns the new object.
+4. Log training with `wger_create_workout_session` (`routine`, `date`, `impression`). Verify `wger_get_workout_sessions` returns the session.
+5. Gauge adherence from `wger_get_workout_logs`. Verify the logs fall inside the period you report.
+6. Sync on request with `wger_ingest_routines` (`limit`). Verify the result reports a count and not `{"ingested": null}`.
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---------|-------|----------|
+| Session create rejected | Missing `routine` or non-ISO `date` | Pass a routine id from `wger_get_routines` and a date such as `2026-07-04` |
+| Empty list at top level | Records are paged under `results` | Read `results` and page with `limit` and `offset` |
+| 401 on write | `WGER_ACCESS_TOKEN` missing | Set `WGER_ACCESS_TOKEN` and call `wger_get_routines` again |
+| Delete requested | Destructive action without approval | Get explicit approval before `wger_delete_routine` |
 
 ## Tools
 One typed tool per API operation.

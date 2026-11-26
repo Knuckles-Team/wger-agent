@@ -2,12 +2,7 @@
 name: wger-nutrition-tracking
 skill_type: skill
 description: >-
-  Nutrition and body-progress operations on wger via the wger-agent MCP server — read and
-  build nutrition plans, meals, diary entries, ingredients, and track body weight and
-  measurements over time. Use when the agent must plan or audit diet against macro goals,
-  reason about calorie balance vs. training, track composition trends, or sync nutrition
-  plans/measurements into the knowledge graph. Do NOT use for routines/sessions
-  (wger-workout-routines) or the exercise catalog (wger-exercise-library); prefer those.
+  Nutrition and body-progress operations on wger via the wger-agent MCP server — read and build nutrition plans, meals, diary entries, ingredients, and track body weight and measurements over time. Use when the agent must plan or audit diet against macro goals, reason about calorie balance vs. training, track composition trends, or sync nutrition plans/measurements into the knowledge graph.
 license: MIT
 tags: [wger, nutrition, diet, macros, body-measurement, mcp]
 metadata:
@@ -15,6 +10,8 @@ metadata:
   version: '0.1.0'
 ---
 # wger Nutrition & Progress Tracking
+
+Scope: Nutrition and body-progress operations on wger via the wger-agent MCP server — read and build nutrition plans, meals, diary entries, ingredients, and track body weight and measurements over time. Use when the agent must plan or audit diet against macro goals, reason about calorie balance vs. training, track composition trends, or sync nutrition plans/measurements into the knowledge graph. Do NOT use for routines/sessions (wger-workout-routines) or the exercise catalog (wger-exercise-library); prefer those.
 
 Domain-typed access to wger **nutrition plans**, meals, the food diary, and **body
 weight/measurement** history — the diet and progress side of the wellness graph.
@@ -38,6 +35,24 @@ Connect via the `mcp-client` skill against the **`wger-agent`** MCP server.
 | `WGER_INSTANCE` / `WGER_URL` | ✅ | wger base URL (defaults to `https://wger.de`) |
 | `WGER_ACCESS_TOKEN` / `WGER_TOKEN` | ✅ | API token — nutrition/body data is user-scoped |
 | `WGER_SSL_VERIFY` | optional | TLS verification toggle |
+
+## Steps
+
+1. List plans with `wger_get_nutrition_plans`. Verify the plan you need appears with its id.
+2. Read totals with `wger_get_nutrition_plan_info` (`plan_id`). Verify meals and nutritional values are in the response.
+3. Compare intake with `wger_get_nutrition_diary`. Verify entries cover the dates being audited.
+4. Log data with `wger_create_nutrition_diary_entry` or `wger_create_weight_entry` (`date`, `weight`). Verify the matching list tool returns the new entry.
+5. Track body progress with `wger_get_weight_entries` and `wger_get_measurements`. Verify the series is ordered by date before reporting a trend.
+6. Sync plans on request with `wger_ingest_nutrition_plans` (`limit`). Verify the result reports a count and not `{"ingested": null}`.
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---------|-------|----------|
+| 401 on any call | `WGER_ACCESS_TOKEN` missing, data is user-scoped | Set `WGER_ACCESS_TOKEN` and call `wger_get_nutrition_plans` again |
+| Measurement create rejected | No category id exists | Create one with `wger_create_measurement_category` and pass its id |
+| No meals in plan result | Used `wger_get_nutrition_plan` | Call `wger_get_nutrition_plan_info` instead |
+| Delete requested for a plan | Destructive action without approval | Get explicit approval before `wger_delete_nutrition_plan` |
 
 ## Tools
 One typed tool per API operation.
